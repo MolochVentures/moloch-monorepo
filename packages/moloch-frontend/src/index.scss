@@ -1,0 +1,715 @@
+body {
+  color: white;
+  font-weight: bold;
+  font-family: "GT Haptik", sans-serif;
+}
+
+.amount {
+  font-family: "Cartograph Mono CF", sans-serif;
+}
+
+.subtext {
+  opacity: 0.5;
+}
+
+.title {
+  font-size: 30px;
+  line-height: 15px;
+}
+
+.button {
+  padding: 20px 45px !important;
+  &.grey {
+    background: rgba(50, 50, 50, 0.9) !important;
+  }
+}
+
+.formErrors {
+  color: red;
+  font-size: 12px;
+}
+
+//.blurred:before {
+//  content: '';
+//  position: absolute;
+//  top: 0;
+//  left: 0;
+//  right: 0;
+//  bottom: 0;
+//  height: 100%;
+//  width: 100%;
+//  background: url("assets/moloch_owl.jpg") 0 / cover fixed;
+//  filter: blur(50px);
+//  opacity: 0.3;
+//}
+
+.pill {
+  border-radius: 20px !important;
+  padding: 8px 20px !important;
+  background: hsla(0, 0, 50%, 0.3) !important;
+}
+
+.uncolored {
+  color: inherit !important;
+}
+
+.blurred {
+  background: rgba(100, 100, 100, 0.9) !important;
+}
+
+.transparent {
+  background: transparent !important;
+}
+
+.blurred.box {
+  background: rgba(100, 100, 100, 0.4) !important;
+  padding: 30px;
+}
+
+#background {
+  .blurred_image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: -2;
+    background: url("assets/moloch_owl.jpg") 0 / cover fixed;
+    background-repeat: repeat !important;
+    filter: blur(12px);
+  }
+
+  .dark_overlay {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    z-index: -1;
+    background: rgba(0, 0, 0, 0.85);
+  }
+}
+
+#header {
+  height: 80px;
+  padding: 20px 30px;
+  .menu {
+    font-size: 20px;
+  }
+  .right_dropdown>.text {
+    background-color: teal !important;
+    padding: 8px 12px !important;
+    border-radius: 50px !important;
+  }
+  .logo {
+    font-size: 20px;
+    letter-spacing: 2px;
+    text-decoration: none;
+    a {
+      color: inherit;
+    }
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .dropdown {
+    .label {
+      font-size: 15px;
+      margin-right: 0;
+    }
+    .menu {
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 15px;
+      font-weight: normal;
+      input {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        margin-bottom: 5px;
+      }
+      .button {
+        padding: 10px 20px !important;
+      }
+      .item {
+        padding: 20px !important;
+        color: inherit;
+      }
+      .item:hover {
+        background-color: rgba(0,0,0,.1);
+        cursor: pointer;
+      }
+      .link {
+        color: inherit;
+      }
+    }
+  }
+}
+
+#wrapper {
+  margin: 30px 50px;
+}
+
+#login {
+  display: flex;
+  justify-content: center;
+  height: 70vh;
+  align-items: center;
+}
+
+#homepage {
+  .guild_value {
+    .amount {
+      font-size: 50px;
+      line-height: 30px;
+    }
+  }
+  .browse_buttons, .submit_button {
+    .link:not(:first-of-type) {
+      margin-left: 10px !important;
+    }
+    margin-top: 40px;
+  }
+  .graph {
+    width: 100%;
+    height: 60vh;
+  }
+  .graph_values {
+    padding-left: 20px;
+    padding-right: 20px;
+    .amount {
+      font-size: 30px;
+      line-height: 15px;
+    }
+  }
+  .text_link {
+    color: #fff !important;
+  }
+
+  
+  @media screen and (min-width: 320px) and (max-width: 375px) { 
+
+    .guild_value {
+      text-align: center;
+      .amount {
+        font-size: 30px;
+        line-height: 35px;
+      }
+    }
+    .btn_link {
+      margin-bottom:  10px !important;
+      margin-left: 0px !important;
+      width: 200px !important;
+      padding-left: 5px !important;
+      padding-right: 5px !important;
+    }
+    .browse_buttons, .submit_button {
+      .link:not(:first-of-type) {
+        margin-left: 0px !important;
+      }
+    }
+    .graph_values {
+      text-align: center !important;
+      .amount {
+        font-size: 14px !important;
+        line-height: 20px !important;
+      }
+      .subtext {
+        margin-bottom: 5px !important;
+      }
+    }
+    .blurred {
+      padding-left: 10px !important;
+      padding-right: 10px !important;
+    }
+  }
+  
+  @media screen and (min-width: 376px) and (max-width: 768px) { 
+  
+    .guild_value {
+      text-align: center;
+    }
+    .btn_link {
+      margin-bottom:  10px !important;
+      margin-left: 0px !important;
+      width: 200px !important;
+      padding-left: 5px !important;
+      padding-right: 5px !important;
+    }
+    .browse_buttons, .submit_button {
+      .link:not(:first-of-type) {
+        margin-left: 0px !important;
+      }
+    }
+    .graph_values {
+      text-align: center !important;
+      .amount {
+        font-size: 14px !important;
+        line-height: 20px !important;
+      }
+      .subtext {
+        margin-bottom: 5px !important;
+      }
+    }
+    .blurred {
+      padding-left: 10px !important;
+      padding-right: 10px !important;
+    }
+  }
+  
+  @media screen and (min-width: 769px) and (max-width: 1024px) { 
+    .browse_buttons {
+      text-align: right;
+    }
+  }
+
+}
+
+#member_list {
+  .name {
+    margin-top: 10px;
+    margin-bottom: 0;
+  }
+  .divider {
+    margin: 0;
+  }
+  .members_row {
+    .member {
+      margin-bottom: 40px;
+    }
+  }
+  .member_avatar {
+    margin-top: 25px;
+  }
+
+  // .member_item {
+  //   margin-left: 1em;
+  //   margin-right: 1em;
+  // }
+  
+  @media screen and (min-width: 320px) and (max-width: 375px) { 
+  
+    .submit_button, .member_list_header {
+      text-align: center !important;
+    }
+  }
+  
+  @media screen and (min-width: 376px) and (max-width: 768px) { 
+  
+    .submit_button, .member_list_header {
+      text-align: center !important;
+    }
+  }
+
+}
+
+#member_detail {
+  .details {
+    margin-top: 20px;
+  }
+  .blurred.box {
+    padding: 30px 60px;
+  }
+  .amount {
+    font-size: 25px;
+    line-height: 15px;
+  }
+  .avatar {
+    margin: 50px;
+  }
+  .user {
+    .segment {
+      height: 100%;
+    }
+  }
+  .user, .proposals{
+    height: 500px !important;
+  }
+  .proposals {
+    .segment {
+      height: 100%;
+      overflow-y: scroll;
+    }
+    .header {
+      margin-bottom: 5px;
+    }
+    p {
+      font-size: 1rem;
+      color: inherit;
+    }
+    .dot {
+      margin-right: 10px;
+    }
+    .divider {
+      margin: 10px;
+    }
+  }
+
+  @media screen and (min-width: 320px) and (max-width: 375px) { 
+
+    .blurred.box { padding: 30px 7px !important; }
+    .user { height: auto !important; }
+  }
+  
+  @media screen and (min-width: 376px) and (max-width: 768px) { 
+  
+    .blurred.box { padding: 30px 20px !important; }
+    .user { height: auto !important; }
+    .proposals {margin-top: 20px !important}
+  }
+  
+  @media screen and (min-width: 769px) and (max-width: 1024px) { 
+  
+    .blurred.box { padding: 30px 20px !important; }
+    .user { height: auto !important; }
+    .proposals {margin-top: 20px !important}
+  }
+  
+  @media screen and (min-width: 1025px) and (max-width: 1366px) { 
+  
+    .blurred.box { padding: 30px 20px !important; }
+  }
+  
+}
+
+#proposal_list {
+  .name {
+    font-size: 15px;
+  }
+  .description {
+    padding-top: 10px;
+    padding-bottom: 20px;
+    height: 25vh;
+    overflow-y: auto;
+  }
+  .value_shares {
+    padding-left: 20px;
+    padding-right: 20px;
+    .amount {
+      font-size: 25px;
+      line-height: 15px;
+    }
+
+    margin-bottom: 30px;
+  }
+  .deadlines {
+    margin: 30px auto;
+    .voting {}
+    .grace {
+      opacity: 0.5;
+    }
+  }
+  .progress .bar {
+    border-radius: 20px;
+  }
+  
+  @media only screen and (min-width: 320px) and (max-width: 374px) {
+    .blurred.box { padding: 30px 7px; }
+  }
+
+  @media only screen and (min-width: 375px) and (max-width: 424px) {
+    .blurred.box { padding: 30px 15px; }
+  }
+
+  @media only screen and (min-width: 320px) and (max-width: 425px) {
+    .pill { padding: 8px 10px !important; }
+  }
+}
+
+#proposal_detail {
+  .title {
+    margin-bottom: 80px;
+  }
+  .tokens {
+    margin: 30px auto;
+  }
+  .amount {
+    font-size: 25px;
+    line-height: 15px;
+  }
+  .grace {
+    opacity: 0.5;
+  }
+  .members_row {
+    .image {
+      width: 60px !important;
+    }
+    .button {
+      width: 60px ;
+      padding: 22px ;
+      margin-top: 0.25em !important;
+    }
+  }
+  .description {
+    text-align: justify !important;
+    min-height: 25vh;
+  }
+
+  .member_list {
+    min-height: 25vh;
+  }
+  
+  .member_avatar {
+    margin-top: 25px;
+  }
+
+  .btn {
+    min-width: 200px;
+  }
+  
+  .pill {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .pill_column {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+  }
+
+  .segment {
+    min-width: 100% !important;
+  }
+  
+  @media screen and (min-width: 320px) and (max-width: 375px) { 
+    .pill_column {
+      text-align: center !important;
+    }
+    .pill {
+      padding-left: 30px !important;
+      padding-right: 30px !important;
+    }
+    .btn {
+      width: 100px !important;
+    }
+  }
+  
+  @media screen and (min-width: 376px) and (max-width: 768px) { 
+    .pill_column {
+      text-align: center !important;
+    }
+    .pill {
+      padding-left: 30px !important;
+      padding-right: 30px !important;
+    }
+    .btn {
+      width: 100px !important;
+    }
+    .tributes {
+      margin-top: 10px !important;
+    }
+    .caret_btn {
+      width: 60px !important;
+      height: 60px !important;
+      padding: 22px !important;
+      }
+  }
+  
+  @media screen and (min-width: 769px) and (max-width: 1825px) { 
+    .btn {
+      min-width: 100px !important;
+    }
+    .tributes {
+      margin-top: 10px !important;
+      padding: 5px !important;
+    }
+
+    .caret_btn {
+      width: 50px !important;
+      height: 50px !important;
+      padding: 0 !important;
+      }
+  }
+  
+  @media screen and (min-width: 1325px )   { 
+    .pill {
+      padding-left: 30px !important;
+      padding-right: 30px !important;
+    }
+    .caret_btn {
+      width: 60px !important;
+      height: 60px !important;
+      padding: 22px !important;
+    }
+  }
+}
+
+#proposal_submission {
+  input, textarea, select, .dropdown {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+  label {
+    color: white;
+    opacity: 0.5;
+  }
+  i {
+    float: left !important;
+  }
+  .amount {
+    font-size: 25px;
+    line-height: 15px;
+  }
+  .blurred.box {
+    height: 100%;
+  }
+  .delete_icon {
+    margin-top: 8px;
+    text-align: center;
+  }
+  .assets_field {
+    overflow-y: auto;
+    min-height: 150px;
+    max-height: 200px;
+  }
+  .submit_button {
+    text-align: center !important;
+  }
+  
+  .computer_delete_icon {
+    display: block;
+  }
+  .mobile_delete_icon {
+    display: none;
+  }
+
+  .icon_asset{
+    padding: 0 !important;
+  }
+  
+  .icon_asset input {
+    padding-left: 2em !important;
+  }
+  
+  @media screen and (min-width: 320px) and (max-width: 767px) { 
+
+    .asset {
+      min-width: 100% !important;
+      padding-left: 3px !important;
+      padding-right: 3px !important;
+    }
+    .assets_field {
+      min-height: 100px !important;
+    }
+    .asset_amount {
+      padding: 0 !important;
+      min-width: 100% !important;
+    }
+    .blurred.box {
+      padding-left: 20px !important;
+      padding-right: 20px !important;
+    }
+
+    .asset_field_grid {
+      padding: 2px !important;
+      text-align: right !important;
+    }
+    .asset_field_row {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+    .delete_icon, .add_icon {
+      float: right !important;
+    }
+    .computer_delete_icon {
+      display: none;
+    }
+    .mobile_delete_icon {
+      display: block;
+    }
+  }
+
+  @media screen and (min-width: 768px) and (max-width: 1024px) { 
+  
+    .asset {
+      min-width: 100% !important;
+      padding-left: 3px !important;
+      padding-right: 3px !important;
+    }
+    .asset_amount {
+      padding: 0 !important;
+      min-width: 100% !important;
+    }
+    .blurred.box {
+      padding-left: 20px !important;
+      padding-right: 20px !important;
+    }
+
+    .asset_field_grid {
+      padding: 2px !important;
+      text-align: right !important;
+    }
+    .asset_field_row {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+    .delete_icon, .add_icon {
+      float: right !important;
+    }
+    .computer_delete_icon {
+      display: block;
+    }
+    .mobile_delete_icon {
+      display: none;
+    }
+  }
+
+  @media screen and (min-width: 1025px) { 
+  
+    .asset {
+      min-width: 100% !important;
+      padding-left: 3px !important;
+      padding-right: 3px !important;
+    }
+    .asset_amount {
+      padding: 0 !important;
+      min-width: 100% !important;
+    }
+    .blurred.box {
+      padding-left: 20px !important;
+      padding-right: 20px !important;
+    }
+
+    .asset_field_grid {
+      padding: 2px !important;
+      text-align: right !important;
+    }
+    .asset_field_row {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+    .delete_icon, .add_icon {
+      float: right !important;
+    }
+    .computer_delete_icon {
+      display: block;
+    }
+    .mobile_delete_icon {
+      display: none;
+    }
+  }
+
+  
+  
+}
+
+#guild_bank {
+  .guild_value {
+    .amount {
+      font-size: 50px;
+      line-height: 30px;
+    }
+  }
+  .text_link {
+    color: #fff !important;
+  }
+  .currency_element {
+    margin-bottom: 75px;
+  }
+  .name {
+    margin-top: 10px;
+  }
+  .shares {
+    margin-bottom: 0px;
+    font-size: 16px;
+    font-weight: lighter;
+  }
+}

@@ -1,0 +1,150 @@
+html, body {
+  margin: 0;
+  height: 100%;
+}
+
+p {
+  color: gray !important;
+  font-weight: 500 !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: white !important;
+}
+
+.ContainerMoloch {
+  background: #180307;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.NavbarMoloch {
+  height: 75px;
+  border-radius: 0px !important;
+  font-size: 20px;
+}
+
+/*
+.NavbarMoloch .container {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+*/
+
+.ContentMoloch {
+  margin-left: 10%;
+  width: 80%;
+  flex: 1;
+}
+
+.MarginRight10 {
+  margin-right: 10px;
+}
+
+.MarginRight40 {
+  margin-right: 40px;
+}
+
+.MarginTop30 {
+  margin-top: 30px;
+}
+
+.PullRight {
+  float: right;
+}
+
+.VerticalDivider {
+  border-left: 1px solid gray;
+  width: 1px !important;
+  flex: 1;
+  height: 40px;
+  right: 249px;
+  top: 10px; 
+}
+
+/* Home */
+
+.GraphOptionsMoloch {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding-top: 50px;
+  padding-bottom: 30px;
+}
+
+.GraphOptionMoloch {
+  flex: 1;
+}
+
+.GraphContainer {
+  height: 600px;
+  width: 100%;
+  background: #463034;
+  border-radius: 10px;
+}
+
+/* Proposals */
+
+.ProposalsContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding-top: 50px;
+  padding-bottom: 30px;
+}
+
+.Proposal {
+  flex: 1;
+  background: #463034;
+  border-radius: 10px;
+  padding: 25px;
+  cursor: pointer;
+}
+
+.ProposalSubcontentContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.ProposalSubcontent {
+  flex: 1;
+}
+
+.VotingBadges {
+  padding: 8px 7px !important;
+  height: 30px !important;
+  border-radius: 15px !important;
+}
+
+.VotesGraphContainer {
+  width: 100%;
+  height: 50px;
+  border-radius: 10px;
+}
+
+/* Members */
+
+.MembersContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding-top: 50px;
+  padding-bottom: 30px;
+}
+
+.Member {
+  flex: 1;
+}
+
+.MemberImage {
+  height: 100px;
+  width: 100px;
+  border-radius: 50px;
+  cursor: pointer;
+}
