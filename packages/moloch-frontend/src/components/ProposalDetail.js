@@ -29,14 +29,15 @@ const ProgressBar = ({ yes, no }) => (
 
 const MemberAvatar = ({ member, shares }) => {
   return (
-  <Grid.Column mobile={4} tablet={3} computer={3} textAlign="center" className="member_avatar" title={member}>
-    <Link to={`/members/${member}`} className="uncolored">
-      <Image src={hood} centered />
-      <p className="name">{!member ? '' : (member.length > 10 ? member.substring(0, 10) + '...' : member)}</p>
+    <Grid.Column mobile={4} tablet={3} computer={3} textAlign="center" className="member_avatar" title={member}>
+      <Link to={`/members/${member}`} className="uncolored">
+        <Image src={hood} centered />
+        <p className="name">{!member ? '' : (member.length > 10 ? member.substring(0, 10) + '...' : member)}</p>
 
-    </Link>
-  </Grid.Column>
-)};
+      </Link>
+    </Grid.Column>
+  )
+};
 
 class ProposalDetail extends Component {
   constructor(props) {
@@ -109,7 +110,7 @@ class ProposalDetail extends Component {
   }
 
   loadData(responseJson) {
-    this.setState({ proposal_detail: (responseJson.items.member ? responseJson.items.member : responseJson.items), isAccepted: (responseJson.items.status === 'accepted' ? true : false) });
+    this.setState({ proposal_detail: (responseJson.items.member ? responseJson.items.member : responseJson.items), isAccepted: (responseJson.items.member.status === 'accepted' || responseJson.items.member.status === 'active' ? true : false) });
     let voters = this.state.proposal_detail.voters ? this.state.proposal_detail.voters : [];
     let userHasVoted = voters.find(voter => voter.member === this.state.loggedUser) ? true : false;
     this.setState({ userHasVoted });
@@ -131,7 +132,7 @@ class ProposalDetail extends Component {
             case 'no':
               totalNumberVotedNo += voter.shares;
               break;
-            default: 
+            default:
               break;
           }
         }
@@ -187,7 +188,7 @@ class ProposalDetail extends Component {
       .then((responseJson) => {
         if (responseJson.type === "POST_EVENTS_SUCCESS") {
           self.calculateVote(proposal.voters);
-          self.setState({ isAccepted: (responseJson.items.payload.status === 'accepted' ? true : false) });
+          self.setState({ isAccepted: true });
           switch (eventName) {
             case 'Project proposal voted':
             case 'Membership proposal voted':
@@ -294,19 +295,17 @@ class ProposalDetail extends Component {
                     <ProgressBar yes={this.state.votedYes} no={this.state.votedNo}></ProgressBar>
                   </Grid.Column>
                 </Grid>
-                {this.state.userShare && this.state.status === 'inprogress' && (this.state.memberStatus === 'àctive' || this.state.memberStatus === 'founder') ?
-                  <Grid columns="equal" centered>
-                    <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
-                      <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted} onClick={this.handleNo}>Vote No</Button>
-                    </Grid.Column>
-                    <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
-                      <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted} onClick={this.handleYes}>Vote Yes</Button>
-                    </Grid.Column>
-                    <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
-                    <Button className="btn" color='grey' onClick={this.handleProcess} disabled={ (this.state.isAccepted ? true : (this.state.votedYes > 50) ? false : true) }>Process Proposal</Button>
-                    </Grid.Column>
-                  </Grid> : null}
-
+                <Grid columns="equal" centered>
+                  <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
+                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || !(this.state.userShare && this.state.status === 'inprogress' && (this.state.memberStatus === 'àctive' || this.state.memberStatus === 'founder'))} onClick={this.handleNo}>Vote No</Button>
+                  </Grid.Column>
+                  <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
+                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || !(this.state.userShare && this.state.status === 'inprogress' && (this.state.memberStatus === 'àctive' || this.state.memberStatus === 'founder'))} onClick={this.handleYes}>Vote Yes</Button>
+                  </Grid.Column>
+                  <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
+                    <Button className="btn" color='grey' onClick={this.handleProcess} disabled={(this.state.isAccepted || (this.state.userShare && this.state.status === 'inprogress' && (this.state.memberStatus === 'àctive' || this.state.memberStatus === 'founder')) ? true : (this.state.votedYes > 50) ? false : true)}>Process Proposal</Button>
+                  </Grid.Column>
+                </Grid>
               </Grid.Column>
             </Grid>
           </Segment>

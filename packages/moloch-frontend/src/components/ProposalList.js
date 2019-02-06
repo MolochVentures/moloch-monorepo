@@ -78,9 +78,17 @@ const ProposalCard = ({ proposal }) => {
 
 
 const ProposalList = (props) => {
+  let hasItem = false;
+  // eslint-disable-next-line array-callback-return
+  Object.keys(props.proposals).map((key, idx) => {
+    if(props.proposals[key].length > 0){
+      hasItem = true;
+      return true;
+    }
+  });
   return (
     <div id="proposal_list">
-      {Object.keys(props.proposals).length > 0 ? null : <>
+      {hasItem > 0 ? null : <>
         <Grid columns={16} verticalAlign="middle">
           <Grid.Column mobile={16} tablet={8} computer={8} textAlign="left">
             <>No proposals to show.</>
@@ -120,7 +128,7 @@ const ProposalList = (props) => {
                     <p className="subtext">{props.proposals[key].length} Proposal{props.proposals[key].length > 1 ? 's' : ''}</p>
                     <p className="title">{(key.charAt(0).toUpperCase() + key.slice(1)).match(/[A-Z][a-z]+|[0-9]+/g).join(" ")}</p>
                   </Grid.Column>
-                  {idx === 0 && !props.proposals['inProgress'] ?
+                  {idx === 0 && props.proposals['inProgress'].length === 0 ?
                     <Grid.Column mobile={16} tablet={8} computer={4} textAlign="right" floated="right" className="submit_button">
                       <Link to={props.userShare && (props.memberStatus === 'àctive' || props.memberStatus === 'founder') ? '/projectproposalsubmission' : '/proposals'} className="link">
                         <Button size='large' color='red' disabled={props.userShare && (props.memberStatus === 'àctive' || props.memberStatus === 'founder') ? false : true}>Project Proposal</Button>
