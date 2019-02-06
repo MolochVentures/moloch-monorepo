@@ -31,7 +31,7 @@ export class MemberController {
     },
   })
   async findAll(): Promise<Member[]> {
-    return await this.memberRepository.find();
+    return await this.memberRepository.find({where: { status: { inq: ['active', 'founder']}}});
   }
 
   /**

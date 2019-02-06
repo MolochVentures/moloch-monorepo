@@ -109,7 +109,6 @@ export class EventController {
                 member.status = 'pending';
                 member.end = member.gracePeriod = 0;
               }
-              console.log(member);
               this.memberRepository.updateById(member.address, member);
             });
             return await this.projectRepository.find().then(async projects => {
@@ -122,7 +121,6 @@ export class EventController {
                   project.status = 'pending';
                   project.end = project.gracePeriod = 0;
                 }
-                console.log(project);
                 this.projectRepository.updateById(project.id, project);
               });
               return await this.eventRepository.create(event);
