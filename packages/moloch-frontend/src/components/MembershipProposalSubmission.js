@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Divider, Form, Grid, Icon, Input, Segment, GridColumn } from "semantic-ui-react";
+import { connect } from 'react-redux';
+import { postEvents } from '../action/actions';
 
 class AssetsFields extends Component {
     constructor(props) {
@@ -20,7 +22,7 @@ class AssetsFields extends Component {
     render() {
         return (
             <Grid.Row className="asset_field_row">
-                <Grid.Column mobile={14} tablet={5} computer={7} className="asset_field_grid">
+                <Grid.Column mobile={14} tablet={5} computer={7} className="asset_field_grid membership">
                     <Input name="asset" className="asset icon_asset" icon="ethereum" iconPosition="left" placeholder="ETH, BTC, Token address" onChange={this.handleAsset} type="text" />
                 </Grid.Column>
                 <Grid.Column mobile={2} tablet={1} computer={2} className="asset_field_grid mobile_delete_icon" textAlign="right">
@@ -41,7 +43,7 @@ class AssetsFields extends Component {
     }
 }
 
-export default class MembershipProposalSubmission extends Component {
+class MembershipProposalSubmission extends Component {
     constructor(props) {
         super(props);
 
@@ -174,19 +176,25 @@ export default class MembershipProposalSubmission extends Component {
             tribute: this.state.tribute,
             assets: this.state.assets
         }
-      
+
         if (this.state.formValid) {
-            fetch('http://127.0.0.1:3001/events', {
-                method: 'POST',
-                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', },
-                body: JSON.stringify({ id: '', name: 'Membership proposal', payload: membership })
-            }).then(response => response.json()).then(responseJson => {
-                if (responseJson.id) {
-                    self.props.history.push('/members');
-                } else {
-                    alert('Error processing proposal');
-                }
-            });
+            this.props.postEvents(JSON.stringify({ id: '', name: 'Membership proposal', payload: membership }))
+                .then((responseJson) => {
+                    switch (responseJson.type) {
+                        case 'POST_EVENTS_SUCCESS':
+                            if (responseJson.items.id) {
+                                self.props.history.push('/members');
+                            } else {
+                                alert('Error processing proposal');
+                            }
+                            break;
+                        case 'POST_EVENTS_FAILURE':
+                            alert('Error processing proposal');
+                            break;
+                        default:
+                            break;
+                    }
+                });
         } else {
             alert('Please, fill any missing field');
         }
@@ -262,3 +270,20 @@ export default class MembershipProposalSubmission extends Component {
         );
     }
 }
+
+
+// This function is used to convert redux global state to desired props.
+function mapStateToProps(state) {
+    return {};
+}
+
+// This function is used to provide callbacks to container component.
+function mapDispatchToProps(dispatch) {
+    return {
+        postEvents: function (data) {
+            return dispatch(postEvents(data));
+        }
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(MembershipProposalSubmission);

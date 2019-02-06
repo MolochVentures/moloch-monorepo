@@ -171,9 +171,14 @@ class ProposalListView extends React.Component {
     Object.keys(props.proposals).map((key, idx) => {
       // eslint-disable-next-line array-callback-return
       props.proposals[key].map((p) => {
-        let calculatedVotes = this.calculateVote(p.voters);
-        p.votedYes = calculatedVotes.votedYes;
-        p.votedNo = calculatedVotes.votedNo;
+        if(p.voters){
+          let calculatedVotes = this.calculateVote(p.voters);
+          p.votedYes = calculatedVotes.votedYes;
+          p.votedNo = calculatedVotes.votedNo;
+        } else {
+          p.votedYes = 0;
+          p.votedNo = 0
+        }
       })
     })
   }

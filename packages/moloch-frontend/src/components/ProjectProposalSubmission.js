@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Divider, Dropdown, Form, Grid, Icon, Input, Segment, GridColumn } from "semantic-ui-react";
 import { connect } from 'react-redux';
-import { fetchMemberDetail } from '../action/actions';
+import { fetchMemberDetail, postEvents } from '../action/actions';
 
 class AssetsFields extends Component {
     constructor(props) {
@@ -40,7 +40,7 @@ class AssetsFields extends Component {
         return (
             <Grid.Row className="asset_field_row">
                 <Grid.Column mobile={14} tablet={5} computer={7} className="asset_field_grid">
-                    <Dropdown name="asset" className="asset" icon="ethereum" selection options={assets} placeholder="Currency" onChange={this.handleAsset} />
+                    <Dropdown name="asset" className="asset proposal_currency_dropdown" icon="ethereum" selection options={assets} placeholder="Currency" onChange={this.handleAsset} />
                 </Grid.Column>
                 <Grid.Column mobile={2} tablet={1} computer={2} className="asset_field_grid mobile_delete_icon" textAlign="right">
                     <div className="subtext">
@@ -91,8 +91,8 @@ class ProjectProposalSubmission extends Component {
             .then((responseJson) => {
                 switch (responseJson.type) {
                     case 'FETCH_MEMBER_DETAIL_SUCCESS':
-                        if(responseJson.items.member.shares && responseJson.items.member.shares > 0){
-                            this.setState({isMember: true})
+                        if (responseJson.items.member.shares && responseJson.items.member.shares > 0) {
+                            this.setState({ isMember: true })
                         }
                         break;
                     default:
@@ -193,17 +193,24 @@ class ProjectProposalSubmission extends Component {
         }
 
         if (this.state.formValid) {
-            fetch('http://127.0.0.1:3001/events', {
-                method: 'POST',
-                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', },
-                body: JSON.stringify({ id: '', name: 'Project proposal', payload: project })
-            }).then(response => response.json()).then(responseJson => {
-                if (responseJson.id) {
-                    self.props.history.push('/proposals');
-                } else {
-                    alert('Error processing proposal');
-                }
-            });
+
+            this.props.postEvents(JSON.stringify({ id: '', name: 'Project proposal', payload: project }))
+                .then((responseJson) => {
+                    switch (responseJson.type) {
+                        case 'POST_EVENTS_SUCCESS':
+                            if (responseJson.items.id) {
+                                self.props.history.push('/proposals');
+                            } else {
+                                alert('Error processing proposal');
+                            }
+                            break;
+                        case 'POST_EVENTS_FAILURE':
+                            alert('Error processing proposal');
+                            break;
+                        default:
+                            break;
+                    }
+                });
         } else {
             alert('Please, fill any missing field');
         }
@@ -287,6 +294,9 @@ function mapDispatchToProps(dispatch) {
         fetchMemberDetail: function (id) {
             return dispatch(fetchMemberDetail(id));
         },
+        postEvents: function (data) {
+            return dispatch(postEvents(data));
+        }
     };
 }
 

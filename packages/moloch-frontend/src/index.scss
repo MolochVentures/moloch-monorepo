@@ -29,20 +29,6 @@ body {
   font-size: 12px;
 }
 
-//.blurred:before {
-//  content: '';
-//  position: absolute;
-//  top: 0;
-//  left: 0;
-//  right: 0;
-//  bottom: 0;
-//  height: 100%;
-//  width: 100%;
-//  background: url("assets/moloch_owl.jpg") 0 / cover fixed;
-//  filter: blur(50px);
-//  opacity: 0.3;
-//}
-
 .pill {
   border-radius: 20px !important;
   padding: 8px 20px !important;
@@ -133,7 +119,7 @@ body {
         padding: 20px !important;
         color: inherit;
       }
-      .item:hover {
+      .item:hover:not(.submenu) {
         background-color: rgba(0,0,0,.1);
         cursor: pointer;
       }
@@ -279,11 +265,6 @@ body {
   .member_avatar {
     margin-top: 25px;
   }
-
-  // .member_item {
-  //   margin-left: 1em;
-  //   margin-right: 1em;
-  // }
   
   @media screen and (min-width: 320px) and (max-width: 375px) { 
   
@@ -583,8 +564,12 @@ body {
 
     .asset {
       min-width: 100% !important;
-      padding-left: 3px !important;
-      padding-right: 3px !important;
+    }
+    .membership .asset i {
+      width: 30px;
+    }
+    .proposal_currency_dropdown {
+      padding-left: 10px !important;
     }
     .assets_field {
       min-height: 100px !important;
@@ -621,8 +606,6 @@ body {
   
     .asset {
       min-width: 100% !important;
-      padding-left: 3px !important;
-      padding-right: 3px !important;
     }
     .asset_amount {
       padding: 0 !important;
@@ -656,8 +639,6 @@ body {
   
     .asset {
       min-width: 100% !important;
-      padding-left: 3px !important;
-      padding-right: 3px !important;
     }
     .asset_amount {
       padding: 0 !important;

@@ -38,7 +38,7 @@ class ChangeDelegateKeyMenu extends Component {
       <div>
         <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => this.props.onLoadMain()} />
         <Dropdown.Divider />
-        <Dropdown.Item className="item">
+        <Dropdown.Item className="item submenu">
           <p><Icon name="key"></Icon>Change Delegate Key</p>
           <Form.Input placeholder="Enter new key address"></Form.Input>
           <Button>Save</Button>
@@ -55,7 +55,7 @@ class WithdrawLootTokenMenu extends Component {
       <div>
         <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => this.props.onLoadMain()} />
         <Dropdown.Divider />
-        <Dropdown.Item className="item">
+        <Dropdown.Item className="item submenu">
           <p><Icon name="dollar"></Icon>Withdraw Loot Token</p>
           <Form.Input placeholder="Enter withdrawal address"></Form.Input>
           <Form.Input placeholder="0"></Form.Input>
