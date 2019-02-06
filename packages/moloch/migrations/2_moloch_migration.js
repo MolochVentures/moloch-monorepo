@@ -1,31 +1,35 @@
 /* global artifacts */
-const fse = require('fs-extra')
-
+const BigNumber = require('bignumber.js')
 const Moloch = artifacts.require('./Moloch.sol')
-const LootToken = artifacts.require('./LootToken.sol')
+// const LootToken = artifacts.require('./LootToken.sol')
 const GuildBank = artifacts.require('./GuildBank.sol')
-const FooToken = artifacts.require('./oz/StandardToken.sol')
-const BarToken = artifacts.require('./oz/StandardToken.sol')
+const FooToken = artifacts.require('./oz/ERC20.sol')
+const BarToken = artifacts.require('./oz/ERC20.sol')
 
 const foundersJSON = require('./founders.json')
 const configJSON = require('./config.json')
 
+
 module.exports = (deployer, network, accounts) => {
   deployer.then(async () => {
-    guildBank = await deployer.deploy(GuildBank)
+    fooToken  = await deployer.deploy(FooToken)
+    guildBank = await deployer.deploy(
+      GuildBank,
+      fooToken.address
+    )
     moloch = await deployer.deploy(
       Moloch,
-      GuildBank.address,
-      foundersJSON.addresses,
-      foundersJSON.votingShares,
-      configJSON.PERIOD_DURATION_IN_SECONDS,
-      configJSON.VOTING_DURATON_IN_PERIODS,
-      configJSON.GRACE_DURATON_IN_PERIODS,
-      configJSON.MIN_PROPOSAL_DEPOSIT_IN_WEI,
+      accounts[0],
+      fooToken.address,
+      17280,
+      7,
+      7,
+      new BigNumber(10000000000000000000),
+      3,
+      new BigNumber(100000000000000000),
       { gas: 6000000 }
     )
-    lootTokenAddress = await moloch.lootToken()
-    await guildBank.setLootTokenAddress(lootTokenAddress)
-    await guildBank.transferOwnership(moloch.address)
+    let proposalDeposit  = await moloch.proposalDeposit()
+    console.log('proposalDeposit', proposalDeposit.toString())
   })
 }
