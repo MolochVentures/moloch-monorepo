@@ -50,20 +50,22 @@ const MemberList = (props) => {
       }
       <Grid className="member_item">
         <Grid.Row>
-          <p style={{paddingLeft: '1rem'}}>Elders</p>
+          <p style={{ paddingLeft: '1rem' }}>Elders</p>
         </Grid.Row>
         <Divider />
         <Grid.Row className="members_row" centered>
-          {props.elders.map((elder, idx) => <MemberAvatar {...elder} key={idx} />)}
+          {props.elders.length > 0 ?
+            props.elders.map((elder, idx) => <MemberAvatar {...elder} key={idx} />) : <>No elders to show.</>}
         </Grid.Row>
       </Grid>
       <Grid className="member_item">
         <Grid.Row>
-          <p style={{paddingLeft: '1rem'}}>Contributors</p>
+          <p style={{ paddingLeft: '1rem' }}>Contributors</p>
         </Grid.Row>
         <Divider />
         <Grid.Row className="members_row" centered>
-          {props.members.map((contributor, idx) => <MemberAvatar {...contributor} key={idx} />)}
+          {props.members.length > 0 ?
+            props.members.map((contributor, idx) => <MemberAvatar {...contributor} key={idx} />) : <>No contributors to show.</>}
         </Grid.Row>
       </Grid>
     </div>
