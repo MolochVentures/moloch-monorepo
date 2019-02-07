@@ -346,23 +346,72 @@ export class EventController {
           return await this.periodRepository.find({ where: { start: { lte: new Date() }, gracePeriod: { gte: new Date() } } }).then(async periods => {
             let memberProposals = member.proposals ? member.proposals : [];
             let canRedeem = true;
-            // Check the gracePeriod of any of the proposals in which the member has voted is above the current date
-            memberProposals.forEach(proposal => {
-              periods.forEach(period => {
-                period.proposals.forEach(periodProposal => {
-                  if (periodProposal.id === proposal.id) {
-                    canRedeem = false;
+            // Only continue checking if there are any periods that might affect the redeeming
+            if (periods && periods.length > 0) {
+              // Get all the ids of the periods that might affect the redeeming
+              let periodIds: Array<string> = [];
+              periods.forEach(period => { periodIds.push(period.id) });
+              // Get the membership proposals associated to those periods
+              return await this.memberRepository.find({ where: { period: { inq: periodIds }}}).then(async currentMemberProposals => {
+                // Check if any of them should prevent the user from redeeming
+                currentMemberProposals.forEach(memberProposal => {
+                  let matchingProposalIndex = memberProposals.findIndex(k => k.id === memberProposal.address);
+                  if (matchingProposalIndex >= 0 && // If the user has a proposal that is within the grace period and
+                    ((memberProposal.status === 'active' && memberProposals[matchingProposalIndex].vote === 'yes') || // The proposal gets approved and they voted yes on said proposal or
+                    (memberProposal.status === 'inactive' && memberProposals[matchingProposalIndex].vote === 'no'))) { // The proposal gets rejected and they voted no on said proposal
+                      canRedeem = false; // Then the user can't redeem  
+                    }
+                });
+                // Get the project proposals associated to those periods
+                return await this.projectRepository.find({ where: { period: { inq: periodIds }}}).then(async currentProjectProposals => {
+                  // Check if any of them should prevent the user from redeeming
+                  currentProjectProposals.forEach(projectProposal => {
+                    let matchingProposalIndex = memberProposals.findIndex(k => k.id === projectProposal.id);
+                    if (matchingProposalIndex >= 0 && // If the user has a proposal that is within the grace period and
+                      ((projectProposal.status === 'accepted' && memberProposals[matchingProposalIndex].vote === 'yes') || // The proposal gets approved and they voted yes on said proposal or
+                      (projectProposal.status === 'rejected' && memberProposals[matchingProposalIndex].vote === 'no'))) { // The proposal gets rejected and they voted no on said proposal
+                        canRedeem = false; // Then the user can't redeem  
+                      }
+                  });
+                  // Only redeem if none of the proposals matched the previous conditions
+                  if (canRedeem) {
+                    // We can redeem, so first we get the total shares of the system and calculate the percentage represented by the member redeeming
+                    return await this.memberRepository.find().then(async members => {
+                      let totalShares = 0;
+                      let redeemingMemberShares = member.shares ? member.shares : 0;
+                      members.forEach(member => { totalShares = totalShares + (member.shares ? member.shares : 0) });
+                      // Then we deduct the assets proportionately to the shares of the member
+                      return await this.assetRepository.find().then(async assets => {
+                        assets.forEach(asset => {
+                          asset.amount = asset.amount - (asset.amount * redeemingMemberShares / totalShares);
+                          this.assetRepository.updateById(asset.address, asset);
+                        });
+                        member.status = 'inactive';
+                        member.shares = 0;
+                        // And deactivate the member
+                        return await this.memberRepository.updateById(member.address, member).then(async result => {
+                          return await this.eventRepository.create(event);
+                        });
+                      });
+                    });
+                  } else {
+                    event.name = "Error on Redeem loot token";
+                    return await this.eventRepository.create(event).then(async result => {
+                      let error: HttpError = new HttpError;
+                      error.status = 400;
+                      error.message = "The member is still within the grace period of a voted proposal."
+                      return await error;
+                    });
                   }
                 });
               });
-            });
-            // Only redeem if none of the proposals matched the previous condition
-            if (canRedeem) {
-              // We can redeem, so first we get the total shares of the system and calculate the percentage represented by the user redeeming
+            } else { // If we get here, there were no periods that might affect the redeeming
+              // First we get the total shares of the system and calculate the percentage represented by the member redeeming
               return await this.memberRepository.find().then(async members => {
                 let totalShares = 0;
                 let redeemingMemberShares = member.shares ? member.shares : 0;
                 members.forEach(member => { totalShares = totalShares + (member.shares ? member.shares : 0) });
+                // Then we deduct the assets proportionately to the shares of the member
                 return await this.assetRepository.find().then(async assets => {
                   assets.forEach(asset => {
                     asset.amount = asset.amount - (asset.amount * redeemingMemberShares / totalShares);
@@ -370,22 +419,15 @@ export class EventController {
                   });
                   member.status = 'inactive';
                   member.shares = 0;
+                  // And deactivate the member
                   return await this.memberRepository.updateById(member.address, member).then(async result => {
                     return await this.eventRepository.create(event);
                   });
                 });
               });
-            } else {
-              event.name = "Error on Redeem loot token";
-              return await this.eventRepository.create(event).then(async result => {
-                let error: HttpError = new HttpError;
-                error.status = 400;
-                error.message = "The member is still within the grace period of a voted proposal."
-                return await error;
-              });
             }
-          })
-        })
+          });
+        });
     }
     event.name = "Error: Unidentified event";
     return await this.eventRepository.create(event).then(result => { return event });
