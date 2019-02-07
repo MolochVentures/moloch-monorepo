@@ -2,11 +2,19 @@ import React from 'react';
 import { Grid, Button, Segment } from "semantic-ui-react";
 import { Link } from 'react-router-dom';
 import Graph from './Graph';
+import moment from 'moment';
 
 import { connect } from 'react-redux';
-import { fetchMemberDetail } from '../action/actions';
+import { fetchMemberDetail, fetchMembers, fetchConfigFounders, fetchProposals } from '../action/actions';
 
 class HomePage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      totalMembers: 0,
+      totalProposals: 0,
+    }
+  }
 
   componentDidMount() {
     if (localStorage.getItem('loggedUser')) {
@@ -20,6 +28,29 @@ class HomePage extends React.Component {
           }
         })
     }
+
+    this.props.fetchMembers()
+      .then((responseJson) => {
+        this.setState({ totalMembers: this.state.totalMembers + responseJson.items.length })
+      });
+    this.props.fetchConfigFounders()
+      .then((responseJson) => {
+        this.setState({ totalMembers: this.state.totalMembers + responseJson.items.length })
+      });
+
+    let proposalParams = {
+      currentDate: moment(new Date()).format('YYYY-MM-DD')
+    }
+    let self = this;
+    this.props.fetchProposals(proposalParams)
+      .then((responseJson) => {
+        if (responseJson.items && Object.keys(responseJson.items).length > 0) {
+          // eslint-disable-next-line array-callback-return
+          Object.keys(responseJson.items).map((key, idx) => {
+            self.setState({ totalProposals: self.state.totalProposals+=responseJson.items[key].length });
+          })
+        }
+      })
   }
 
   render() {
@@ -34,10 +65,10 @@ class HomePage extends React.Component {
           </Grid.Column>
           <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons" >
             <Link to='/members' className="link">
-              <Button size='large' color='grey' className='btn_link'>57 Members</Button>
+              <Button size='large' color='grey' className='btn_link'>{this.state.totalMembers} Members</Button>
             </Link>
             <Link to='/proposals' className="link">
-              <Button size='large' color='grey' className='btn_link'>13 Proposals</Button>
+              <Button size='large' color='grey' className='btn_link'>{this.state.totalProposals} Proposals</Button>
             </Link>
           </Grid.Column>
 
@@ -81,6 +112,15 @@ function mapDispatchToProps(dispatch) {
   return {
     fetchMemberDetail: function (id) {
       return dispatch(fetchMemberDetail(id));
+    },
+    fetchMembers: function () {
+      return dispatch(fetchMembers());
+    },
+    fetchConfigFounders: function () {
+      return dispatch(fetchConfigFounders());
+    },
+    fetchProposals: function (params) {
+      return dispatch(fetchProposals(params));
     },
   };
 }
