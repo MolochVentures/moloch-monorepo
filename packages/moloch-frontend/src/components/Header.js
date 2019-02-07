@@ -4,6 +4,7 @@ import { Grid, Icon, Dropdown, Form, Button } from "semantic-ui-react";
 
 const user = {
   "name": localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')).address : '',
+  "status": localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')).status : '',
 };
 
 class MainMenu extends Component {
@@ -11,18 +12,19 @@ class MainMenu extends Component {
   render() {
     return (
       <div>
-        <Dropdown.Item className="item" onClick={()=> this.props._handleCloseDropdown()}>
-          <Link to={`/members/${user.name}`} className="link">
-            <p><Icon name="user" ></Icon>View Profile</p>
-          </Link>
-        </Dropdown.Item>
+        {user.status === 'active' || user.status === 'founder' ?
+          <Dropdown.Item className="item" onClick={() => this.props._handleCloseDropdown()}>
+            <Link to={`/members/${user.name}`} className="link">
+              <p><Icon name="user" ></Icon>View Profile</p>
+            </Link>
+          </Dropdown.Item> : null}
         <Dropdown.Divider />
-        <Dropdown.Item icon="dollar" className="item" content="Withdraw Loot Token" onClick={() => {this.props._handleOpenDropdown(); this.props.onLoadWithdrawLootToken()}} />
+        <Dropdown.Item icon="dollar" className="item" content="Withdraw Loot Token" onClick={() => { this.props._handleOpenDropdown(); this.props.onLoadWithdrawLootToken() }} />
         <Dropdown.Divider />
-        <Dropdown.Item icon="key" className="item" content="Change Delegate Key" onClick={() => {this.props._handleOpenDropdown(); this.props.onLoadChangeDelegateKey()}} />
+        <Dropdown.Item icon="key" className="item" content="Change Delegate Key" onClick={() => { this.props._handleOpenDropdown(); this.props.onLoadChangeDelegateKey() }} />
         <Dropdown.Divider />
         <Dropdown.Item className="item">
-          <Link to="/login" className="link" onClick={() => {this.props._handleCloseDropdown(); localStorage.removeItem("loggedUser");}}>
+          <Link to="/login" className="link" onClick={() => { this.props._handleCloseDropdown(); localStorage.removeItem("loggedUser"); }}>
             <p><Icon name="power off"></Icon>Sign Out</p>
           </Link>
         </Dropdown.Item>
@@ -77,68 +79,68 @@ export default class Header extends Component {
   }
 
   _handleOpenDropdown() {
-    this.setState({visibleRightMenu: true});
+    this.setState({ visibleRightMenu: true });
   }
 
   _handleCloseDropdown() {
-    this.setState({visibleRightMenu: false});
+    this.setState({ visibleRightMenu: false });
   }
 
   render() {
     let topRightMenuContent;
 
-    switch(this.state.visibleMenu) {
+    switch (this.state.visibleMenu) {
       case 'main':
-        topRightMenuContent = <MainMenu _handleOpenDropdown={() => this._handleOpenDropdown()} _handleCloseDropdown={() => this._handleCloseDropdown()}  onLoadChangeDelegateKey={() => this.setState({visibleMenu: 'changeDelegateKey'})} onLoadWithdrawLootToken={() => this.setState({visibleMenu: 'withdrawLootToken'})}></MainMenu>
+        topRightMenuContent = <MainMenu _handleOpenDropdown={() => this._handleOpenDropdown()} _handleCloseDropdown={() => this._handleCloseDropdown()} onLoadChangeDelegateKey={() => this.setState({ visibleMenu: 'changeDelegateKey' })} onLoadWithdrawLootToken={() => this.setState({ visibleMenu: 'withdrawLootToken' })}></MainMenu>
         break;
       case 'changeDelegateKey':
-        topRightMenuContent = <ChangeDelegateKeyMenu onLoadMain={() => {this._handleOpenDropdown(); this.setState({visibleMenu: 'main'})}}></ChangeDelegateKeyMenu>
+        topRightMenuContent = <ChangeDelegateKeyMenu onLoadMain={() => { this._handleOpenDropdown(); this.setState({ visibleMenu: 'main' }) }}></ChangeDelegateKeyMenu>
         break;
       case 'withdrawLootToken':
-        topRightMenuContent = <WithdrawLootTokenMenu onLoadMain={() => {this._handleOpenDropdown(); this.setState({visibleMenu: 'main'})}}></WithdrawLootTokenMenu>
+        topRightMenuContent = <WithdrawLootTokenMenu onLoadMain={() => { this._handleOpenDropdown(); this.setState({ visibleMenu: 'main' }) }}></WithdrawLootTokenMenu>
         break;
       default:
         break;
     }
 
-    return(
+    return (
       <div id="header">
         <Grid columns='equal' verticalAlign="middle">
-          {localStorage.getItem('loggedUser') ? 
-          <Grid.Column textAlign="left" className="menu">
-            <Dropdown icon="bars">
-              <Dropdown.Menu className="menu blurred" direction="right">
-                <Link to="guildbank" className="item">
-                  <p>Guild Bank</p>
-                </Link>
-                <Dropdown.Divider />
-                <Link to="/members" className="item">
-                  <p>Members</p>
-                </Link>
-                <Dropdown.Divider />
-                <Link to="/proposals" className="item">
-                  <p>Proposals</p>
-                </Link>
-              </Dropdown.Menu>
-            </Dropdown>
-          </Grid.Column> : null }
+          {localStorage.getItem('loggedUser') ?
+            <Grid.Column textAlign="left" className="menu">
+              <Dropdown icon="bars">
+                <Dropdown.Menu className="menu blurred" direction="right">
+                  <Link to="guildbank" className="item">
+                    <p>Guild Bank</p>
+                  </Link>
+                  <Dropdown.Divider />
+                  <Link to="/members" className="item">
+                    <p>Members</p>
+                  </Link>
+                  <Dropdown.Divider />
+                  <Link to="/proposals" className="item">
+                    <p>Proposals</p>
+                  </Link>
+                </Dropdown.Menu>
+              </Dropdown>
+            </Grid.Column> : null}
           <Grid.Column textAlign="center" className="logo">
             <Link to="/">MOLOCH</Link>
           </Grid.Column>
           {localStorage.getItem('loggedUser') ?
-          <Grid.Column textAlign="right" className="dropdown">
-            <Dropdown 
-              className='right_dropdown'
-              open={this.state.visibleRightMenu} 
-              onBlur={() => this._handleCloseDropdown()}
-              onFocus={() => this._handleOpenDropdown()}
-              text="A" 
+            <Grid.Column textAlign="right" className="dropdown">
+              <Dropdown
+                className='right_dropdown'
+                open={this.state.visibleRightMenu}
+                onBlur={() => this._handleCloseDropdown()}
+                onFocus={() => this._handleOpenDropdown()}
+                text="A"
               >
-              <Dropdown.Menu className="menu blurred" direction="left">
-                {topRightMenuContent}
-              </Dropdown.Menu>
-            </Dropdown>
-          </Grid.Column> : null }
+                <Dropdown.Menu className="menu blurred" direction="left">
+                  {topRightMenuContent}
+                </Dropdown.Menu>
+              </Dropdown>
+            </Grid.Column> : null}
         </Grid>
       </div>
     );
