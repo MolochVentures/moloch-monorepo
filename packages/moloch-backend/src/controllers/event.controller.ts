@@ -136,15 +136,19 @@ export class EventController {
       case 'Membership proposal':
         let memberPatch = event.payload as Member;
         memberPatch.name = memberPatch.address;
-        memberPatch.status = 'pending';
+        // Current date at midnight
+        let currentDate = new Date();
+        currentDate.setHours(1, 0, 0, 0);
+        // Add the new proposal to the list of proposals of the member that submitted it
+        if (!memberPatch.proposals) {
+          memberPatch.proposals = [];
+        }
+        memberPatch.proposals.push({id: memberPatch.address, title: memberPatch.title ? memberPatch.title : '', vote: 'owner', date: currentDate});
         // Recover the config data to define a new period
         return await this.configRepository.find().then(async config => {
           // Config data
           let periodLength = config[0].periodLength;
           let gracePeriodLength = config[0].gracePeriod;
-          // Current date at midnight
-          let currentDate = new Date();
-          currentDate.setHours(1, 0, 0, 0);
           // Check if there is a period for the current date
           return await this.periodRepository.find({ where: { start: { eq: currentDate } } }).then(async period => {
             let periodCreate: Period = new Period;
@@ -154,13 +158,19 @@ export class EventController {
             if (period && period.length) {
               return await this.periodRepository.find().then(async periods => {
                 // There can't be another period for the same date, so check what is the closest date available
-                let lastPeriodDate = periods[periods.length - 1].start;
+                let lastPeriodDate = currentDate;
+                periods.forEach(potentialLastPeriod => {
+                  if (potentialLastPeriod.start.getTime() > lastPeriodDate.getTime()) {
+                    lastPeriodDate = potentialLastPeriod.start;
+                  }
+                });
                 periodCreate.start = new Date(lastPeriodDate.getTime() + (1000 * 60 * 60 * 24));
                 periodCreate.end = new Date(periodCreate.start.getTime() + (1000 * 60 * 60 * 24 * periodLength));
                 periodCreate.gracePeriod = new Date(periodCreate.end.getTime() + (1000 * 60 * 60 * 24 * gracePeriodLength));
                 // And create a period for it
                 return await this.periodRepository.create(periodCreate).then(async newPeriod => {
                   memberPatch.period = newPeriod.id; // Assign it to the member
+                  memberPatch.status = 'pending';
                   // And update the member
                   return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async result => {
                     return await this.eventRepository.create(event);
@@ -174,6 +184,7 @@ export class EventController {
               // Create the period
               return await this.periodRepository.create(periodCreate).then(async newPeriod => {
                 memberPatch.period = newPeriod.id; // Assign it to the member
+                memberPatch.status = 'inprogress';
                 // And create the member
                 return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async result => {
                   return await this.eventRepository.create(event);
@@ -184,9 +195,10 @@ export class EventController {
         });
       case 'Project proposal':
         // Project data
-        let projectCreate = event.payload as Project;
+        let receivedData = event.payload as any;
+        let projectCreate = receivedData.project as Project;
+        let ownerAddress = receivedData.owner as string;
         projectCreate.id = (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-        projectCreate.status = 'pending';
         // Recover the config data to define a new period
         return await this.configRepository.find().then(async config => {
           // Config data
@@ -205,15 +217,31 @@ export class EventController {
               return await this.periodRepository.find().then(async periods => {
                 // There can't be another period for the same date, so check what is the closest date available
                 let lastPeriodDate = periods[periods.length - 1].start;
+                periods.forEach(potentialLastPeriod => {
+                  if (potentialLastPeriod.start.getTime() > lastPeriodDate.getTime()) {
+                    lastPeriodDate = potentialLastPeriod.start;
+                  }
+                });
                 periodCreate.start = new Date(lastPeriodDate.getTime() + (1000 * 60 * 60 * 24));
                 periodCreate.end = new Date(periodCreate.start.getTime() + (1000 * 60 * 60 * 24 * periodLength));
                 periodCreate.gracePeriod = new Date(periodCreate.end.getTime() + (1000 * 60 * 60 * 24 * gracePeriodLength));
                 // And create a period for it
                 return await this.periodRepository.create(periodCreate).then(async newPeriod => {
                   projectCreate.period = newPeriod.id; // Assign it to the project
+                  projectCreate.status = 'pending';
                   // And create the project
-                  return await this.projectRepository.create(projectCreate).then(async result => {
-                    return await this.eventRepository.create(event);
+                  return await this.projectRepository.create(projectCreate).then(async project => {
+                    // Get the member that submitted the project
+                    return await this.memberRepository.findById(ownerAddress).then(async matchingMember => {
+                      // And add the new proposal that they have submitted to their list of proposals
+                      if (!matchingMember.proposals) {
+                        matchingMember.proposals = [];
+                      }
+                      matchingMember.proposals.push({id: projectCreate.id, title: projectCreate.title, vote: 'owner', date: currentDate});
+                      return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
+                        return await this.eventRepository.create(event);
+                      });
+                    });                    
                   });
                 });
               });
@@ -226,7 +254,17 @@ export class EventController {
                 projectCreate.period = newPeriod.id; // Assign it to the project
                 // And create the project
                 return await this.projectRepository.create(projectCreate).then(async result => {
-                  return await this.eventRepository.create(event);
+                  // Get the member that submitted the project
+                  return await this.memberRepository.findById(ownerAddress).then(async matchingMember => {
+                    // And add the new proposal that they have submitted to their list of proposals
+                    if (!matchingMember.proposals) {
+                      matchingMember.proposals = [];
+                    }
+                    matchingMember.proposals.push({id: projectCreate.id, title: projectCreate.title, vote: 'owner', date: currentDate});
+                    return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
+                      return await this.eventRepository.create(event);
+                    });
+                  });
                 });
               });
             }
