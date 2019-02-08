@@ -5,6 +5,7 @@ import ProposalsReducers from './ProposalsReducers'
 import ProposalDetailReducers from './ProposalDetailReducers'
 import EventsReducers from './EventsReducers'
 import FounderReducers from './FounderReducers'
+import AssetAmountReducers from './AssetReducers'
 
 export default combineReducers({
     members: MembersReducers,
@@ -12,5 +13,6 @@ export default combineReducers({
     proposals: ProposalsReducers,
     proposalDetail: ProposalDetailReducers,
     events: EventsReducers,
-    founders: FounderReducers
+    founders: FounderReducers,
+    assetAmount: AssetAmountReducers
 });
