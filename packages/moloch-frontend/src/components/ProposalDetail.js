@@ -110,7 +110,8 @@ class ProposalDetail extends Component {
   }
 
   loadData(responseJson) {
-    this.setState({ proposal_detail: (responseJson.items.member ? responseJson.items.member : responseJson.items), isAccepted: (responseJson.items.member.status === 'accepted' || responseJson.items.member.status === 'active' ? true : false) });
+    let proposal = responseJson.items.member ? responseJson.items.member : responseJson.items;
+    this.setState({ proposal_detail: proposal, isAccepted: (proposal.status === 'accepted' || proposal.status === 'active' ? true : false) });
     let voters = this.state.proposal_detail.voters ? this.state.proposal_detail.voters : [];
     let userHasVoted = voters.find(voter => voter.member === this.state.loggedUser) ? true : false;
     this.setState({ userHasVoted });
@@ -297,13 +298,13 @@ class ProposalDetail extends Component {
                 </Grid>
                 <Grid columns="equal" centered>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
-                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || !(this.state.userShare && this.state.status === 'inprogress' && (this.state.memberStatus === 'àctive' || this.state.memberStatus === 'founder'))} onClick={this.handleNo}>Vote No</Button>
+                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || !(this.state.userShare && this.state.status === 'inprogress' && (this.state.memberStatus === 'active' || this.state.memberStatus === 'founder'))} onClick={this.handleNo}>Vote No</Button>
                   </Grid.Column>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
-                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || !(this.state.userShare && this.state.status === 'inprogress' && (this.state.memberStatus === 'àctive' || this.state.memberStatus === 'founder'))} onClick={this.handleYes}>Vote Yes</Button>
+                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || !(this.state.userShare && this.state.status === 'inprogress' && (this.state.memberStatus === 'active' || this.state.memberStatus === 'founder'))} onClick={this.handleYes}>Vote Yes</Button>
                   </Grid.Column>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
-                    <Button className="btn" color='grey' onClick={this.handleProcess} disabled={(this.state.isAccepted || (this.state.userShare && this.state.status === 'inprogress' && (this.state.memberStatus === 'àctive' || this.state.memberStatus === 'founder')) ? true : (this.state.votedYes > 50) ? false : true)}>Process Proposal</Button>
+                    <Button className="btn" color='grey' onClick={this.handleProcess} disabled={(this.state.isAccepted || (this.state.userShare && this.state.status === 'inprogress' && (this.state.memberStatus === 'active' || this.state.memberStatus === 'founder')) ? true : (this.state.votedYes > 50) ? false : true)}>Process Proposal</Button>
                   </Grid.Column>
                 </Grid>
               </Grid.Column>

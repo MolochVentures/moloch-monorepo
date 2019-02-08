@@ -91,7 +91,7 @@ class ProjectProposalSubmission extends Component {
             .then((responseJson) => {
                 switch (responseJson.type) {
                     case 'FETCH_MEMBER_DETAIL_SUCCESS':
-                        if (responseJson.items.member.shares && responseJson.items.member.shares > 0) {
+                        if (responseJson.items.member.shares && responseJson.items.member.shares > 0 && (responseJson.items.member.status === 'active' || responseJson.items.member.status === 'founder')) {
                             this.setState({ isMember: true })
                         }
                         break;
@@ -193,8 +193,8 @@ class ProjectProposalSubmission extends Component {
         }
 
         if (this.state.formValid) {
-
-            this.props.postEvents(JSON.stringify({ id: '', name: 'Project proposal', payload: project }))
+            let user = JSON.parse(localStorage.getItem('loggedUser'));
+            this.props.postEvents(JSON.stringify({ id: '', name: 'Project proposal', payload: {project: project, owner: user.address} }))
                 .then((responseJson) => {
                     switch (responseJson.type) {
                         case 'POST_EVENTS_SUCCESS':
