@@ -74,8 +74,10 @@ class ProposalDetail extends Component {
       .then((responseJson) => {
         this.setState({
           userShare: (responseJson.items.member.shares) ? responseJson.items.member.shares : 0,
+          // userShare: 20,
           totalShares: responseJson.items.totalShares,
-          memberStatus: (responseJson.items.member.status) ? responseJson.items.member.status : '',
+          memberStatus: (responseJson.items.member.status) ? (responseJson.items.member.status === 'active' || responseJson.items.member.status === 'founder' ? 'active' : responseJson.items.member.status) : '',
+          // memberStatus: 'active'
         });
 
       })
@@ -110,7 +112,8 @@ class ProposalDetail extends Component {
   }
 
   loadData(responseJson) {
-    this.setState({ proposal_detail: (responseJson.items.member ? responseJson.items.member : responseJson.items), isAccepted: (responseJson.items.member.status === 'accepted' || responseJson.items.member.status === 'active' ? true : false) });
+    let proposal = responseJson.items.member ? responseJson.items.member : responseJson.items;
+    this.setState({ proposal_detail: proposal, isAccepted: (proposal.status === 'accepted' || proposal.status === 'active' ? true : false) });
     let voters = this.state.proposal_detail.voters ? this.state.proposal_detail.voters : [];
     let userHasVoted = voters.find(voter => voter.member === this.state.loggedUser) ? true : false;
     this.setState({ userHasVoted });
@@ -187,8 +190,6 @@ class ProposalDetail extends Component {
     this.props.postEvents(JSON.stringify({ id: '', name: eventName, payload: proposal }))
       .then((responseJson) => {
         if (responseJson.type === "POST_EVENTS_SUCCESS") {
-          self.calculateVote(proposal.voters);
-          self.setState({ isAccepted: true });
           switch (eventName) {
             case 'Project proposal voted':
             case 'Membership proposal voted':
@@ -200,6 +201,10 @@ class ProposalDetail extends Component {
               break;
             default:
               break;
+          }
+          self.calculateVote(proposal.voters);
+          if(!voter){
+            self.setState({ isAccepted: true });
           }
         } else {
           alert('Error processing proposal');
@@ -297,13 +302,13 @@ class ProposalDetail extends Component {
                 </Grid>
                 <Grid columns="equal" centered>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
-                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || !(this.state.userShare && this.state.status === 'inprogress' && (this.state.memberStatus === 'àctive' || this.state.memberStatus === 'founder'))} onClick={this.handleNo}>Vote No</Button>
+                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || this.state.status !== 'inprogress' || (!this.state.userShare || (this.state.memberStatus !== 'active'))} onClick={this.handleNo}>Vote No</Button>
                   </Grid.Column>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
-                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || !(this.state.userShare && this.state.status === 'inprogress' && (this.state.memberStatus === 'àctive' || this.state.memberStatus === 'founder'))} onClick={this.handleYes}>Vote Yes</Button>
+                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || this.state.status !== 'inprogress' || (!this.state.userShare || (this.state.memberStatus !== 'active'))} onClick={this.handleYes}>Vote Yes</Button>
                   </Grid.Column>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
-                    <Button className="btn" color='grey' onClick={this.handleProcess} disabled={(this.state.isAccepted || (this.state.userShare && this.state.status === 'inprogress' && (this.state.memberStatus === 'àctive' || this.state.memberStatus === 'founder')) ? true : (this.state.votedYes > 50) ? false : true)}>Process Proposal</Button>
+                    <Button className="btn" color='grey' onClick={this.handleProcess} disabled={(this.state.isAccepted || this.state.votedYes <= 50 || this.state.status !== 'inprogress' || (this.state.memberStatus !== 'active')) ? true : false}>Process Proposal</Button>
                   </Grid.Column>
                 </Grid>
               </Grid.Column>

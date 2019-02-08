@@ -55,11 +55,11 @@ class Login extends Component {
                                 // Create it.
                                 this.props.postEvents(JSON.stringify({ name: 'User creation', payload: { address: address, nonce: 0 } }))
                                     .then((resJson) => {
-                                        self.signWithAccessRequest(resJson.items.nonce, 0);
+                                        self.signWithAccessRequest(resJson.items.nonce, 0, 'pending');
                                     })
                             }
                         } else { // If the user exists, ask for a signature.
-                            self.signWithAccessRequest(responseJson.items.member.nonce, responseJson.items.member.shares);
+                            self.signWithAccessRequest(responseJson.items.member.nonce, responseJson.items.member.shares, responseJson.items.member.status);
                         }
                     });
             }
@@ -68,7 +68,7 @@ class Login extends Component {
         }
     }
 
-    signWithAccessRequest(nonce, shares) {
+    signWithAccessRequest(nonce, shares, status) {
         let web3 = window.web3;
         let ethereum = window.ethereum;
         let self = this;
@@ -90,7 +90,7 @@ class Login extends Component {
                     ).then((signature) => {
                         web3.personal.ecRecover(message, signature, function (error, result) {
                             if (!error) {
-                                localStorage.setItem("loggedUser", JSON.stringify({ shares: (shares ? shares : 0), address: result, nonce }));
+                                localStorage.setItem("loggedUser", JSON.stringify({ status: (status ? status : 'pending'), shares: (shares ? shares : 0), address: result, nonce }));
                                 if (nonce) {
                                     self.props.history.push('/');
                                 } else {

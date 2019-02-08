@@ -47,15 +47,27 @@ export class MemberController {
     },
   })
   async findById(@param.path.string('id') id: string): Promise<any> {
+    // Get all the users to calculate the total shares of the system
     return await this.memberRepository.find().then(async members => {
       let totalShares = 0;
-      members.forEach(member => { totalShares = totalShares + (member.shares ? member.shares : 0) });
-      return await this.memberRepository.findById(id).then(async matchingMember => {
-        let result = {
-          member: matchingMember,
-          totalShares: totalShares
+      // Only add the shares of the members
+      members.forEach(member => {
+        if (member.status === 'active' || member.status === 'founder') {
+          totalShares = totalShares + (member.shares ? member.shares : 0)
         }
-        return result;
+      });
+      // Get the user that has been requested
+      return await this.memberRepository.findById(id).then(async matchingMember => {
+        // Modify the nonce of the user
+        matchingMember.nonce = Math.floor(Math.random() * 1000000);
+        return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async modifiedMember => {
+          // Return the user with the new nonce
+          let result = {
+            member: matchingMember,
+            totalShares: totalShares
+          }
+          return result;
+        });
       });
     });
   }
