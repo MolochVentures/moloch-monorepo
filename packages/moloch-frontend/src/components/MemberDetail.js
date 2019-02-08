@@ -84,7 +84,6 @@ class MemberDetail extends React.Component {
                             <Grid.Column textAlign="left">
                               {p.vote === "yes" && <Label className="dot" circular color="green" empty />}
                               {p.vote === "no" && <Label className="dot" circular color="red" empty />}
-                              {/* {p.status === "Submitted" && <Label className="dot" circular color="grey" empty />} */}
                               {p.title}
                             </Grid.Column>
                             <Grid.Column textAlign="center">
