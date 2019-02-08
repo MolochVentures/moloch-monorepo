@@ -1,3 +1,6 @@
+const HDWalletProvider = require("truffle-hdwallet-provider-privkey");
+const privateKeys = ["659c..."]; // insert full PK here
+
 module.exports = {
   networks: {
     development: {
@@ -5,6 +8,12 @@ module.exports = {
       port: 8545,
       gas: 4700000,
       network_id: '*' // Match any network id
+    },
+    rinkeby: {
+      provider: () => {
+        return new HDWalletProvider(privateKeys, "https://rinkeby.infura.io/v3/") // insert full INFURA URL
+      },
+      network_id: 4
     }
   },
   compilers: {
