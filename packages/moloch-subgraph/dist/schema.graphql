@@ -1,0 +1,27 @@
+type Vote @entity {
+  id: ID!
+  sender: Bytes!
+  memberAddress: Bytes!
+  index: BigInt!
+  uintVote: Int!
+}
+
+type Proposal @entity {
+  id: ID!
+  index: BigInt!
+  applicant: Bytes!
+  proposer: Bytes!
+  shares: BigInt!
+  votes: [Vote!]
+  didPass: Int!
+}
+
+type Member @entity {
+  id: ID!
+  memberAddress: Bytes!
+  shares: BigInt!
+  isProcessed: Int!
+  didPass: Int!
+  didRagequit: Int!
+  votes: [Vote!]
+}

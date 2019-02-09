@@ -1,5 +1,6 @@
 
 const url = 'http://127.0.0.1:3001';
+const coinMarketUrl = 'https://api.coinmarketcap.com/v1';
 
 export function fetchMembers() {
     // Instead of plain objects, we are returning function.
@@ -207,6 +208,41 @@ export function fetchConfigFounders() {
                     // When everything is ok, dispatching SUCCESS action.
                     return dispatch({
                         type: 'FETCH_FOUNDERS_SUCCESS',
+                        items: body
+                    });
+                }
+            });
+    }
+}
+
+export function getAssetAmount(params) {
+    // var queryParams = Object.keys(params)
+    //     .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k]))
+    //     .join('&');
+    // Instead of plain objects, we are returning function.
+    return function (dispatch) {
+        // Dispatching REQUEST action, which tells our app, that we are started requesting members.
+        dispatch({
+            type: 'GET_ASSET_AMOUNT_REQUEST'
+        });
+        return fetch(url + '/assets/getETH', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CMC_PRO_API_KEY' : '22b33b35-eea6-4f3f-9938-f38a3c10c068'},
+        })
+            // Here, we are getting json body(in our case it will contain `members` or `error` prop, depending on request was failed or not) from server response
+            // And providing `response` and `body` variables to the next chain.
+            .then(response => response.json().then(body => ({ response, body })))
+            .then(({ response, body }) => {
+                if (!response.ok) {
+                    // If request was failed, dispatching FAILURE action.
+                    return dispatch({
+                        type: 'GET_ASSET_AMOUNT_FAILURE',
+                        error: body.error
+                    });
+                } else {
+                    // When everything is ok, dispatching SUCCESS action.
+                    return dispatch({
+                        type: 'GET_ASSET_AMOUNT_SUCCESS',
                         items: body
                     });
                 }

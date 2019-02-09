@@ -6,6 +6,12 @@ import hood from 'assets/hood.png';
 import { connect } from 'react-redux';
 import { fetchProposalDetail, fetchMembers, postEvents, fetchMemberDetail } from '../action/actions';
 
+const formatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2
+});
+
 const ProgressBar = ({ yes, no }) => (
   <>
     <div style={{ "position": "relative" }}>
@@ -248,7 +254,7 @@ class ProposalDetail extends Component {
                 <Grid columns="equal">
                   <Grid.Column>
                     <p className="subtext">Total USD Value</p>
-                    <p className="amount">$ {this.state.proposal_detail.tribute ? this.state.proposal_detail.tribute : 0}</p>
+                    <p className="amount"> {formatter.format(this.state.proposal_detail.tribute ? this.state.proposal_detail.tribute : 0)}</p>
                   </Grid.Column>
                   {this.state.proposal_detail.shares ?
                     <Grid.Column textAlign="right">

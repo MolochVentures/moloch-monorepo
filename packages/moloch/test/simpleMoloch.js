@@ -66,22 +66,6 @@ async function moveForwardSecs(secs) {
   return true
 }
 
-web3.currentProvider.send({
-  jsonrpc: '2.0', 
-  method: 'evm_increaseTime', 
-  params: [10000], 
-  id: new Date().getSeconds()
-}, (err, resp) => {
-  if (!err) {
-    web3.currentProvider.send({
-    jsonrpc: '2.0', 
-    method: 'evm_mine', 
-    params: [], 
-    id: new Date().getSeconds()
-  }
-  }
-})
-
 contract('Moloch', accounts => {
   let snapshotId
 
@@ -92,19 +76,19 @@ contract('Moloch', accounts => {
     summoner = accounts[0]
     applicant = accounts[1]
     // transfer 10 SIM to applicant
-    simpleToken.transfer(applicant, new BigNumber("10000000000000000000"))
+    simpleToken.transfer(applicant, new BigNumber(configJSON.PROPOSAL_DEPOSIT))
     
     // approve 10 SIM owner summoner and applicant to Moloch contract (spender)
-    simpleToken.approve(moloch.address, new BigNumber("10000000000000000000"))
-    simpleToken.approve(moloch.address, new BigNumber("10000000000000000000"), {from:applicant})
+    simpleToken.approve(moloch.address, new BigNumber(configJSON.PROPOSAL_DEPOSIT))
+    simpleToken.approve(moloch.address, new BigNumber(configJSON.PROPOSAL_DEPOSIT), {from:applicant})
   })
 
   beforeEach(async () => {
-    snapshotId = await snapshot()
+    //snapshotId = await snapshot()
   })
 
   afterEach(async () => {
-    await restore(snapshotId)
+    //await restore(snapshotId)
   })
 
   it('verify deployment parameters', async () => {
@@ -125,8 +109,10 @@ contract('Moloch', accounts => {
 
   it('submit proposal', async () => {
     const now = await blockTime()    
-    const tx = await moloch.submitProposal(applicant, new BigNumber("10000000000000000000"), 3, "first proposal")
+    const tx = await moloch.submitProposal(applicant, new BigNumber(configJSON.PROPOSAL_DEPOSIT), 3, "first proposal")
     const event = await getEventParams(tx, "SubmitProposal")
+    console.log('moloch.address', moloch.address)
+    console.log('event', event)
     assert.equal(+event[0], 0)
     assert.equal(event[1], applicant)
     assert.equal(event[2], summoner)

@@ -1,7 +1,13 @@
 import React, { Component } from 'react';
-import { Button, Divider, Dropdown, Form, Grid, Icon, Input, Segment, GridColumn } from "semantic-ui-react";
+import { Button, Divider, Dropdown, Form, Grid, Icon, Input, Label, Segment, GridColumn } from "semantic-ui-react";
 import { connect } from 'react-redux';
-import { fetchMemberDetail, postEvents } from '../action/actions';
+import { fetchMemberDetail, getAssetAmount, postEvents } from '../action/actions';
+
+const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+});
 
 class AssetsFields extends Component {
     constructor(props) {
@@ -20,41 +26,48 @@ class AssetsFields extends Component {
     }
 
     render() {
-        const assets = [
-            {
-                'key': 1,
-                'value': 'ETH',
-                'text': 'ETH'
-            },
-            {
-                'key': 2,
-                'value': 'BTC',
-                'text': 'BTC'
-            },
-            {
-                'key': 3,
-                'value': 'LTC',
-                'text': 'LTC'
-            }
-        ];
+        // const assets = [
+        //     {
+        //         'key': 1,
+        //         'value': 'ETH',
+        //         'text': 'ETH'
+        //     },
+        //     {
+        //         'key': 2,
+        //         'value': 'BTC',
+        //         'text': 'BTC'
+        //     },
+        //     {
+        //         'key': 3,
+        //         'value': 'LTC',
+        //         'text': 'LTC'
+        //     }
+        // ];
         return (
             <Grid.Row className="asset_field_row">
-                <Grid.Column mobile={14} tablet={5} computer={7} className="asset_field_grid">
-                    <Dropdown name="asset" className="asset proposal_currency_dropdown" icon="ethereum" selection options={assets} placeholder="Currency" onChange={this.handleAsset} />
+                {/* <Grid.Column mobile={14} tablet={5} computer={7} className="asset_field_grid"> */}
+                <Grid.Column width={2} textAlign='left' className="asset_field_grid membership">
+                    {/* <Dropdown name="asset" className="asset proposal_currency_dropdown" icon="ethereum" selection options={assets} placeholder="Currency" onChange={this.handleAsset} /> */}
+                    {/* <div>
+                    <Input icon="ethereum" iconPosition="left" name="asset" className="asset_amount" type="text" value={this.props.assets.symbol} disabled={true} />
+                    </div> */}
+                    <div className="subtext" style={{ paddingTop: 10, paddingRight: 10 }}>
+                        {this.props.assets.symbol}
+                    </div>
                 </Grid.Column>
-                <Grid.Column mobile={2} tablet={1} computer={2} className="asset_field_grid mobile_delete_icon" textAlign="right">
+                {/* <Grid.Column mobile={2} tablet={1} computer={2} className="asset_field_grid mobile_delete_icon" textAlign="right">
                     <div className="subtext">
                         <Icon name='times' className="delete_icon" link onClick={this.deleteAsset} />
                     </div>
-                </Grid.Column>
+                </Grid.Column> */}
                 <Grid.Column mobile={14} tablet={10} computer={7} className="asset_field_grid" >
                     <Input name="amount" className="asset_amount" placeholder="Enter Amount" type="number" onChange={this.handleAsset} />
                 </Grid.Column>
-                <Grid.Column mobile={2} tablet={1} computer={2} className="asset_field_grid computer_delete_icon" textAlign="center">
+                {/* <Grid.Column mobile={2} tablet={1} computer={2} className="asset_field_grid computer_delete_icon" textAlign="center">
                     <div className="subtext">
                         <Icon name='times' className="delete_icon" link onClick={this.deleteAsset} />
                     </div>
-                </Grid.Column>
+                </Grid.Column> */}
             </Grid.Row>
         );
     }
@@ -99,6 +112,16 @@ class ProjectProposalSubmission extends Component {
                         break;
                 }
             });
+        // this.addAsset();
+        this.setState({
+            assets: [{
+                asset: 'ETH',
+                symbol: 'ETH',
+                amount: 0,
+                logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+            }]
+        })
+        this.props.getAssetAmount({ symbol: 'ETH' });
     }
 
     validateField(fieldName, value) {
@@ -171,6 +194,7 @@ class ProjectProposalSubmission extends Component {
             () => {
                 this.validateField('assets', assets);
             });
+        this.setState({ tribute: this.props.assetDetails.price_usd * event.value });
     }
 
     handleDeleteAsset(event) {
@@ -194,7 +218,7 @@ class ProjectProposalSubmission extends Component {
 
         if (this.state.formValid) {
             let user = JSON.parse(localStorage.getItem('loggedUser'));
-            this.props.postEvents(JSON.stringify({ id: '', name: 'Project proposal', payload: {project: project, owner: user.address} }))
+            this.props.postEvents(JSON.stringify({ id: '', name: 'Project proposal', payload: { project: project, owner: user.address } }))
                 .then((responseJson) => {
                     switch (responseJson.type) {
                         case 'POST_EVENTS_SUCCESS':
@@ -243,15 +267,15 @@ class ProjectProposalSubmission extends Component {
                                                         Request Amount
                                                     </div>
                                                 </Grid.Column>
-                                                <Grid.Column width={2}>
+                                                {/* <Grid.Column width={2}>
                                                     <div className="subtext">
                                                         <Icon name='add' className="add_icon" link onClick={this.addAsset} />
                                                     </div>
-                                                </Grid.Column>
+                                                </Grid.Column> */}
                                             </Grid>
                                             <Grid columns={3} className="assets_field" >
                                                 {this.state.assets.map((row, i) =>
-                                                    <AssetsFields key={i} assetIndex={i} onHandleAsset={this.handleAsset} onHandleDeleteAsset={this.handleDeleteAsset}></AssetsFields>
+                                                    <AssetsFields key={i} assetIndex={i} assets={row} onHandleAsset={this.handleAsset} onHandleDeleteAsset={this.handleDeleteAsset}></AssetsFields>
                                                 )}
                                             </Grid>
                                             <Divider />
@@ -259,7 +283,7 @@ class ProjectProposalSubmission extends Component {
                                                 <Grid.Row>
                                                     <Grid.Column textAlign="center">
                                                         <p className="subtext">Tribute Value</p>
-                                                        <p className="amount">${this.state.tribute}</p>
+                                                        <p className="amount">{formatter.format(this.state.tribute)}</p>
                                                     </Grid.Column>
                                                 </Grid.Row>
                                             </Grid>
@@ -285,6 +309,7 @@ function mapStateToProps(state) {
     return {
         proposal_detail: state.proposalDetail.items,
         members: state.members.items,
+        assetDetails: state.assetAmount.items ? state.assetAmount.items[0] : { price_usd: 1 }
     };
 }
 
@@ -296,6 +321,9 @@ function mapDispatchToProps(dispatch) {
         },
         postEvents: function (data) {
             return dispatch(postEvents(data));
+        },
+        getAssetAmount: function (data) {
+            dispatch(getAssetAmount(data));
         }
     };
 }

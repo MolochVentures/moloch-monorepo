@@ -7,6 +7,12 @@ import ProposalDetail from "./ProposalDetail";
 import { connect } from 'react-redux';
 import { fetchProposals, fetchMemberDetail } from '../action/actions';
 
+const formatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2
+});
+
 const ProgressBar = ({ yes, no }) => (
   <>
     <div style={{ "position": "relative" }}>
@@ -44,7 +50,7 @@ const ProposalCard = ({ proposal }) => {
               {proposal.shares ? <Divider vertical /> : null}
               <Grid.Column textAlign="center">
                 <p className="subtext">Total USD Value</p>
-                <p className="amount">$ {proposal.tribute ? proposal.tribute : 0}</p>
+                <p className="amount">{formatter.format(proposal.tribute ? proposal.tribute : 0)}</p>
               </Grid.Column>
               {proposal.shares ?
                 <Grid.Column textAlign="center">

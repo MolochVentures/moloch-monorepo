@@ -1,7 +1,13 @@
 import React, { Component } from 'react';
-import { Button, Divider, Form, Grid, Icon, Input, Segment, GridColumn } from "semantic-ui-react";
+import { Button, Divider, Form, Grid, Icon, Input, Segment, GridColumn, Label } from "semantic-ui-react";
 import { connect } from 'react-redux';
-import { postEvents } from '../action/actions';
+import { postEvents, getAssetAmount } from '../action/actions';
+
+const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+});
 
 class AssetsFields extends Component {
     constructor(props) {
@@ -22,22 +28,27 @@ class AssetsFields extends Component {
     render() {
         return (
             <Grid.Row className="asset_field_row">
-                <Grid.Column mobile={14} tablet={5} computer={7} className="asset_field_grid membership">
-                    <Input name="asset" className="asset icon_asset" icon="ethereum" iconPosition="left" placeholder="ETH, BTC, Token address" onChange={this.handleAsset} type="text" />
+                {/* <Grid.Column mobile={14} tablet={5} computer={7} className="asset_field_grid membership"> */}
+                <Grid.Column width={2} textAlign='left' className="asset_field_grid membership">
+                    {/* <Input name="asset" className="asset icon_asset" icon="ethereum" iconPosition="left" placeholder="ETH, BTC, Token address" onChange={this.handleAsset} type="text" /> */}
+                    {/* <Input icon="ethereum" iconPosition="left" name="asset" className="asset icon_asset" type="text" value={this.props.assets.symbol} disabled={true} /> */}
+                    <div className="subtext" style={{ paddingTop: 10, paddingRight: 10 }}>
+                        {this.props.assets.symbol}
+                    </div>
                 </Grid.Column>
-                <Grid.Column mobile={2} tablet={1} computer={2} className="asset_field_grid mobile_delete_icon" textAlign="right">
+                {/* <Grid.Column mobile={2} tablet={1} computer={2} className="asset_field_grid mobile_delete_icon" textAlign="right">
                     <div className="subtext">
                         <Icon name='times' className="delete_icon" link onClick={this.deleteAsset} />
                     </div>
-                </Grid.Column>
+                </Grid.Column> */}
                 <Grid.Column mobile={14} tablet={10} computer={7} className="asset_field_grid" >
                     <Input name="amount" className="asset_amount" placeholder="Enter Amount" type="number" onChange={this.handleAsset} />
                 </Grid.Column>
-                <Grid.Column mobile={2} tablet={1} computer={2} className="asset_field_grid computer_delete_icon" textAlign="center">
+                {/* <Grid.Column mobile={2} tablet={1} computer={2} className="asset_field_grid computer_delete_icon" textAlign="center">
                     <div className="subtext">
                         <Icon name='times' className="delete_icon" link onClick={this.deleteAsset} />
                     </div>
-                </Grid.Column>
+                </Grid.Column> */}
             </Grid.Row>
         );
     }
@@ -68,6 +79,18 @@ class MembershipProposalSubmission extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleAsset = this.handleAsset.bind(this);
         this.handleDeleteAsset = this.handleDeleteAsset.bind(this);
+    }
+
+    componentDidMount() {
+        this.setState({
+            assets: [{
+                asset: 'ETH',
+                symbol: 'ETH',
+                amount: 0,
+                logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+            }]
+        });
+        this.props.getAssetAmount({ symbol: 'ETH' });
     }
 
     validateField(fieldName, value) {
@@ -154,6 +177,7 @@ class MembershipProposalSubmission extends Component {
             () => {
                 this.validateField('assets', assets);
             });
+        this.setState({ tribute: this.props.assetDetails.price_usd * event.value });
     }
 
     handleDeleteAsset(event) {
@@ -234,15 +258,15 @@ class MembershipProposalSubmission extends Component {
                                                         Request Amount
                                                     </div>
                                                 </Grid.Column>
-                                                <Grid.Column width={2}>
+                                                {/* <Grid.Column width={2}>
                                                     <div className="subtext">
                                                         <Icon name='add' className="add_icon" link onClick={this.addAsset} />
                                                     </div>
-                                                </Grid.Column>
+                                                </Grid.Column> */}
                                             </Grid>
                                             <Grid columns={3} className="assets_field">
                                                 {this.state.assets.map((row, i) =>
-                                                    <AssetsFields key={i} assetIndex={i} onHandleAsset={this.handleAsset} onHandleDeleteAsset={this.handleDeleteAsset}></AssetsFields>
+                                                    <AssetsFields key={i} assetIndex={i} assets={row} onHandleAsset={this.handleAsset} onHandleDeleteAsset={this.handleDeleteAsset}></AssetsFields>
                                                 )}
                                             </Grid>
                                             <Divider />
@@ -250,7 +274,7 @@ class MembershipProposalSubmission extends Component {
                                                 <Grid.Row>
                                                     <Grid.Column textAlign="center">
                                                         <p className="subtext">Tribute Value</p>
-                                                        <p className="amount">${this.state.tribute}</p>
+                                                        <p className="amount">{formatter.format(this.state.tribute)}</p>
                                                     </Grid.Column>
                                                 </Grid.Row>
                                             </Grid>
@@ -274,7 +298,9 @@ class MembershipProposalSubmission extends Component {
 
 // This function is used to convert redux global state to desired props.
 function mapStateToProps(state) {
-    return {};
+    return {
+        assetDetails: state.assetAmount.items ? state.assetAmount.items[0] : { price_usd: 1 }
+    };
 }
 
 // This function is used to provide callbacks to container component.
@@ -282,6 +308,9 @@ function mapDispatchToProps(dispatch) {
     return {
         postEvents: function (data) {
             return dispatch(postEvents(data));
+        },
+        getAssetAmount: function (data) {
+            dispatch(getAssetAmount(data));
         }
     };
 }
