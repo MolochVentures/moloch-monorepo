@@ -20,12 +20,16 @@ dataSources:
         - name: Moloch
           file: ./abis/Moloch.abi
       eventHandlers:
-        - event: SubmitProposal(uint256,address,address)
+        - event: SubmitProposal(uint256,address,address,address,uint256,uint256)
           handler: handleSubmitProposal
-        - event: SubmitVote(address,address,uint256,uint8)
+        - event: SubmitVote(uint256,address,address,uint8)
           handler: handleSubmitVote
-        - event: ProcessProposal(uint256,address,address,bool,uint256)
+        - event: ProcessProposal(uint256,address,address,uint256,uint256,bool)
           handler: handleProcessProposal
         - event: Ragequit(address,uint256)
           handler: handleRagequit
+        - event: Abort(uint256,address)
+          handler: handleAbort
+        - event: UpdateDelegateKey(address,address)
+          handler: handleUpdateDelegateKey          
       file: ./src/mapping.ts

@@ -11,23 +11,7 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0x03e32fa1"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "currentPeriod",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function",
-    "signature": "0x06040618"
+    "type": "function"
   },
   {
     "constant": true,
@@ -58,8 +42,21 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0x08ae4b0c"
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "totalSharesRequested",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "constant": true,
@@ -73,8 +70,7 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0x3a98ef39"
+    "type": "function"
   },
   {
     "constant": true,
@@ -115,6 +111,14 @@
         "type": "bool"
       },
       {
+        "name": "didPass",
+        "type": "bool"
+      },
+      {
+        "name": "aborted",
+        "type": "bool"
+      },
+      {
         "name": "tokenTribute",
         "type": "uint256"
       },
@@ -123,14 +127,13 @@
         "type": "string"
       },
       {
-        "name": "totalSharesAtLastVote",
+        "name": "maxTotalSharesAtYesVote",
         "type": "uint256"
       }
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0x3b214a74"
+    "type": "function"
   },
   {
     "constant": true,
@@ -149,23 +152,7 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0x402c1794"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "pendingProposals",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function",
-    "signature": "0x40ac82a2"
+    "type": "function"
   },
   {
     "constant": true,
@@ -179,8 +166,21 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0x63858f2d"
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "abortWindow",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "constant": true,
@@ -194,8 +194,7 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0x7d5b6c72"
+    "type": "function"
   },
   {
     "constant": true,
@@ -209,8 +208,7 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0x8340bbce"
+    "type": "function"
   },
   {
     "constant": true,
@@ -224,8 +222,7 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0x8b15a605"
+    "type": "function"
   },
   {
     "constant": true,
@@ -239,8 +236,7 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0xa42afd29"
+    "type": "function"
   },
   {
     "constant": true,
@@ -254,8 +250,7 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0xafe5475f"
+    "type": "function"
   },
   {
     "constant": true,
@@ -269,8 +264,7 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0xb470aade"
+    "type": "function"
   },
   {
     "constant": true,
@@ -284,28 +278,7 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0xbab46259"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "isApplicant",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function",
-    "signature": "0xf4310d49"
+    "type": "function"
   },
   {
     "inputs": [
@@ -330,6 +303,10 @@
         "type": "uint256"
       },
       {
+        "name": "_abortWindow",
+        "type": "uint256"
+      },
+      {
         "name": "_proposalDeposit",
         "type": "uint256"
       },
@@ -344,16 +321,25 @@
     ],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "constructor",
-    "signature": "constructor"
+    "type": "constructor"
   },
   {
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "name": "index",
+        "indexed": false,
+        "name": "proposalIndex",
         "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "name": "delegateKey",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "name": "memberAddress",
+        "type": "address"
       },
       {
         "indexed": true,
@@ -361,65 +347,36 @@
         "type": "address"
       },
       {
-        "indexed": true,
-        "name": "memberAddress",
-        "type": "address"
+        "indexed": false,
+        "name": "tokenTribute",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "sharesRequested",
+        "type": "uint256"
       }
     ],
     "name": "SubmitProposal",
-    "type": "event",
-    "signature": "0xfde0c5a886136e1ee122bbeacabb758fee57d1fc8b6fd212dcbeac21e7f5657b"
+    "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": true,
-        "name": "index",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "name": "applicant",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "name": "proposer",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "name": "didPass",
-        "type": "bool"
-      },
-      {
-        "indexed": false,
-        "name": "shares",
-        "type": "uint256"
-      }
-    ],
-    "name": "ProcessProposal",
-    "type": "event",
-    "signature": "0x12c58b3da037ccff28e555fb8453cec41ba65673f0bab9010d04e74d4a609f76"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "name": "sender",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "name": "memberAddress",
-        "type": "address"
-      },
       {
         "indexed": true,
         "name": "proposalIndex",
         "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "name": "delegateKey",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "name": "memberAddress",
+        "type": "address"
       },
       {
         "indexed": false,
@@ -428,8 +385,44 @@
       }
     ],
     "name": "SubmitVote",
-    "type": "event",
-    "signature": "0x84744402c3c9b3c41236bf12c73a8468537eb1ceb3ecc3bdb0f8cce21bd68efe"
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "proposalIndex",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "name": "applicant",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "name": "memberAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "tokenTribute",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "sharesRequested",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "didPass",
+        "type": "bool"
+      }
+    ],
+    "name": "ProcessProposal",
+    "type": "event"
   },
   {
     "anonymous": false,
@@ -446,18 +439,41 @@
       }
     ],
     "name": "Ragequit",
-    "type": "event",
-    "signature": "0x667cb7a1818eacd2e3a421e734429ba9c4c7dec85e578e098b6d72cd2bfbf2f6"
+    "type": "event"
   },
   {
-    "constant": false,
-    "inputs": [],
-    "name": "updatePeriod",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "signature": "0xa83627de"
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "proposalIndex",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "applicantAddress",
+        "type": "address"
+      }
+    ],
+    "name": "Abort",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "memberAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "newDelegateKey",
+        "type": "address"
+      }
+    ],
+    "name": "UpdateDelegateKey",
+    "type": "event"
   },
   {
     "constant": false,
@@ -483,8 +499,7 @@
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "function",
-    "signature": "0x962006c3"
+    "type": "function"
   },
   {
     "constant": false,
@@ -502,8 +517,7 @@
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "function",
-    "signature": "0x99653fbe"
+    "type": "function"
   },
   {
     "constant": false,
@@ -517,8 +531,7 @@
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "function",
-    "signature": "0xe63bc62d"
+    "type": "function"
   },
   {
     "constant": false,
@@ -532,8 +545,21 @@
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "function",
-    "signature": "0x8436593f"
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "proposalIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "abort",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
     "constant": false,
@@ -547,8 +573,21 @@
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "function",
-    "signature": "0x2582bf2a"
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getCurrentPeriod",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "constant": true,
@@ -567,8 +606,7 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0xa3dc3800"
+    "type": "function"
   },
   {
     "constant": true,
@@ -587,8 +625,7 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0x9425a476"
+    "type": "function"
   },
   {
     "constant": true,
@@ -611,7 +648,6 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0x044a0ca8"
+    "type": "function"
   }
 ]

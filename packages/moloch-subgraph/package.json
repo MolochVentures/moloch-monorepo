@@ -1,5 +1,5 @@
 {
-  "name": "moloch",
+  "name": "moloch-subgraph",
   "version": "0.1.0",
   "scripts": {
     "build-contract": "solc contracts/Counter.sol --abi -o abis --overwrite && solc contracts/Counter.sol --bin -o bin --overwrite",

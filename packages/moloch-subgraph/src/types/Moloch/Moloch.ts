@@ -23,50 +23,28 @@ export class SubmitProposalParams {
     this._event = event;
   }
 
-  get index(): BigInt {
+  get proposalIndex(): BigInt {
     return this._event.parameters[0].value.toBigInt();
   }
 
-  get applicant(): Address {
+  get delegateKey(): Address {
     return this._event.parameters[1].value.toAddress();
   }
 
   get memberAddress(): Address {
     return this._event.parameters[2].value.toAddress();
   }
-}
-
-export class ProcessProposal extends EthereumEvent {
-  get params(): ProcessProposalParams {
-    return new ProcessProposalParams(this);
-  }
-}
-
-export class ProcessProposalParams {
-  _event: ProcessProposal;
-
-  constructor(event: ProcessProposal) {
-    this._event = event;
-  }
-
-  get index(): BigInt {
-    return this._event.parameters[0].value.toBigInt();
-  }
 
   get applicant(): Address {
-    return this._event.parameters[1].value.toAddress();
+    return this._event.parameters[3].value.toAddress();
   }
 
-  get proposer(): Address {
-    return this._event.parameters[2].value.toAddress();
-  }
-
-  get didPass(): boolean {
-    return this._event.parameters[3].value.toBoolean();
-  }
-
-  get shares(): BigInt {
+  get tokenTribute(): BigInt {
     return this._event.parameters[4].value.toBigInt();
+  }
+
+  get sharesRequested(): BigInt {
+    return this._event.parameters[5].value.toBigInt();
   }
 }
 
@@ -83,20 +61,58 @@ export class SubmitVoteParams {
     this._event = event;
   }
 
-  get sender(): Address {
-    return this._event.parameters[0].value.toAddress();
+  get proposalIndex(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
   }
 
-  get memberAddress(): Address {
+  get delegateKey(): Address {
     return this._event.parameters[1].value.toAddress();
   }
 
-  get proposalIndex(): BigInt {
-    return this._event.parameters[2].value.toBigInt();
+  get memberAddress(): Address {
+    return this._event.parameters[2].value.toAddress();
   }
 
   get uintVote(): i32 {
     return this._event.parameters[3].value.toI32();
+  }
+}
+
+export class ProcessProposal extends EthereumEvent {
+  get params(): ProcessProposalParams {
+    return new ProcessProposalParams(this);
+  }
+}
+
+export class ProcessProposalParams {
+  _event: ProcessProposal;
+
+  constructor(event: ProcessProposal) {
+    this._event = event;
+  }
+
+  get proposalIndex(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get applicant(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get memberAddress(): Address {
+    return this._event.parameters[2].value.toAddress();
+  }
+
+  get tokenTribute(): BigInt {
+    return this._event.parameters[3].value.toBigInt();
+  }
+
+  get sharesRequested(): BigInt {
+    return this._event.parameters[4].value.toBigInt();
+  }
+
+  get didPass(): boolean {
+    return this._event.parameters[5].value.toBoolean();
   }
 }
 
@@ -119,6 +135,50 @@ export class RagequitParams {
 
   get sharesToBurn(): BigInt {
     return this._event.parameters[1].value.toBigInt();
+  }
+}
+
+export class Abort extends EthereumEvent {
+  get params(): AbortParams {
+    return new AbortParams(this);
+  }
+}
+
+export class AbortParams {
+  _event: Abort;
+
+  constructor(event: Abort) {
+    this._event = event;
+  }
+
+  get proposalIndex(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+
+  get applicantAddress(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+}
+
+export class UpdateDelegateKey extends EthereumEvent {
+  get params(): UpdateDelegateKeyParams {
+    return new UpdateDelegateKeyParams(this);
+  }
+}
+
+export class UpdateDelegateKeyParams {
+  _event: UpdateDelegateKey;
+
+  constructor(event: UpdateDelegateKey) {
+    this._event = event;
+  }
+
+  get memberAddress(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get newDelegateKey(): Address {
+    return this._event.parameters[1].value.toAddress();
   }
 }
 
@@ -158,9 +218,11 @@ export class Moloch__proposalQueueResult {
   value4: BigInt;
   value5: BigInt;
   value6: boolean;
-  value7: BigInt;
-  value8: string;
+  value7: boolean;
+  value8: boolean;
   value9: BigInt;
+  value10: string;
+  value11: BigInt;
 
   constructor(
     value0: Address,
@@ -170,9 +232,11 @@ export class Moloch__proposalQueueResult {
     value4: BigInt,
     value5: BigInt,
     value6: boolean,
-    value7: BigInt,
-    value8: string,
-    value9: BigInt
+    value7: boolean,
+    value8: boolean,
+    value9: BigInt,
+    value10: string,
+    value11: BigInt
   ) {
     this.value0 = value0;
     this.value1 = value1;
@@ -184,6 +248,8 @@ export class Moloch__proposalQueueResult {
     this.value7 = value7;
     this.value8 = value8;
     this.value9 = value9;
+    this.value10 = value10;
+    this.value11 = value11;
   }
 
   toMap(): TypedMap<string, EthereumValue> {
@@ -195,9 +261,11 @@ export class Moloch__proposalQueueResult {
     map.set("value4", EthereumValue.fromUnsignedBigInt(this.value4));
     map.set("value5", EthereumValue.fromUnsignedBigInt(this.value5));
     map.set("value6", EthereumValue.fromBoolean(this.value6));
-    map.set("value7", EthereumValue.fromUnsignedBigInt(this.value7));
-    map.set("value8", EthereumValue.fromString(this.value8));
+    map.set("value7", EthereumValue.fromBoolean(this.value7));
+    map.set("value8", EthereumValue.fromBoolean(this.value8));
     map.set("value9", EthereumValue.fromUnsignedBigInt(this.value9));
+    map.set("value10", EthereumValue.fromString(this.value10));
+    map.set("value11", EthereumValue.fromUnsignedBigInt(this.value11));
     return map;
   }
 }
@@ -212,11 +280,6 @@ export class Moloch extends SmartContract {
     return result[0].toBigInt();
   }
 
-  currentPeriod(): BigInt {
-    let result = super.call("currentPeriod", []);
-    return result[0].toBigInt();
-  }
-
   members(param0: Address): Moloch__membersResult {
     let result = super.call("members", [EthereumValue.fromAddress(param0)]);
     return new Moloch__membersResult(
@@ -225,6 +288,11 @@ export class Moloch extends SmartContract {
       result[2].toBoolean(),
       result[3].toBigInt()
     );
+  }
+
+  totalSharesRequested(): BigInt {
+    let result = super.call("totalSharesRequested", []);
+    return result[0].toBigInt();
   }
 
   totalShares(): BigInt {
@@ -244,9 +312,11 @@ export class Moloch extends SmartContract {
       result[4].toBigInt(),
       result[5].toBigInt(),
       result[6].toBoolean(),
-      result[7].toBigInt(),
-      result[8].toString(),
-      result[9].toBigInt()
+      result[7].toBoolean(),
+      result[8].toBoolean(),
+      result[9].toBigInt(),
+      result[10].toString(),
+      result[11].toBigInt()
     );
   }
 
@@ -257,13 +327,13 @@ export class Moloch extends SmartContract {
     return result[0].toAddress();
   }
 
-  pendingProposals(): BigInt {
-    let result = super.call("pendingProposals", []);
+  gracePeriodLength(): BigInt {
+    let result = super.call("gracePeriodLength", []);
     return result[0].toBigInt();
   }
 
-  gracePeriodLength(): BigInt {
-    let result = super.call("gracePeriodLength", []);
+  abortWindow(): BigInt {
+    let result = super.call("abortWindow", []);
     return result[0].toBigInt();
   }
 
@@ -302,9 +372,9 @@ export class Moloch extends SmartContract {
     return result[0].toAddress();
   }
 
-  isApplicant(param0: Address): boolean {
-    let result = super.call("isApplicant", [EthereumValue.fromAddress(param0)]);
-    return result[0].toBoolean();
+  getCurrentPeriod(): BigInt {
+    let result = super.call("getCurrentPeriod", []);
+    return result[0].toBigInt();
   }
 
   canRagequit(highestIndexYesVote: BigInt): boolean {

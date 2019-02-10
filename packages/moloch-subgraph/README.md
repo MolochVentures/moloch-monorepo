@@ -39,6 +39,9 @@ type Member @entity {
   votes: [Vote!]
 }
 ```
+
+To create graph, run `graph create moloch --node http://127.0.0.1:8020`
+
 After updating subgraph or schema, run `yarn codegen`
 
 To deploy locally, run `graph deploy jamesyoung/moloch --debug --ipfs http://localhost:5001/ --node http://127.0.0.1:8020`

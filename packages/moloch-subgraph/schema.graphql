@@ -1,27 +1,48 @@
 type Vote @entity {
   id: ID!
-  sender: Bytes!
+  proposalIndex:BigInt!
+  delegateKey: Bytes!
   memberAddress: Bytes!
-  index: BigInt!
   uintVote: Int!
 }
 
 type Proposal @entity {
   id: ID!
-  index: BigInt!
-  applicant: Bytes!
+  timestamp:String!
+  delegateKey: Bytes!
+  memberAddress: Bytes!
   proposer: Bytes!
-  shares: BigInt!
+  applicant: Bytes!
+  tokenTribute: BigInt!
+  sharesRequested:BigInt!
+  yesVotes: BigInt!
+  noVotes: BigInt!
+  processed: Boolean!
+  didPass: Boolean!
+  aborted: Boolean!
   votes: [Vote!]
-  didPass: Int!
+}
+
+type Applicant @entity {
+  id: ID!
+  timestamp:String!
+  proposalIndex: BigInt!
+  delegateKey: Bytes!
+  memberAddress: Bytes!
+  tokenTribute: BigInt!
+  sharesRequested:BigInt!
+  didPass: Boolean!
+  aborted: Boolean!
+  votes: [Vote!]
 }
 
 type Member @entity {
   id: ID!
-  memberAddress: Bytes!
+  delegateKey: Bytes!
   shares: BigInt!
-  isProcessed: Int!
-  didPass: Int!
-  didRagequit: Int!
+  isActive: Boolean!
+  highestIndexYesVote: BigInt!
+  tokenTribute: BigInt!
+  didRagequit: Boolean!
   votes: [Vote!]
 }
