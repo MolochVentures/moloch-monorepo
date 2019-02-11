@@ -1,5 +1,6 @@
 import { MolochBackendApplication } from './application';
 import { ApplicationConfig } from '@loopback/core';
+import { ChainsawController } from './controllers/chainsaw.controller';
 const cron = require("node-cron");
 const http = require('http');
 const https = require('https');
@@ -13,6 +14,29 @@ export async function main(options: ApplicationConfig = {}) {
   await app.start();
 
   const url = app.restServer.url;
+
+  // poll contract for events
+  cron.schedule("1 * * * * *", function () {
+    console.log("Running poller to query contract");
+
+    var options = {
+      port: 3001,
+      path: '/chainsaw',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    };
+    var req = http.request(options, function (res: any) {
+      res.setEncoding('utf8');
+      res.on('data', function (body: any) {
+        console.log('Cron job exexuted: ' + body);
+      });
+    });
+
+    req.write(JSON.stringify({ id: "", name: "chainsaw", payload: {} }));
+    req.end();
+  });
 
   cron.schedule("*/59 * * * *", function () {
     var options = {
