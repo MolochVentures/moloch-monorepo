@@ -143,7 +143,15 @@ export class EventController {
         if (!memberPatch.proposals) {
           memberPatch.proposals = [];
         }
-        memberPatch.proposals.push({id: memberPatch.address, title: memberPatch.title ? memberPatch.title : '', vote: 'owner', date: currentDate});
+        memberPatch.proposals.push({
+          id: memberPatch.address, 
+          title: memberPatch.title ? memberPatch.title : '', 
+          date: currentDate, 
+          shares: memberPatch.shares ? memberPatch.shares : 0, 
+          tribute: memberPatch.tribute ? memberPatch.tribute : 0, 
+          vote: 'owner',
+          status: 'pending'
+        });
         // Recover the config data to define a new period
         return await this.configRepository.find().then(async config => {
           // Config data
@@ -237,7 +245,15 @@ export class EventController {
                       if (!matchingMember.proposals) {
                         matchingMember.proposals = [];
                       }
-                      matchingMember.proposals.push({id: projectCreate.id, title: projectCreate.title, vote: 'owner', date: currentDate});
+                      matchingMember.proposals.push({
+                        id: projectCreate.id, 
+                        title: projectCreate.title, 
+                        date: currentDate, 
+                        shares: 0, 
+                        tribute: projectCreate.tribute, 
+                        vote: 'owner',
+                        status: 'pending'
+                      });
                       return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
                         return await this.eventRepository.create(event);
                       });
@@ -260,7 +276,15 @@ export class EventController {
                     if (!matchingMember.proposals) {
                       matchingMember.proposals = [];
                     }
-                    matchingMember.proposals.push({id: projectCreate.id, title: projectCreate.title, vote: 'owner', date: currentDate});
+                    matchingMember.proposals.push({
+                      id: projectCreate.id, 
+                      title: projectCreate.title, 
+                      date: currentDate, 
+                      shares: 0, 
+                      tribute: projectCreate.tribute, 
+                      vote: 'owner',
+                      status: 'pending'
+                    });
                     return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
                       return await this.eventRepository.create(event);
                     });
@@ -280,7 +304,16 @@ export class EventController {
             if (!member.proposals) {
               member.proposals = [];
             }
-            member.proposals.push({ id: projectVoted.id, title: projectVoted.title, vote: lastProjectVoter.vote, date: new Date() });
+            
+            member.proposals.push({
+              id: projectVoted.id, 
+              title: projectVoted.title, 
+              date: new Date(), 
+              shares: 0, 
+              tribute: projectVoted.tribute, 
+              vote: lastProjectVoter.vote,
+              status: 'inprogress'
+            });
             return await this.memberRepository.updateById(member.address, member).then(async updatedMember => {
               return await this.eventRepository.create(event);
             });
@@ -302,7 +335,15 @@ export class EventController {
             if (!member.proposals) {
               member.proposals = [];
             }
-            member.proposals.push({ id: memberVoted.address, title: memberVoted.title ? memberVoted.title : '', vote: lastMemberVoter.vote, date: new Date() });
+            member.proposals.push({
+              id: memberVoted.address, 
+              title: memberVoted.title ? memberVoted.title : '', 
+              date: new Date(), 
+              shares: memberVoted.shares ? memberVoted.shares : 0, 
+              tribute: memberVoted.tribute ? memberVoted.tribute : 0, 
+              vote: lastMemberVoter.vote,
+              status: 'inprogress'
+            });
             return await this.memberRepository.updateById(member.address, member).then(async updatedMember => {
               return await this.eventRepository.create(event);
             });
