@@ -84,7 +84,6 @@ class MemberListView extends React.Component {
     }
   }
   componentDidMount() {
-    let loggedUser = JSON.parse(localStorage.getItem('loggedUser'));
     this.props.fetchMembers()
       .then((responseJson) => {
         this.setState({ totalMembers: this.state.totalMembers + responseJson.items.length })
@@ -94,7 +93,7 @@ class MemberListView extends React.Component {
         this.setState({ totalMembers: this.state.totalMembers + responseJson.items.length })
       });
 
-    this.props.fetchMemberDetail(loggedUser.address)
+    this.props.fetchMemberDetail(this.state.user.name)
       .then((responseJson) => {
         if (responseJson.type === 'FETCH_MEMBER_DETAIL_SUCCESS') {
           let user = this.state.user;

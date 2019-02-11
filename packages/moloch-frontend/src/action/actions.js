@@ -224,7 +224,7 @@ export function getAssetAmount(params) {
         dispatch({
             type: 'GET_ASSET_AMOUNT_REQUEST'
         });
-        return fetch(url + '/assets/getETH', {
+        return fetch(url + '/assets/getETHData', {
             method: 'GET',
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/json'},
         })
