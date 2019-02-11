@@ -116,7 +116,7 @@ body {
         padding: 10px 20px !important;
       }
       .item {
-        padding: 20px !important;
+        padding: 20px 10px !important;
         color: inherit;
       }
       .item:hover:not(.submenu) {
@@ -125,6 +125,9 @@ body {
       }
       .link {
         color: inherit;
+      }
+      .dropdownItems i {
+        margin-right: 12px;
       }
     }
   }

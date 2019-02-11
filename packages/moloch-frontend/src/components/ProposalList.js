@@ -47,16 +47,16 @@ const ProposalCard = ({ proposal }) => {
           <p className="subtext description">{proposal.description}</p>
           <Grid columns="equal" className="value_shares">
             <Grid.Row>
+              {proposal.shares ?
+                <Grid.Column textAlign="center">
+                  <p className="subtext">Shares</p>
+                  <p className="amount">{proposal.shares}</p>
+                </Grid.Column> : null}
               {proposal.shares ? <Divider vertical /> : null}
               <Grid.Column textAlign="center">
                 <p className="subtext">Total USD Value</p>
                 <p className="amount">{formatter.format(proposal.tribute ? proposal.tribute : 0)}</p>
               </Grid.Column>
-              {proposal.shares ?
-                <Grid.Column textAlign="center">
-                  <p className="subtext">Voting Shares</p>
-                  <p className="amount">{proposal.shares}</p>
-                </Grid.Column> : null}
             </Grid.Row>
           </Grid>
           <Grid columns="equal" className="deadlines">
@@ -85,9 +85,11 @@ const ProposalCard = ({ proposal }) => {
 
 const ProposalList = (props) => {
   let hasItem = false;
+  let showBtnIndex = false;
   // eslint-disable-next-line array-callback-return
   Object.keys(props.proposals).map((key, idx) => {
     if(props.proposals[key].length > 0){
+      showBtnIndex = idx;
       hasItem = true;
       return true;
     }
@@ -101,7 +103,7 @@ const ProposalList = (props) => {
           </Grid.Column>
           <Grid.Column mobile={16} tablet={8} computer={4} textAlign="right" floated="right" className="submit_button">
             <Link to={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? '/projectproposalsubmission' : '/proposals'} className="link">
-              <Button size='large' color='red' disabled={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? false : true}>Project Proposal</Button>
+              <Button size='large' color='red' disabled={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? false : true}>New Proposal</Button>
             </Link>
           </Grid.Column>
         </Grid></>}
@@ -116,7 +118,7 @@ const ProposalList = (props) => {
                 </Grid.Column>
                 <Grid.Column mobile={16} tablet={8} computer={4} textAlign="right" floated="right" className="submit_button">
                   <Link to={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? '/projectproposalsubmission' : '/proposals'} className="link">
-                    <Button size='large' color='red' disabled={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? false : true}>Project Proposal</Button>
+                    <Button size='large' color='red' disabled={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? false : true}>New Proposal</Button>
                   </Link>
                 </Grid.Column>
               </Grid>
@@ -134,17 +136,17 @@ const ProposalList = (props) => {
                     <p className="subtext">{props.proposals[key].length} Proposal{props.proposals[key].length > 1 ? 's' : ''}</p>
                     <p className="title">{(key.charAt(0).toUpperCase() + key.slice(1)).match(/[A-Z][a-z]+|[0-9]+/g).join(" ")}</p>
                   </Grid.Column>
-                  {idx === 0 && props.proposals['inProgress'].length === 0 ?
+                  {showBtnIndex === idx && props.proposals['inProgress'].length === 0 ?
                     <Grid.Column mobile={16} tablet={8} computer={4} textAlign="right" floated="right" className="submit_button">
                       <Link to={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? '/projectproposalsubmission' : '/proposals'} className="link">
-                        <Button size='large' color='red' disabled={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? false : true}>Project Proposal</Button>
+                        <Button size='large' color='red' disabled={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? false : true}>New Proposal</Button>
                       </Link>
-                    </Grid.Column>
+                    </Grid.Column> 
                     : null}
                 </Grid>
                 <Grid columns={3} >
                   {props.proposals[key].map((p, index) => <ProposalCard proposal={p} key={index} />)}
-                </Grid> </> : null}
+              </Grid> </>  : null}
           </React.Fragment>
         )}
     </div>

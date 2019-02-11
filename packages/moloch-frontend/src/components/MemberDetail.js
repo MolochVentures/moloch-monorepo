@@ -7,10 +7,27 @@ import bull from 'assets/bull.png';
 import { connect } from 'react-redux';
 import { fetchMemberDetail } from '../action/actions';
 
-class MemberDetail extends React.Component {
+const formatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2
+});
 
+class MemberDetail extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      member_detail: {
+      }
+    }
+  }
   componentDidMount() {
-    this.props.fetchMemberDetail(this.props.match.params.name);
+    this.props.fetchMemberDetail(this.props.match.params.name)
+      .then((responseJson) => {
+        if (responseJson.type === 'FETCH_MEMBER_DETAIL_SUCCESS') {
+          this.setState({member_detail: responseJson.items.member})
+        }
+      });
   }
 
   render() {
@@ -24,12 +41,12 @@ class MemberDetail extends React.Component {
               <Segment className="blurred box">
                 <Grid columns="equal">
                   <Grid.Column>
-                    <p className="subtext">Total USD Value</p>
-                    <p className="amount">$ {this.props.member_detail.tribute ? this.props.member_detail.tribute : 0}</p>
+                    <p className="subtext">Shares</p>
+                    <p className="amount">{this.state.member_detail.shares ? this.state.member_detail.shares : 0}</p>
                   </Grid.Column>
-                  <Grid.Column textAlign="right">
-                    <p className="subtext">Voting Share</p>
-                    <p className="amount">{this.props.member_detail.shares ? this.props.member_detail.shares : 0}</p>
+                  <Grid.Column  textAlign="right">
+                    <p className="subtext">Total USD Value</p>
+                    <p className="amount">{formatter.format(this.state.member_detail.tribute ? this.state.member_detail.tribute : 0)}</p>
                   </Grid.Column>
                 </Grid>
                 <Grid>
@@ -37,10 +54,10 @@ class MemberDetail extends React.Component {
                     <Image centered src={bull} size='tiny' />
                   </Grid.Column>
                 </Grid>
-                <p className="subtext">Token Tribute</p>
+                <p className="subtext">Tribute</p>
                 <Grid columns="equal">
                   <Grid.Row>
-                    {this.props.member_detail.assets ? this.props.member_detail.assets.map((token, idx) => {
+                    {this.state.member_detail.assets ? this.state.member_detail.assets.map((token, idx) => {
                       return (
                         <Grid.Column key={idx}>
                           <Segment className="pill" textAlign="center">
@@ -51,7 +68,7 @@ class MemberDetail extends React.Component {
                     }) : null}
                   </Grid.Row>
                   {/* <Grid.Row>
-                    {this.props.member_detail.assets.map((token, idx) => (
+                    {this.state.member_detail.assets.map((token, idx) => (
                       <Grid.Column key={idx}>
                         <Segment className="pill" textAlign="center">
                           <Icon name="ethereum" />{token.amount} {token.asset}
@@ -76,8 +93,8 @@ class MemberDetail extends React.Component {
                       <p className="subtext">Action</p>
                     </Grid.Column>
                   </Grid.Row>
-                  {this.props.member_detail.proposals && this.props.member_detail.proposals.length > 0 ?
-                    this.props.member_detail.proposals.map((p, idx) => {
+                  {this.state.member_detail.proposals && this.state.member_detail.proposals.length > 0 ?
+                    this.state.member_detail.proposals.map((p, idx) => {
                       return (
                         <React.Fragment key={idx}>
                           <Grid.Row verticalAlign="middle">
@@ -121,7 +138,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     fetchMemberDetail: function (name) {
-      dispatch(fetchMemberDetail(name));
+      return dispatch(fetchMemberDetail(name));
     }
   };
 }

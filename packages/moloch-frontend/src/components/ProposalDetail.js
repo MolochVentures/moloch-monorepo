@@ -252,15 +252,15 @@ class ProposalDetail extends Component {
                     </Grid.Row>
                   </Grid> : null}
                 <Grid columns="equal">
-                  <Grid.Column>
+                  {this.state.proposal_detail.shares ?
+                    <Grid.Column>
+                      <p className="subtext voting">Shares</p>
+                      <p className="amount">{this.state.proposal_detail.shares ? this.state.proposal_detail.shares : 0}</p>
+                    </Grid.Column> : null}
+                  <Grid.Column textAlign="right">
                     <p className="subtext">Total USD Value</p>
                     <p className="amount"> {formatter.format(this.state.proposal_detail.tribute ? this.state.proposal_detail.tribute : 0)}</p>
                   </Grid.Column>
-                  {this.state.proposal_detail.shares ?
-                    <Grid.Column textAlign="right">
-                      <p className="subtext voting">Voting Shares</p>
-                      <p className="amount">{this.state.proposal_detail.shares ? this.state.proposal_detail.shares : 0}</p>
-                    </Grid.Column> : null}
                 </Grid>
               </Grid.Column>
 

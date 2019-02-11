@@ -78,15 +78,15 @@ class HomePage extends React.Component {
             <Segment className="blurred box">
               <Grid columns="equal" className="graph_values">
                 <Grid.Column textAlign="left">
-                  <p className="subtext">Total Voting Shares</p>
+                  <p className="subtext">Total Shares</p>
                   <p className="amount">378</p>
                 </Grid.Column>
                 <Grid.Column textAlign="center">
-                  <p className="subtext">Total Loot Tokens</p>
+                  <p className="subtext">Total ETH</p>
                   <p className="amount">541</p>
                 </Grid.Column>
                 <Grid.Column textAlign="right">
-                  <p className="subtext">Loot Token Value</p>
+                  <p className="subtext">Share Value</p>
                   <p className="amount">128 USD</p>
                 </Grid.Column>
               </Grid>
