@@ -36,16 +36,34 @@ class Proposal {
   title: string;
 
   @property({
+    type: 'date',
+    required: true,
+  })
+  date: Date;
+
+  @property({
+    type: 'number',
+    required: true,
+  })
+  shares: number;
+
+  @property({
+    type: 'number',
+    required: true,
+  })
+  tribute: number;
+
+  @property({
     type: 'string',
     required: true,
   })
   vote: string;
 
   @property({
-    type: 'date',
+    type: 'string',
     required: true,
   })
-  date: Date;
+  status: string;
 }
 
 @model()
