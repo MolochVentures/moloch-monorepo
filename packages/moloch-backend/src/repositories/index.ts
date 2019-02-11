@@ -4,3 +4,4 @@ export * from './member.repository';
 export * from './period.repository';
 export * from './config.repository';
 export * from './project.repository';
+export * from './chainsaw.repository';
