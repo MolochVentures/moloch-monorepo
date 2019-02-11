@@ -57,6 +57,44 @@ export class MemberController {
   }
 
   /**
+   * Returns all existing members that are active.
+   */
+  @get('/members/getActiveMembers', {
+    responses: {
+      '200': {
+        description: 'Returned all members.',
+        content: {
+          'application/json': {
+            schema: { type: 'array', items: { 'x-ts-type': Member } },
+          },
+        },
+      },
+    },
+  })
+  async findActiveMembers(): Promise<Member[]> {
+    return await this.memberRepository.find({ where: { status: 'active', shares: { gte: 1 }}});
+  }
+
+  /**
+   * Returns all existing founders.
+   */
+  @get('/members/getFounders', {
+    responses: {
+      '200': {
+        description: 'Returned all members.',
+        content: {
+          'application/json': {
+            schema: { type: 'array', items: { 'x-ts-type': Member } },
+          },
+        },
+      },
+    },
+  })
+  async findFounders(): Promise<Member[]> {
+    return await this.memberRepository.find({ where: { status: 'founder'}});
+  }
+
+  /**
    * Returns a member filtered by its id.
    * @param id: id of the member to be returned.
    */
