@@ -17,60 +17,42 @@ class Login extends Component {
     this.loginWithMetamask = this.loginWithMetamask.bind(this);
     this.loginWithGnosisSafe = this.loginWithGnosisSafe.bind(this);
     this.signWithAccessRequest = this.signWithAccessRequest.bind(this);
-    this.signWithoutAccessRequest = this.signWithoutAccessRequest.bind(this);
   }
 
   async loginWithMetamask() {
-    if (window.ethereum) {
-      // Modern DApp browsers need to enable Metamask access.
-      // let web3 = window.web3;
-      web3 = new Web3(Web3.givenProvider)
-      coinbase = (await web3.eth.getAccounts())[0];
-
-      if (!coinbase) {
-        // First time logging in on metamask
-        await this.signWithAccessRequest(null);
-      } else {
-        // Try getting a user by their public address.
-        const responseJson = await this.props.fetchMemberDetail(coinbase)
-        if (responseJson.type === "FETCH_MEMBER_DETAIL_FAILURE") {
-          if (responseJson.error && responseJson.error.statusCode === 404) {
-            // If the user didn't exist.
-            // Create it.
-            const resJson = await this.props.postEvents(JSON.stringify({ id: "", name: "User creation", payload: { address: coinbase, nonce: 0 } }))
-            await this.signWithAccessRequest(resJson.items.nonce, 0);
-          }
-        } else {
-          // If the user exists, ask for a signature.
-          localStorage.setItem("totalShares", responseJson.items.totalShares);
-          await this.signWithAccessRequest(responseJson.items.member.nonce, responseJson.items.member.shares);
-        }
-      }
-    } else if (window.web3) {
-      // Legacy DApp browsers don't need to enable access.
-      web3 = new Web3(Web3.givenProvider)
-      coinbase = (await web3.eth.getAccounts())[0];
-      if (!coinbase) {
-        // First time logging in on metamask
-        await this.signWithAccessRequest(null);
-      } else {
-        // Try getting a user by their public address.
-        const responseJson = this.props.fetchMemberDetail(coinbase)
-        if (responseJson.type === "FETCH_MEMBER_DETAIL_FAILURE") {
-          if (responseJson.error && responseJson.error.statusCode === 404) {
-            // If the user didn't exist.
-            // Create it.
-            const resJson = await this.props.postEvents(JSON.stringify({ name: "User creation", payload: { address: coinbase, nonce: 0 } }))
-            await this.signWithAccessRequest(resJson.items.nonce, 0, "pending");
-          }
-        } else {
-          // If the user exists, ask for a signature.
-          await this.signWithAccessRequest(responseJson.items.member.nonce, responseJson.items.member.shares, responseJson.items.member.status);
-        }
-      }
-    } else {
+    if (!window.ethereum && !window.web3) {
       // Non-DApp browsers won't work.
       alert("Metamask needs to be installed and configured.");
+    }
+    if (window.ethereum) {
+      // Modern DApp browsers need to enable Metamask access.
+      try {
+        await window.ethereum.enable()
+      } catch (error) {
+        alert("Metamask needs to be enabled.")
+      }
+    }
+    web3 = new Web3(Web3.givenProvider)
+    coinbase = (await web3.eth.getAccounts())[0];
+
+    if (!coinbase) {
+      // First time logging in on metamask
+      await this.signWithAccessRequest(null);
+    } else {
+      // Try getting a user by their public address.
+      const responseJson = await this.props.fetchMemberDetail(coinbase)
+      if (responseJson.type === "FETCH_MEMBER_DETAIL_FAILURE") {
+        if (responseJson.error && responseJson.error.statusCode === 404) {
+          // If the user didn't exist.
+          // Create it.
+          const resJson = await this.props.postEvents(JSON.stringify({ id: "", name: "User creation", payload: { address: coinbase, nonce: 0 } }))
+          await this.signWithAccessRequest(resJson.items.nonce, 0);
+        }
+      } else {
+        // If the user exists, ask for a signature.
+        localStorage.setItem("totalShares", responseJson.items.totalShares);
+        await this.signWithAccessRequest(responseJson.items.member.nonce, responseJson.items.member.shares);
+      }
     }
   }
 
@@ -95,6 +77,7 @@ class Login extends Component {
      */
     const accounts = await web3.eth.getAccounts();
     console.log("accounts: ", accounts);
+    console.log(web3.eth.personal);
   }
 
   async signWithAccessRequest(nonce, shares, status) {
@@ -102,46 +85,27 @@ class Login extends Component {
     let message = "Please, sign the following one-time message to authenticate: " + nonce;
     // Request account access if needed.
     if (!localStorage.getItem("loggedUser")) {
+      const signature = await web3.eth.personal.sign(web3.utils.utf8ToHex(message), coinbase)
       try {
-        await ethereum.enable()
-        const signature = await web3.eth.personal.sign(web3.utils.utf8ToHex(message), coinbase)
-        try {
-          const result = await web3.eth.personal.ecRecover(message, signature)
-          console.log('result: ', result);
-          localStorage.setItem(
-            "loggedUser",
-            JSON.stringify({ status: status ? status : "pending", shares: shares ? shares : 0, address: result, nonce })
-          );
-          if (nonce) {
-            this.props.history.push("/");
-          } else {
-            this.loginWithMetamask();
-          }
-        } catch (e) {
-          alert("Error while retrieving your public key.");
+        const result = await web3.eth.personal.ecRecover(message, signature)
+        console.log('result: ', result);
+        localStorage.setItem(
+          "loggedUser",
+          JSON.stringify({ status: status ? status : "pending", shares: shares ? shares : 0, address: result, nonce })
+        );
+        if (nonce) {
+          this.props.history.push("/");
+        } else {
+          this.loginWithMetamask();
         }
-      } catch (error) {
-        alert("Metamask needs to be enabled.");
+      } catch (e) {
+        alert("Error while retrieving your public key.");
       }
     } else {
       let loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
       loggedUser.nonce = nonce;
       localStorage.setItem("loggedUser", JSON.stringify(loggedUser));
       this.props.history.push("/");
-    }
-  }
-
-  async signWithoutAccessRequest(nonce) {
-    let message = "Please, sign the following one-time message to authenticate: " + nonce;
-
-    // Acccounts always exposed, so the message can be sent to be signed directly.
-    const signature = await web3.eth.personal.sign(web3.utils.utf8ToHex(message), coinbase)
-    try {
-      const result = await web3.personal.ecRecover(message, signature)
-      localStorage.setItem("loggedUser", JSON.stringify({ address: result, nonce }));
-      this.props.history.push("/");
-    } catch (e) {
-      alert("Error while retrieving your public key.");
     }
   }
 
