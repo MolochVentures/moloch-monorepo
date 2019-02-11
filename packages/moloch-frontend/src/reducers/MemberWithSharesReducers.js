@@ -4,20 +4,20 @@ const INITIAL_STATE = {
     error: undefined
   };
   
-  function GetAssetData(state = INITIAL_STATE, action) {
+  function MemberWithSharesReducers(state = INITIAL_STATE, action) {
     switch (action.type) {
-      case 'GET_ASSET_DATA_REQUEST':
+      case 'FETCH_MEMBERS_WITH_SHARES_REQUEST':
         // This time, you may want to display loader in the UI.
         return Object.assign({}, state, {
           isFetching: true
         });
-      case 'GET_ASSET_DATA_SUCCESS':
+      case 'FETCH_MEMBERS_WITH_SHARES_SUCCESS':
         // Adding derived members to state
         return Object.assign({}, state, {
           isFetching: false,
           items: action.items
         });
-      case 'GET_ASSET_DATA_FAILURE':
+      case 'FETCH_MEMBERS_WITH_SHARES_FAILURE':
         // Providing error message to state, to be able display it in UI.
         return Object.assign({}, state, {
           isFetching: false,
@@ -28,4 +28,4 @@ const INITIAL_STATE = {
     }
   }
   
-  export default GetAssetData;
+  export default MemberWithSharesReducers;

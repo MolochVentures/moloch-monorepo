@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Divider, Form, Grid, Input, Segment, GridColumn } from "semantic-ui-react";
 import { connect } from 'react-redux';
-import { postEvents, getAssetAmount } from '../action/actions';
+import { postEvents, getAssetData } from '../action/actions';
 
 const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -90,7 +90,7 @@ class MembershipProposalSubmission extends Component {
                 logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
             }]
         });
-        this.props.getAssetAmount({ symbol: 'ETH' });
+        this.props.getAssetData();
     }
 
     validateField(fieldName, value) {
@@ -299,7 +299,7 @@ class MembershipProposalSubmission extends Component {
 // This function is used to convert redux global state to desired props.
 function mapStateToProps(state) {
     return {
-        assetDetails: state.assetAmount.items ? state.assetAmount.items[0] : { price_usd: 1 }
+        assetDetails: state.assetData.items ? state.assetData.items[0] : { price_usd: 1 }
     };
 }
 
@@ -309,8 +309,8 @@ function mapDispatchToProps(dispatch) {
         postEvents: function (data) {
             return dispatch(postEvents(data));
         },
-        getAssetAmount: function (data) {
-            dispatch(getAssetAmount(data));
+        getAssetData: function () {
+            dispatch(getAssetData());
         }
     };
 }

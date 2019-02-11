@@ -5,7 +5,13 @@ import Graph from './Graph';
 import moment from 'moment';
 
 import { connect } from 'react-redux';
-import { fetchMemberDetail, fetchMembers, fetchConfigFounders, fetchProposals } from '../action/actions';
+import { fetchMemberDetail, fetchMembersWithShares, fetchProposals, getAssetAmount } from '../action/actions';
+
+const formatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2
+});
 
 class HomePage extends React.Component {
   constructor(props) {
@@ -13,6 +19,7 @@ class HomePage extends React.Component {
     this.state = {
       totalMembers: 0,
       totalProposals: 0,
+      ethAmount: 0
     }
   }
 
@@ -29,14 +36,15 @@ class HomePage extends React.Component {
         })
     }
 
-    this.props.fetchMembers()
+    this.props.fetchMembersWithShares()
       .then((responseJson) => {
-        this.setState({ totalMembers: this.state.totalMembers + responseJson.items.length })
+        this.setState({ totalMembers: parseInt(responseJson.items) })
       });
-    this.props.fetchConfigFounders()
+
+    this.props.getAssetAmount()
       .then((responseJson) => {
-        this.setState({ totalMembers: this.state.totalMembers + responseJson.items.length })
-      });
+        this.setState({ ethAmount: responseJson.items })
+      })
 
     let proposalParams = {
       currentDate: moment(new Date()).format('YYYY-MM-DD')
@@ -50,7 +58,7 @@ class HomePage extends React.Component {
             self.setState({ totalProposals: self.state.totalProposals+=responseJson.items[key].length });
           })
         }
-      })
+      });
   }
 
   render() {
@@ -60,7 +68,7 @@ class HomePage extends React.Component {
           <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value" >
             <Link to='/guildbank' className="text_link">
               <p className="subtext">Guild Bank Value</p>
-              <p className="amount">$53,640,918</p>
+              <p className="amount">{formatter.format(this.state.ethAmount)}</p>
             </Link>
           </Grid.Column>
           <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons" >
@@ -113,14 +121,14 @@ function mapDispatchToProps(dispatch) {
     fetchMemberDetail: function (id) {
       return dispatch(fetchMemberDetail(id));
     },
-    fetchMembers: function () {
-      return dispatch(fetchMembers());
-    },
-    fetchConfigFounders: function () {
-      return dispatch(fetchConfigFounders());
+    fetchMembersWithShares: function () {
+      return dispatch(fetchMembersWithShares());
     },
     fetchProposals: function (params) {
       return dispatch(fetchProposals(params));
+    },
+    getAssetAmount: function () {
+      return dispatch(getAssetAmount());
     },
   };
 }

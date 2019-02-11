@@ -1,11 +1,14 @@
 import { combineReducers } from 'redux';
 import MembersReducers from './MembersReducers'
 import MemberDetailReducers from './MemberDetailReducers';
-import ProposalsReducers from './ProposalsReducers'
-import ProposalDetailReducers from './ProposalDetailReducers'
-import EventsReducers from './EventsReducers'
-import FounderReducers from './FounderReducers'
-import AssetAmountReducers from './AssetReducers'
+import ProposalsReducers from './ProposalsReducers';
+import ProposalDetailReducers from './ProposalDetailReducers';
+import EventsReducers from './EventsReducers';
+import FounderReducers from './FounderReducers';
+import AssetDataReducers from './AssetReducers';
+import AssetAmountReducers from './AssetAmountReducers';
+import MemberWithSharesReducers from './MemberWithSharesReducers';
+
 
 export default combineReducers({
     members: MembersReducers,
@@ -14,5 +17,7 @@ export default combineReducers({
     proposalDetail: ProposalDetailReducers,
     events: EventsReducers,
     founders: FounderReducers,
-    assetAmount: AssetAmountReducers
+    assetData: AssetDataReducers,
+    assetAmount: AssetAmountReducers,
+    membersWithShares: MemberWithSharesReducers
 });

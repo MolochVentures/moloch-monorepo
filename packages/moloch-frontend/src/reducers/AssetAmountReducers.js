@@ -4,20 +4,20 @@ const INITIAL_STATE = {
     error: undefined
   };
   
-  function GetAssetData(state = INITIAL_STATE, action) {
+  function GetAssetAmount(state = INITIAL_STATE, action) {
     switch (action.type) {
-      case 'GET_ASSET_DATA_REQUEST':
+      case 'GET_ASSET_AMOUNT_REQUEST':
         // This time, you may want to display loader in the UI.
         return Object.assign({}, state, {
           isFetching: true
         });
-      case 'GET_ASSET_DATA_SUCCESS':
+      case 'GET_ASSET_AMOUNT_SUCCESS':
         // Adding derived members to state
         return Object.assign({}, state, {
           isFetching: false,
           items: action.items
         });
-      case 'GET_ASSET_DATA_FAILURE':
+      case 'GET_ASSET_AMOUNT_FAILURE':
         // Providing error message to state, to be able display it in UI.
         return Object.assign({}, state, {
           isFetching: false,
@@ -28,4 +28,4 @@ const INITIAL_STATE = {
     }
   }
   
-  export default GetAssetData;
+  export default GetAssetAmount;
