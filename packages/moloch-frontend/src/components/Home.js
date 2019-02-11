@@ -43,7 +43,7 @@ class HomePage extends React.Component {
 
     this.props.getAssetAmount()
       .then((responseJson) => {
-        this.setState({ ethAmount: responseJson.items })
+        this.setState({ ethAmount: (responseJson.items) ? (responseJson.items.amount ? responseJson.items.amount : 0) : 0 })
       })
 
     let proposalParams = {
