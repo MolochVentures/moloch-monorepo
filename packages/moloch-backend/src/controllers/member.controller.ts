@@ -8,6 +8,7 @@ import {
 } from '@loopback/rest';
 import { Member } from '../models';
 import { MemberRepository } from '../repositories';
+import { Count } from 'loopback-datasource-juggler';
 
 export class MemberController {
   constructor(
@@ -32,6 +33,27 @@ export class MemberController {
   })
   async findAll(): Promise<Member[]> {
     return await this.memberRepository.find({where: { status: { inq: ['active', 'founder']}}});
+  }
+
+  /**
+   * Returns all existing members that have at least 1 share.
+   */
+  @get('/members/getMembersWithShares', {
+    responses: {
+      '200': {
+        description: 'Returned all members.',
+        content: {
+          'application/json': {
+            schema: { type: 'array', items: { 'x-ts-type': Member } },
+          },
+        },
+      },
+    },
+  })
+  async findMembersWithShares(): Promise<number> {
+    return await this.memberRepository.count({ status: { inq: ['active', 'founder']}, shares: { gte: 1 }}).then(async result => {
+      return await result.count;
+    });
   }
 
   /**
