@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Divider, Form, Grid, Icon, Input, Segment, GridColumn, Label } from "semantic-ui-react";
+import { Button, Divider, Form, Grid, Input, Segment, GridColumn } from "semantic-ui-react";
 import { connect } from 'react-redux';
 import { postEvents, getAssetAmount } from '../action/actions';
 
