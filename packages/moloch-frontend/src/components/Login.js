@@ -16,6 +16,7 @@ class Login extends Component {
 
     this.loginWithMetamask = this.loginWithMetamask.bind(this);
     this.loginWithGnosisSafe = this.loginWithGnosisSafe.bind(this);
+    this.doLogin = this.doLogin.bind(this)
     this.signWithAccessRequest = this.signWithAccessRequest.bind(this);
   }
 
@@ -33,6 +34,34 @@ class Login extends Component {
       }
     }
     web3 = new Web3(Web3.givenProvider)
+    await this.doLogin()
+  }
+
+  async loginWithGnosisSafe() {
+    console.log("Logging in with Gnosis Safe.");
+
+    /**
+     *  Create Safe Provider
+     */
+    const provider = new SafeProvider({
+      // TODO: CHANGE THIS TO INFURA/ALCHEMY
+      rpcUrl: "http://localhost:8545"
+    });
+
+    /**
+     *  Create Web3
+     */
+    web3 = new Web3(provider);
+
+    /**
+     *  Get Accounts
+     */
+    const accounts = await web3.eth.getAccounts();
+    console.log("accounts: ", accounts);
+    await this.doLogin()
+  }
+
+  async doLogin() {
     coinbase = (await web3.eth.getAccounts())[0];
 
     if (!coinbase) {
@@ -56,32 +85,7 @@ class Login extends Component {
     }
   }
 
-  async loginWithGnosisSafe() {
-    console.log("Logging in with Gnosis Safe.");
-
-    /**
-     *  Create Safe Provider
-     */
-    const provider = new SafeProvider({
-      // TODO: CHANGE THIS TO INFURA/ALCHEMY
-      rpcUrl: "http://localhost:8545"
-    });
-
-    /**
-     *  Create Web3
-     */
-    const web3 = new Web3(provider);
-
-    /**
-     *  Get Accounts
-     */
-    const accounts = await web3.eth.getAccounts();
-    console.log("accounts: ", accounts);
-    console.log(web3.eth.personal);
-  }
-
   async signWithAccessRequest(nonce, shares, status) {
-    let ethereum = window.ethereum;
     let message = "Please, sign the following one-time message to authenticate: " + nonce;
     // Request account access if needed.
     if (!localStorage.getItem("loggedUser")) {
