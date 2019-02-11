@@ -24,12 +24,12 @@ class MemberDetail extends React.Component {
               <Segment className="blurred box">
                 <Grid columns="equal">
                   <Grid.Column>
+                    <p className="subtext">Shares</p>
+                    <p className="amount">{this.props.member_detail.shares ? this.props.member_detail.shares : 0}</p>
+                  </Grid.Column>
+                  <Grid.Column  textAlign="right">
                     <p className="subtext">Total USD Value</p>
                     <p className="amount">$ {this.props.member_detail.tribute ? this.props.member_detail.tribute : 0}</p>
-                  </Grid.Column>
-                  <Grid.Column textAlign="right">
-                    <p className="subtext">Voting Share</p>
-                    <p className="amount">{this.props.member_detail.shares ? this.props.member_detail.shares : 0}</p>
                   </Grid.Column>
                 </Grid>
                 <Grid>
@@ -37,7 +37,7 @@ class MemberDetail extends React.Component {
                     <Image centered src={bull} size='tiny' />
                   </Grid.Column>
                 </Grid>
-                <p className="subtext">Token Tribute</p>
+                <p className="subtext">Tribute</p>
                 <Grid columns="equal">
                   <Grid.Row>
                     {this.props.member_detail.assets ? this.props.member_detail.assets.map((token, idx) => {

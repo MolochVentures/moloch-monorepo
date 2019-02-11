@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Divider, Form, Grid, Icon, Input, Segment, GridColumn } from "semantic-ui-react";
+import { Button, Divider, Form, Grid, Icon, Input, Segment, GridColumn, Label } from "semantic-ui-react";
 import { connect } from 'react-redux';
 import { postEvents, getAssetAmount } from '../action/actions';
 
@@ -28,9 +28,13 @@ class AssetsFields extends Component {
     render() {
         return (
             <Grid.Row className="asset_field_row">
-                <Grid.Column mobile={14} tablet={5} computer={7} className="asset_field_grid membership">
+                {/* <Grid.Column mobile={14} tablet={5} computer={7} className="asset_field_grid membership"> */}
+                <Grid.Column width={2} textAlign='left' className="asset_field_grid membership">
                     {/* <Input name="asset" className="asset icon_asset" icon="ethereum" iconPosition="left" placeholder="ETH, BTC, Token address" onChange={this.handleAsset} type="text" /> */}
-                    <Input icon="ethereum" iconPosition="left" name="asset" className="asset icon_asset" type="text" value={this.props.assets.symbol} disabled={true} />
+                    {/* <Input icon="ethereum" iconPosition="left" name="asset" className="asset icon_asset" type="text" value={this.props.assets.symbol} disabled={true} /> */}
+                    <div className="subtext" style={{ paddingTop: 10, paddingRight: 10 }}>
+                        {this.props.assets.symbol}
+                    </div>
                 </Grid.Column>
                 {/* <Grid.Column mobile={2} tablet={1} computer={2} className="asset_field_grid mobile_delete_icon" textAlign="right">
                     <div className="subtext">
@@ -82,7 +86,8 @@ class MembershipProposalSubmission extends Component {
             assets: [{
                 asset: 'ETH',
                 symbol: 'ETH',
-                amount: 0
+                amount: 0,
+                logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
             }]
         });
         this.props.getAssetAmount({ symbol: 'ETH' });

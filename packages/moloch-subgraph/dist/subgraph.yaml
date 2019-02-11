@@ -1,0 +1,35 @@
+specVersion: 0.0.1
+description: Moloch subgraph
+repository: 'https://github.com/moloch/subgraph'
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Moloch
+    network: james
+    source:
+      address: '0x39C0d6F3Df0ed1a5f4aBccAf6fA7eA25507Ef762'
+      abi: Moloch
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.1
+      language: wasm/assemblyscript
+      entities:
+        - Proposal
+      abis:
+        - name: Moloch
+          file: Moloch/abis/Moloch.abi
+      eventHandlers:
+        - event: 'SubmitProposal(uint256,address,address,address,uint256,uint256)'
+          handler: handleSubmitProposal
+        - event: 'SubmitVote(uint256,address,address,uint8)'
+          handler: handleSubmitVote
+        - event: 'ProcessProposal(uint256,address,address,uint256,uint256,bool)'
+          handler: handleProcessProposal
+        - event: 'Ragequit(address,uint256)'
+          handler: handleRagequit
+        - event: 'Abort(uint256,address)'
+          handler: handleAbort
+        - event: 'UpdateDelegateKey(address,address)'
+          handler: handleUpdateDelegateKey
+      file: Moloch/Moloch.wasm

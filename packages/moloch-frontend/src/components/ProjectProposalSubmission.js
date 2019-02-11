@@ -7,7 +7,7 @@ const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2
-  });
+});
 
 class AssetsFields extends Component {
     constructor(props) {
@@ -45,10 +45,14 @@ class AssetsFields extends Component {
         // ];
         return (
             <Grid.Row className="asset_field_row">
-                <Grid.Column mobile={14} tablet={5} computer={7} className="asset_field_grid">
+                {/* <Grid.Column mobile={14} tablet={5} computer={7} className="asset_field_grid"> */}
+                <Grid.Column width={2} textAlign='left' className="asset_field_grid membership">
                     {/* <Dropdown name="asset" className="asset proposal_currency_dropdown" icon="ethereum" selection options={assets} placeholder="Currency" onChange={this.handleAsset} /> */}
-                    <div>
+                    {/* <div>
                     <Input icon="ethereum" iconPosition="left" name="asset" className="asset_amount" type="text" value={this.props.assets.symbol} disabled={true} />
+                    </div> */}
+                    <div className="subtext" style={{ paddingTop: 10, paddingRight: 10 }}>
+                        {this.props.assets.symbol}
                     </div>
                 </Grid.Column>
                 {/* <Grid.Column mobile={2} tablet={1} computer={2} className="asset_field_grid mobile_delete_icon" textAlign="right">
@@ -109,12 +113,15 @@ class ProjectProposalSubmission extends Component {
                 }
             });
         // this.addAsset();
-        this.setState({assets: [{
-            asset: 'ETH',
-            symbol: 'ETH',
-            amount: 0
-        }]})
-        this.props.getAssetAmount({symbol: 'ETH'});
+        this.setState({
+            assets: [{
+                asset: 'ETH',
+                symbol: 'ETH',
+                amount: 0,
+                logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+            }]
+        })
+        this.props.getAssetAmount({ symbol: 'ETH' });
     }
 
     validateField(fieldName, value) {
@@ -187,7 +194,7 @@ class ProjectProposalSubmission extends Component {
             () => {
                 this.validateField('assets', assets);
             });
-        this.setState({tribute:this.props.assetDetails.price_usd*event.value });
+        this.setState({ tribute: this.props.assetDetails.price_usd * event.value });
     }
 
     handleDeleteAsset(event) {
@@ -302,7 +309,7 @@ function mapStateToProps(state) {
     return {
         proposal_detail: state.proposalDetail.items,
         members: state.members.items,
-        assetDetails: state.assetAmount.items ? state.assetAmount.items[0] : {price_usd: 1}
+        assetDetails: state.assetAmount.items ? state.assetAmount.items[0] : { price_usd: 1 }
     };
 }
 

@@ -11,7 +11,7 @@ class MainMenu extends Component {
 
   render() {
     return (
-      <div>
+      <div className="dropdownItems">
         {user.status === 'active' || user.status === 'founder' ?
           <Dropdown.Item className="item" onClick={() => this.props._handleCloseDropdown()}>
             <Link to={`/members/${user.name}`} className="link">
@@ -19,9 +19,9 @@ class MainMenu extends Component {
             </Link>
           </Dropdown.Item> : null}
         <Dropdown.Divider />
-        <Dropdown.Item icon="dollar" className="item" content="Withdraw Loot Token" onClick={() => { this.props._handleOpenDropdown(); this.props.onLoadWithdrawLootToken() }} />
-        <Dropdown.Divider />
         <Dropdown.Item icon="key" className="item" content="Change Delegate Key" onClick={() => { this.props._handleOpenDropdown(); this.props.onLoadChangeDelegateKey() }} />
+        <Dropdown.Divider />
+        <Dropdown.Item icon="dollar" className="item" content="Rage Quit" onClick={() => { this.props._handleOpenDropdown(); this.props.onLoadWithdrawLootToken() }} />
         <Dropdown.Divider />
         <Dropdown.Item className="item">
           <Link to="/login" className="link" onClick={() => { this.props._handleCloseDropdown(); localStorage.removeItem("loggedUser"); }}>
@@ -58,7 +58,7 @@ class WithdrawLootTokenMenu extends Component {
         <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => this.props.onLoadMain()} />
         <Dropdown.Divider />
         <Dropdown.Item className="item submenu">
-          <p><Icon name="dollar"></Icon>Withdraw Loot Token</p>
+          <p><Icon name="dollar"></Icon>Rage Quit</p>
           <Form.Input placeholder="Enter withdrawal address"></Form.Input>
           <Form.Input placeholder="0"></Form.Input>
           <Button>Withdraw</Button>
@@ -108,7 +108,7 @@ export default class Header extends Component {
         <Grid columns='equal' verticalAlign="middle">
           {localStorage.getItem('loggedUser') ?
             <Grid.Column textAlign="left" className="menu">
-              <Dropdown icon="bars">
+              {/* <Dropdown icon="bars">
                 <Dropdown.Menu className="menu blurred" direction="right">
                   <Link to="guildbank" className="item">
                     <p>Guild Bank</p>
@@ -122,7 +122,7 @@ export default class Header extends Component {
                     <p>Proposals</p>
                   </Link>
                 </Dropdown.Menu>
-              </Dropdown>
+              </Dropdown> */}
             </Grid.Column> : null}
           <Grid.Column textAlign="center" className="logo">
             <Link to="/">MOLOCH</Link>
