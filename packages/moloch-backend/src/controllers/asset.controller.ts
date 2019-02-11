@@ -36,9 +36,34 @@ export class AssetController {
   }
 
   /**
+   * Returns all existing assets.
+   */
+  @get('/assets/getETHAmount', {
+    responses: {
+      '200': {
+        description: 'Returned ETH amount.',
+        content: {
+          'application/json': {
+            schema: { type: 'array', items: { 'x-ts-type': Asset } },
+          },
+        },
+      },
+    },
+  })
+  async findEth(): Promise<number> {
+    return await this.assetRepository.findOne({ where: {address: 'ETH'}}).then(async result => {
+      if (result) {
+        return await result.amount;
+      } else {
+        return await 0;
+      }
+    });
+  }
+
+  /**
    * Returns the current data of ETH.
    */
-  @get('/assets/getETH', {
+  @get('/assets/getETHData', {
     responses: {
       '200': {
         description: 'Returned ETH data.',

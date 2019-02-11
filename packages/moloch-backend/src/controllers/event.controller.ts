@@ -442,40 +442,40 @@ export class EventController {
             }
           });
         });
-      case 'Graph update':
-        let apiData = event.payload as any;
-        let currentPointDate = new Date(1, 0, 0, 0);
-        let newGraphPoint;
-        let ethAsset: Asset;
-        return await this.assetRepository.find().then(async assets => {
-          if (assets && assets.length > 0) {
-            assets.forEach(asset => {
-              if (asset.address === "ETH") {
-                ethAsset = asset;
-              }
-            });
-            ethAsset.price = apiData.price_usd;
-            newGraphPoint = { date: currentPointDate, value: ethAsset.price * ethAsset.amount}
-            return await this.assetRepository.updateById(ethAsset.address, ethAsset).then(async updatedAsset => {
-              // Add new point to the graph
-              return await this.eventRepository.create(event);
-            });
-          } else {
-            ethAsset = {
-              address: 'ETH',
-              symbol: 'ETH',
-              logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
-              amount: 0,
-              price: apiData.price_usd
-            } as Asset;
-            newGraphPoint = { date: currentPointDate, value: 0}
-            return await this.assetRepository.create(ethAsset).then(async createdAsset => {
-              // Add new point to the graph
-              return await this.eventRepository.create(event);
-            });
-          }
-        });
-        break;
+      // case 'Graph update':
+      //   let apiData = event.payload as any;
+      //   let currentPointDate = new Date(1, 0, 0, 0);
+      //   let newGraphPoint;
+      //   let ethAsset: Asset;
+      //   return await this.assetRepository.find().then(async assets => {
+      //     if (assets && assets.length > 0) {
+      //       assets.forEach(asset => {
+      //         if (asset.address === "ETH") {
+      //           ethAsset = asset;
+      //         }
+      //       });
+      //       ethAsset.price = apiData.price_usd;
+      //       newGraphPoint = { date: currentPointDate, value: ethAsset.price * ethAsset.amount}
+      //       return await this.assetRepository.updateById(ethAsset.address, ethAsset).then(async updatedAsset => {
+      //         // Add new point to the graph
+      //         return await this.eventRepository.create(event);
+      //       });
+      //     } else {
+      //       ethAsset = {
+      //         address: 'ETH',
+      //         symbol: 'ETH',
+      //         logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+      //         amount: 0,
+      //         price: apiData.price_usd
+      //       } as Asset;
+      //       newGraphPoint = { date: currentPointDate, value: 0}
+      //       return await this.assetRepository.create(ethAsset).then(async createdAsset => {
+      //         // Add new point to the graph
+      //         return await this.eventRepository.create(event);
+      //       });
+      //     }
+      //   });
+      //   break;
     }
     event.name = "Error: Unidentified event";
     return await this.eventRepository.create(event).then(result => { return event });
