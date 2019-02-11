@@ -59,6 +59,7 @@ class Login extends Component {
     const accounts = await web3.eth.getAccounts();
     console.log("accounts: ", accounts);
     await this.doLogin()
+    
   }
 
   async doLogin() {
@@ -89,10 +90,9 @@ class Login extends Component {
     let message = "Please, sign the following one-time message to authenticate: " + nonce;
     // Request account access if needed.
     if (!localStorage.getItem("loggedUser")) {
-      const signature = await web3.eth.personal.sign(web3.utils.utf8ToHex(message), coinbase)
       try {
+        const signature = await web3.eth.personal.sign(web3.utils.utf8ToHex(message), coinbase)
         const result = await web3.eth.personal.ecRecover(message, signature)
-        console.log('result: ', result);
         localStorage.setItem(
           "loggedUser",
           JSON.stringify({ status: status ? status : "pending", shares: shares ? shares : 0, address: result, nonce })
@@ -100,7 +100,7 @@ class Login extends Component {
         if (nonce) {
           this.props.history.push("/");
         } else {
-          this.loginWithMetamask();
+          this.doLogin();
         }
       } catch (e) {
         alert("Error while retrieving your public key.");
