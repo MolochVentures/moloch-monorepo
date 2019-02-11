@@ -1,3 +1,4 @@
+require('dotenv').config()
 const application = require('./dist');
 
 module.exports = application;
