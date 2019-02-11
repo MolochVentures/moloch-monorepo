@@ -81,16 +81,30 @@ class MemberDetail extends React.Component {
             </Grid.Column>
             <Grid.Column mobile={16} tablet={16} computer={10} className="proposals" >
               <Segment className="blurred box">
+                <Grid columns="equal" textAlign="center">
+                  <Grid.Row className="subtext" style={{fontSize: 20}}>
+                    History
+                  </Grid.Row>
+                </Grid>
                 <Grid columns="equal">
                   <Grid.Row className="header">
-                    <Grid.Column textAlign="left">
-                      <p className="subtext">Proposal</p>
-                    </Grid.Column>
                     <Grid.Column textAlign="center">
+                      <p className="subtext">Proposal Title</p>
+                    </Grid.Column>
+                    <Grid.Column textAlign="center" >
                       <p className="subtext">Date</p>
                     </Grid.Column>
-                    <Grid.Column textAlign="right">
-                      <p className="subtext">Action</p>
+                    <Grid.Column textAlign="center" >
+                      <p className="subtext">Shares Requested</p>
+                    </Grid.Column>
+                    <Grid.Column textAlign="center" >
+                      <p className="subtext">Tribute Offered</p>
+                    </Grid.Column>
+                    <Grid.Column textAlign="center">
+                      <p className="subtext">Vote</p>
+                    </Grid.Column>
+                    <Grid.Column textAlign="center" >
+                      <p className="subtext">Status</p>
                     </Grid.Column>
                   </Grid.Row>
                   {this.state.member_detail.proposals && this.state.member_detail.proposals.length > 0 ?
@@ -98,7 +112,7 @@ class MemberDetail extends React.Component {
                       return (
                         <React.Fragment key={idx}>
                           <Grid.Row verticalAlign="middle">
-                            <Grid.Column textAlign="left">
+                            <Grid.Column textAlign="center">
                               {p.vote === "yes" && <Label className="dot" circular color="green" empty />}
                               {p.vote === "no" && <Label className="dot" circular color="red" empty />}
                               {p.title}
@@ -106,11 +120,20 @@ class MemberDetail extends React.Component {
                             <Grid.Column textAlign="center">
                               <p className="subtext date">{moment(p.date).format('MM/MDD/YYYY')}</p>
                             </Grid.Column>
-                            <Grid.Column textAlign="right">
+                            <Grid.Column textAlign="center">
+                              <p className="subtext date">{p.shares ? p.shares : ''}</p>
+                            </Grid.Column>
+                            <Grid.Column textAlign="center">
+                              <p className="subtext date">{formatter.format(p.tribute ? p.tribute : 0)}</p>
+                            </Grid.Column>
+                            <Grid.Column  textAlign="center">
                               <Header as="p"
                                 color={p.vote === "yes" ? "green" : p.vote === "no" ? "red" : null}>
-                                {p.vote.charAt(0).toUpperCase() + p.vote.slice(1)}
+                                {p.vote.charAt(0).toUpperCase()}
                               </Header>
+                            </Grid.Column>
+                            <Grid.Column textAlign="center">
+                              <p className="subtext date">{p.status ? p.status.charAt(0).toUpperCase() + p.status.slice(1) : ''}</p>
                             </Grid.Column>
                           </Grid.Row>
                           <Divider />

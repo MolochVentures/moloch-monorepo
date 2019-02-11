@@ -38,10 +38,10 @@ const MemberList = (props) => {
       {props.user.status === 'founder' || props.user.status === 'active' ?
         <Grid>
           <Grid.Column textAlign="center">
-            <Link to={`/members/${props.user.address}`} className="uncolored">
+            <Link to={`/members/${props.user.name}`} className="uncolored">
               <Image centered src={bull} size='tiny' />
-              <p className="name">{!props.user.address ? '' : (props.user.address.length > 10 ? props.user.address.substring(0, 10) + '...' : props.user.address)}</p>
-              <p className="subtext">{props.user.shares} shares</p>
+              <p className="name">{!props.user.name ? '' : (props.user.name.length > 10 ? props.user.name.substring(0, 10) + '...' : props.user.name)}</p>
+              <p className="subtext">{props.user.shares ? props.user.shares : 0} shares</p>
             </Link>
           </Grid.Column>
         </Grid> : null

@@ -104,7 +104,7 @@ const ProposalList = (props) => {
             <>No proposals to show.</>
           </Grid.Column>
           <Grid.Column mobile={16} tablet={8} computer={4} textAlign="right" floated="right" className="submit_button">
-            <Link to={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? '/projectproposalsubmission' : '/proposals'} className="link">
+            <Link to={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? '/membershipproposalsubmission' : '/proposals'} className="link">
               <Button size='large' color='red' disabled={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? false : true}>New Proposal</Button>
             </Link>
           </Grid.Column>
@@ -119,7 +119,7 @@ const ProposalList = (props) => {
                   <p className="title">In Progress</p>
                 </Grid.Column>
                 <Grid.Column mobile={16} tablet={8} computer={4} textAlign="right" floated="right" className="submit_button">
-                  <Link to={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? '/projectproposalsubmission' : '/proposals'} className="link">
+                  <Link to={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? '/membershipproposalsubmission' : '/proposals'} className="link">
                     <Button size='large' color='red' disabled={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? false : true}>New Proposal</Button>
                   </Link>
                 </Grid.Column>
@@ -140,7 +140,7 @@ const ProposalList = (props) => {
                   </Grid.Column>
                   {showBtnKey === key && props.proposals['inProgress'].length === 0 ?
                     <Grid.Column mobile={16} tablet={8} computer={4} textAlign="right" floated="right" className="submit_button">
-                      <Link to={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? '/projectproposalsubmission' : '/proposals'} className="link">
+                      <Link to={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? '/membershipproposalsubmission' : '/proposals'} className="link">
                         <Button size='large' color='red' disabled={props.userShare && (props.memberStatus === 'active' || props.memberStatus === 'founder') ? false : true}>New Proposal</Button>
                       </Link>
                     </Grid.Column> 
