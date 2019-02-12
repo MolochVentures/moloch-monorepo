@@ -31,24 +31,10 @@ const GET_LOGGED_IN_USER = gql`
   }
 `
 class LoggedInUser extends React.Component {
-  state = {
-    user: {
-      name: ""
-    }
-  }
-
-  componentDidMount() {
-    let loggedUser = JSON.parse(localStorage.getItem('loggedUser'));
-    this.setState({
-      user: {
-        name: loggedUser.address
-      }
-    })
-  }
-
   render() {
+    let loggedUser = JSON.parse(localStorage.getItem('loggedUser'));
     return (
-      <Query query={GET_LOGGED_IN_USER} variables={{ address: this.state.user.name }}>
+      <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedUser.address }}>
         {({ loading, error, data }) => {
           if (loading) return "...";
           if (error) throw new Error(`Error!: ${error}`);
