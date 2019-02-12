@@ -6,12 +6,42 @@ import moment from 'moment';
 
 import { connect } from 'react-redux';
 import { fetchMemberDetail, fetchMembersWithShares, fetchProposals, getAssetAmount } from '../action/actions';
+import gql from 'graphql-tag';
+import { Query } from 'react-apollo';
 
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
   minimumFractionDigits: 2
 });
+
+const GET_MEMBERS = gql`
+  {
+    members(where: { shares_gt: 0, isActive: true }) {
+      id
+    }
+  }
+`
+const NumMembers = () => (
+  <Query query={GET_MEMBERS}>
+    {({ loading, error, data }) => {
+      let members
+      if (error) {
+        members = 'NA'
+        console.error(`Could not load members: ${error}`)
+      } else if (loading) {
+        members = '-'
+      } else {
+        members = data.members.length
+      }
+      return (
+        <Link to='/members' className="link">
+          <Button size='large' color='grey' className='btn_link'>{members} Members</Button>
+        </Link>
+      );
+    }}
+  </Query>
+);
 
 class HomePage extends React.Component {
   constructor(props) {
@@ -72,9 +102,7 @@ class HomePage extends React.Component {
             </Link>
           </Grid.Column>
           <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons" >
-            <Link to='/members' className="link">
-              <Button size='large' color='grey' className='btn_link'>{this.state.totalMembers} Members</Button>
-            </Link>
+            <NumMembers />
             <Link to='/proposals' className="link">
               <Button size='large' color='grey' className='btn_link'>{this.state.totalProposals} Proposals</Button>
             </Link>
