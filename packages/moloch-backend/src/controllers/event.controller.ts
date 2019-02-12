@@ -78,52 +78,114 @@ export class EventController {
     switch (event.name) {
       case 'Cron job':
         let today = new Date();
-        let filterCurrent = {
-          where:
-          {
-            start: { lte: today },
-            end: { gte: today }
-          }
-        }
-        return await this.periodRepository.find(filterCurrent).then(async periods => {
-          let memberFilter: Array<any> = [];
-          let projectFilter: Array<any> = [];
-          periods.forEach(period => {
-            period.proposals.forEach(periodProposal => {
-              let endDays = Math.round((period.end.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
-              let graceDays = Math.round((period.gracePeriod.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
-              if (periodProposal.type === 'member') {
-                memberFilter.push({ id: period.id, end: endDays, gracePeriod: graceDays });
-              } else {
-                projectFilter.push({ id: period.id, end: endDays, gracePeriod: graceDays });
-              }
-            });
-          });
-          return await this.memberRepository.find().then(async members => {
-            members.forEach(member => {
-              if (memberFilter.findIndex(k => k.id === member.period) >= 0 && member.status === 'pending') {
-                member.status = 'inprogress';
-                member.end = memberFilter.find(k => k.id === member.period).end;
-                member.gracePeriod = memberFilter.find(k => k.id === member.period).gracePeriod;
-              } else if (member.status === 'inprogress') {
-                member.status = 'pending';
-                member.end = member.gracePeriod = 0;
-              }
-              this.memberRepository.updateById(member.address, member);
-            });
-            return await this.projectRepository.find().then(async projects => {
-              projects.forEach(project => {
-                if (projectFilter.findIndex(k => k.id === project.period) >= 0 && project.status === 'pending') {
-                  project.status = 'inprogress';
-                  project.end = projectFilter.find(k => k.id === project.period).end;
-                  project.gracePeriod = projectFilter.find(k => k.id === project.period).gracePeriod;
-                } else if (project.status === 'inprogress') {
-                  project.status = 'pending';
-                  project.end = project.gracePeriod = 0;
-                }
-                this.projectRepository.updateById(project.id, project);
+        let filterVotingPeriods = {where:{start: { lte: today },end: { gte: today }}}
+        let filterGracePeriods = {where:{end: { lte: today },gracePeriod: { gte: today }}}
+        let filterPastGracePeriods = {where:{gracePeriod: { lte: today }}}
+
+        // Get all the voting periods
+        return await this.periodRepository.find(filterVotingPeriods).then(async votingPeriods => {
+          // Get all the grace periods
+          return await this.periodRepository.find(filterGracePeriods).then(async gracePeriods => {
+            // Get all the periods past their grace period
+            return await this.periodRepository.find(filterPastGracePeriods).then(async pastGracePeriods => {
+              let periods: Array<any> = [];
+              // Create an array to contain all the periods identifying the status in which they are to filter later the proposals and decide what status to assign
+              votingPeriods.forEach(period => {
+                periods.push({id: period.id, start: period.start, end: period.end, grace: period.gracePeriod, status: 'votingperiod'});
               });
-              return await this.eventRepository.create(event);
+              gracePeriods.forEach(period => {
+                periods.push({id: period.id, start: period.start, end: period.end, grace: period.gracePeriod, status: 'graceperiod'});
+              });
+              pastGracePeriods.forEach(period => {
+                periods.push({id: period.id, start: period.start, end: period.end, grace: period.gracePeriod, status: 'pastgraceperiod'});
+              });
+              // Get the membership proposals
+              return await this.memberRepository.find().then(async members => {
+                // Get the total shares of the system to decide if a proposal past the grace period has >50% of yes votes
+                let totalShares = 0;
+                members.forEach(member => { totalShares = totalShares + (member.shares ? member.shares : 0) });
+                // Get the project proposals
+                return await this.projectRepository.find().then(async projects => {
+                  // Check all the membership proposals to decide in which status should they be
+                  members.forEach(member => {
+                    // Only non-founders are affected by the cron job
+                    if (member.status !== 'founder') {
+                      let matchingPeriodIndex = periods.findIndex(k => k.id === member.period);
+                      // If the proposal belogs to a period that can be on voting, grace or past the grace period
+                      if (matchingPeriodIndex >= 0 && (member.status !== 'passed' && member.status !== 'failed' && member.status !== 'aborted')) {
+                        let matchingPeriod = periods[matchingPeriodIndex];
+                        // We decide which status should it get
+                        switch(matchingPeriod.status) {
+                          case 'votingperiod': // This sets it as in votingperiod
+                            member.status = 'votingperiod';
+                            member.end = Math.round((matchingPeriod.end.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
+                            member.gracePeriod = Math.round((matchingPeriod.grace.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
+                            break;
+                          case 'graceperiod': // This sets it as in graceperiod
+                            member.status = 'graceperiod';
+                            member.end = 0;
+                            member.gracePeriod = Math.round((matchingPeriod.grace.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
+                            break;
+                          case 'pastgraceperiod': // This sets it either as in queue (yes votes >50%, waiting until someone processes it) or failed (yes votes < 50%)
+                            let voters = member.voters ? member.voters : [];
+                            let yesPercentage = 0;
+                            // Check the percentage of yes votes
+                            voters.forEach(voter => {
+                              if (voter.vote === 'yes') {
+                                yesPercentage = yesPercentage + (voter.shares * 100 / totalShares);
+                              }
+                            })
+                            yesPercentage >= 50 ? member.status = 'inqueue' : member.status = 'failed';
+                            member.end = 0;
+                            member.gracePeriod = 0;
+                            break;
+                        }
+                      } else { // The proposal is below the voting period or doesn't have a period. Assign the status accordingly
+                        member.period ? member.status = 'inqueue' : member.status = '';
+                      }
+                      this.memberRepository.updateById(member.address, member);
+                    }
+                  });
+                  // Check all the project proposals to decide in which status should they be
+                  projects.forEach(project => {
+                    let matchingPeriodIndex = periods.findIndex(k => k.id === project.period);
+                    // If the proposal belogs to a period that can be on voting, grace or past the grace period
+                    if (matchingPeriodIndex >= 0 && (project.status !== 'passed' && project.status !== 'failed' && project.status !== 'aborted')) {
+                      let matchingPeriod = periods[matchingPeriodIndex];
+                      // We decide which status should it get
+                      switch(matchingPeriod.status) {
+                        case 'votingperiod': // This sets it as in votingperiod
+                          project.status = 'votingperiod';
+                          project.end = Math.round((matchingPeriod.end.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
+                          project.gracePeriod = Math.round((matchingPeriod.grace.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
+                          break;
+                        case 'graceperiod': // This sets it as in graceperiod
+                          project.status = 'graceperiod';
+                          project.end = 0;
+                          project.gracePeriod = Math.round((matchingPeriod.grace.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
+                          break;
+                        case 'pastgraceperiod': // This sets it either as in queue (yes votes >50%, waiting until someone processes it) or failed (yes votes < 50%)
+                          let voters = project.voters ? project.voters : [];
+                          let yesPercentage = 0;
+                          // Check the percentage of yes votes
+                          voters.forEach(voter => {
+                            if (voter.vote === 'yes') {
+                              yesPercentage = yesPercentage + (voter.shares * 100 / totalShares);
+                            }
+                          })
+                          yesPercentage >= 50 ? project.status = 'inqueue' : project.status = 'failed';
+                          project.end = 0;
+                          project.gracePeriod = 0;
+                          break;
+                      }
+                    } else { // If the proposal is below the start date of its period, then it's inqueue
+                      project.status = 'inqueue';
+                    }
+                    this.projectRepository.updateById(project.id, project);
+                  });
+                  return await this.eventRepository.create(event);
+                });
+              });
             });
           });
         });
