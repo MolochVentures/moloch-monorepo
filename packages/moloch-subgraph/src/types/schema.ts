@@ -48,6 +48,15 @@ export class Vote extends Entity {
     this.set("proposalIndex", Value.fromBigInt(value));
   }
 
+  get timestamp(): string {
+    let value = this.get("timestamp");
+    return value.toString();
+  }
+
+  set timestamp(value: string) {
+    this.set("timestamp", Value.fromString(value));
+  }
+
   get delegateKey(): Bytes {
     let value = this.get("delegateKey");
     return value.toBytes();
@@ -214,21 +223,13 @@ export class Proposal extends Entity {
     this.set("aborted", Value.fromBoolean(value));
   }
 
-  get votes(): Array<string> | null {
+  get votes(): Array<string> {
     let value = this.get("votes");
-    if (value === null) {
-      return null;
-    } else {
-      return value.toStringArray();
-    }
+    return value.toStringArray();
   }
 
-  set votes(value: Array<string> | null) {
-    if (value === null) {
-      this.unset("votes");
-    } else {
-      this.set("votes", Value.fromStringArray(value as Array<string>));
-    }
+  set votes(value: Array<string>) {
+    this.set("votes", Value.fromStringArray(value));
   }
 }
 
@@ -343,21 +344,13 @@ export class Applicant extends Entity {
     this.set("aborted", Value.fromBoolean(value));
   }
 
-  get votes(): Array<string> | null {
+  get votes(): Array<string> {
     let value = this.get("votes");
-    if (value === null) {
-      return null;
-    } else {
-      return value.toStringArray();
-    }
+    return value.toStringArray();
   }
 
-  set votes(value: Array<string> | null) {
-    if (value === null) {
-      this.unset("votes");
-    } else {
-      this.set("votes", Value.fromStringArray(value as Array<string>));
-    }
+  set votes(value: Array<string>) {
+    this.set("votes", Value.fromStringArray(value));
   }
 }
 
@@ -445,21 +438,22 @@ export class Member extends Entity {
     this.set("didRagequit", Value.fromBoolean(value));
   }
 
-  get votes(): Array<string> | null {
+  get votes(): Array<string> {
     let value = this.get("votes");
-    if (value === null) {
-      return null;
-    } else {
-      return value.toStringArray();
-    }
+    return value.toStringArray();
   }
 
-  set votes(value: Array<string> | null) {
-    if (value === null) {
-      this.unset("votes");
-    } else {
-      this.set("votes", Value.fromStringArray(value as Array<string>));
-    }
+  set votes(value: Array<string>) {
+    this.set("votes", Value.fromStringArray(value));
+  }
+
+  get proposals(): Array<string> {
+    let value = this.get("proposals");
+    return value.toStringArray();
+  }
+
+  set proposals(value: Array<string>) {
+    this.set("proposals", Value.fromStringArray(value));
   }
 }
 

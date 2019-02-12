@@ -1,6 +1,7 @@
 type Vote @entity {
   id: ID!
   proposalIndex:BigInt!
+  timestamp:String!
   delegateKey: Bytes!
   memberAddress: Bytes!
   uintVote: Int!
@@ -9,9 +10,9 @@ type Vote @entity {
 type Proposal @entity {
   id: ID!
   timestamp:String!
+  proposalIndex: BigInt!
   delegateKey: Bytes!
   memberAddress: Bytes!
-  proposer: Bytes!
   applicant: Bytes!
   tokenTribute: BigInt!
   sharesRequested:BigInt!
@@ -20,7 +21,7 @@ type Proposal @entity {
   processed: Boolean!
   didPass: Boolean!
   aborted: Boolean!
-  votes: [Vote!]
+  votes: [Vote!]! @derivedFrom(field: "id")
 }
 
 type Applicant @entity {
@@ -29,11 +30,12 @@ type Applicant @entity {
   proposalIndex: BigInt!
   delegateKey: Bytes!
   memberAddress: Bytes!
+  applicant: Bytes!
   tokenTribute: BigInt!
   sharesRequested:BigInt!
   didPass: Boolean!
   aborted: Boolean!
-  votes: [Vote!]
+  votes: [Vote!]! @derivedFrom(field: "id")
 }
 
 type Member @entity {
@@ -44,5 +46,13 @@ type Member @entity {
   highestIndexYesVote: BigInt!
   tokenTribute: BigInt!
   didRagequit: Boolean!
-  votes: [Vote!]
+  votes: [Vote!]! @derivedFrom(field: "id")
+  proposals: [Proposal!]! @derivedFrom(field: "id")
+}
+
+type Txs @entity {
+  id: ID!
+  timestamp: String!
+  memberAddress: Bytes!
+  tokenTribute: BigInt!
 }
