@@ -202,6 +202,7 @@ export class EventController {
         let currentDate = new Date();
         currentDate.setHours(1, 0, 0, 0);
         // Add the new proposal to the list of proposals of the member that submitted it
+        /* TODO: this is being kept in case the vote 'owner' comes back
         if (!memberPatch.proposals) {
           memberPatch.proposals = [];
         }
@@ -215,6 +216,7 @@ export class EventController {
           status: 'inqueue',
           type: 'member'
         });
+        */
         // Recover the config data to define a new period
         return await this.configRepository.find().then(async config => {
           // Config data
@@ -353,7 +355,9 @@ export class EventController {
                   projectCreate.status = 'inqueue';
                   // And create the project
                   return await this.projectRepository.create(projectCreate).then(async project => {
+                    return await this.eventRepository.create(event);
                     // Get the member that submitted the project
+                    /* TODO: this is being kept in case the vote 'owner' comes back
                     return await this.memberRepository.findById(ownerAddress).then(async matchingMember => {
                       // And add the new proposal that they have submitted to their list of proposals
                       if (!matchingMember.proposals) {
@@ -372,7 +376,8 @@ export class EventController {
                       return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
                         return await this.eventRepository.create(event);
                       });
-                    });                    
+                    });
+                    */                   
                   });
                 });
               });
@@ -385,7 +390,9 @@ export class EventController {
                 projectCreate.period = newPeriod.id; // Assign it to the project
                 // And create the project
                 return await this.projectRepository.create(projectCreate).then(async result => {
+                  return await this.eventRepository.create(event);
                   // Get the member that submitted the project
+                  /* TODO: this is being kept in case the vote 'owner' comes back
                   return await this.memberRepository.findById(ownerAddress).then(async matchingMember => {
                     // And add the new proposal that they have submitted to their list of proposals
                     if (!matchingMember.proposals) {
@@ -405,6 +412,7 @@ export class EventController {
                       return await this.eventRepository.create(event);
                     });
                   });
+                  */
                 });
               });
             }
