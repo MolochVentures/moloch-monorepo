@@ -43,6 +43,35 @@ const NumMembers = () => (
   </Query>
 );
 
+// TODO filter this to get current proposals?
+const GET_PROPOSALS = gql`
+  {
+    proposals {
+      id
+    }
+  }
+`
+const NumProposals = () => (
+  <Query query={GET_PROPOSALS}>
+    {({ loading, error, data }) => {
+      let proposals
+      if (error) {
+        proposals = 'NA'
+        console.error(`Could not load proposals: ${error}`)
+      } else if (loading) {
+        proposals = '-'
+      } else {
+        proposals = data.proposals.length
+      }
+      return (
+        <Link to='/proposals' className="link">
+          <Button size='large' color='grey' className='btn_link'>{proposals} Proposals</Button>
+        </Link>
+      );
+    }}
+  </Query>
+);
+
 class HomePage extends React.Component {
   constructor(props) {
     super(props);
@@ -65,11 +94,6 @@ class HomePage extends React.Component {
           }
         })
     }
-
-    this.props.fetchMembersWithShares()
-      .then((responseJson) => {
-        this.setState({ totalMembers: parseInt(responseJson.items) })
-      });
 
     this.props.getAssetAmount()
       .then((responseJson) => {
@@ -103,9 +127,7 @@ class HomePage extends React.Component {
           </Grid.Column>
           <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons" >
             <NumMembers />
-            <Link to='/proposals' className="link">
-              <Button size='large' color='grey' className='btn_link'>{this.state.totalProposals} Proposals</Button>
-            </Link>
+            <NumProposals />
           </Grid.Column>
 
           <Grid.Column computer={4} />
