@@ -32,7 +32,7 @@ export class MemberController {
     },
   })
   async findAll(): Promise<Member[]> {
-    return await this.memberRepository.find({where: { status: { inq: ['active', 'founder']}}});
+    return await this.memberRepository.find({where: { status: { inq: ['passed', 'founder']}}});
   }
 
   /**
@@ -51,7 +51,7 @@ export class MemberController {
     },
   })
   async findMembersWithShares(): Promise<number> {
-    return await this.memberRepository.count({ status: { inq: ['active', 'founder']}, shares: { gte: 1 }}).then(async result => {
+    return await this.memberRepository.count({ status: { inq: ['passed', 'founder']}, shares: { gte: 1 }}).then(async result => {
       return await result.count;
     });
   }
@@ -72,7 +72,7 @@ export class MemberController {
     },
   })
   async findActiveMembers(): Promise<Member[]> {
-    return await this.memberRepository.find({ where: { status: 'active', shares: { gte: 1 }}});
+    return await this.memberRepository.find({ where: { status: 'passed', shares: { gte: 1 }}});
   }
 
   /**
@@ -112,7 +112,7 @@ export class MemberController {
       let totalShares = 0;
       // Only add the shares of the members
       members.forEach(member => {
-        if (member.status === 'active' || member.status === 'founder') {
+        if (member.status === 'passed' || member.status === 'founder') {
           totalShares = totalShares + (member.shares ? member.shares : 0)
         }
       });
