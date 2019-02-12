@@ -1,3 +1,13 @@
+# Moloch Front-End
+
+## Local Development
+
+Run `moloch-subgraph` locally using instructions in that folder (same level as this), making sure contracts are migrated.
+
+TODO: Update URLs for use with testnet/mainnet deployment.
+
+=====================================
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
