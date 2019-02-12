@@ -239,12 +239,45 @@ export class EventController {
                 periodCreate.gracePeriod = new Date(periodCreate.end.getTime() + (1000 * 60 * 60 * 24 * gracePeriodLength));
                 // And create a period for it
                 return await this.periodRepository.create(periodCreate).then(async newPeriod => {
-                  memberPatch.period = newPeriod.id; // Assign it to the member
-                  memberPatch.status = 'inqueue';
-                  // And update the member
-                  return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async result => {
-                    return await this.eventRepository.create(event);
-                  });
+                  if (memberPatch.applicantAddress === memberPatch.address) { // If the membership proposal is for the same user that submitted it
+                    memberPatch.period = newPeriod.id; // Assign the period
+                    memberPatch.status = 'inqueue'; // Assign the status
+                    // And update the member
+                    return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async result => {
+                      return await this.eventRepository.create(event);
+                    });
+                  } else { // If the membership proposal is for a different user than the one that submitted it
+                    let applicantAddress = memberPatch.applicantAddress ? memberPatch.applicantAddress : '';
+                    // First check if there was a proposal already submitted for that user
+                    return await this.memberRepository.findById(applicantAddress).then(async matchingMember => {
+                      if (matchingMember) { // If there is
+                        matchingMember.period = newPeriod.id; // Assign the period
+                        matchingMember.status = 'inqueue'; // Assign the status
+                        // And update the matching membership proposal
+                        return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
+                          return await this.eventRepository.create(event);
+                        });
+                      } else { // If there isn't
+                        // Prepare the data for a new membership proposal
+                        let newMembershipProposal = {
+                          address: applicantAddress,
+                          nonce: Math.floor(Math.random() * 1000000),
+                          name: applicantAddress,
+                          title: memberPatch.title,
+                          description: memberPatch.description,
+                          shares: memberPatch.shares,
+                          tribute: memberPatch.tribute,
+                          status: 'inqueue',
+                          period: newPeriod.id,
+                          assets: memberPatch.assets
+                        } as Member;
+                        // And create it
+                        return await this.memberRepository.create(newMembershipProposal).then(async result => {
+                          return await this.eventRepository.create(event);
+                        });
+                      }
+                    });
+                  }
                 });
               });
             } else { // If there isn't a period on that date

@@ -94,6 +94,11 @@ export class Member extends Entity {
   @property({
     type: 'string',
   })
+  applicantAddress?: string;
+
+  @property({
+    type: 'string',
+  })
   description?: string;
 
   @property({
