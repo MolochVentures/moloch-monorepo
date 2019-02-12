@@ -21,7 +21,7 @@ type Proposal @entity {
   processed: Boolean!
   didPass: Boolean!
   aborted: Boolean!
-  votes: [Vote!]! @derivedFrom(field: "id")
+  votes: [Vote!]!
 }
 
 type Applicant @entity {
@@ -35,7 +35,7 @@ type Applicant @entity {
   sharesRequested:BigInt!
   didPass: Boolean!
   aborted: Boolean!
-  votes: [Vote!]! @derivedFrom(field: "id")
+  votes: [Vote!]! 
 }
 
 type Member @entity {
@@ -46,8 +46,8 @@ type Member @entity {
   highestIndexYesVote: BigInt!
   tokenTribute: BigInt!
   didRagequit: Boolean!
-  votes: [Vote!]! @derivedFrom(field: "id")
-  proposals: [Proposal!]! @derivedFrom(field: "id")
+  votes: [Vote!]!
+  proposals: [Proposal!]!
 }
 
 type Txs @entity {

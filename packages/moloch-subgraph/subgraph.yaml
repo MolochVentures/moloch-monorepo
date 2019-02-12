@@ -8,7 +8,7 @@ dataSources:
     name: Moloch
     network: james
     source:
-      address: '0xc96E8C976Cc6337AfC7D146aA0360FBB465d202b'
+      address: '0xacd2A62497701420fD8278De9b3225Ac0f0854f1'
       abi: Moloch
     mapping:
       kind: ethereum/events

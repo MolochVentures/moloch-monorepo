@@ -61,16 +61,26 @@ export function handleSubmitVote(event: SubmitVote): void {
   if (event.params.uintVote == 2) {
     proposal.noVotes = proposal.noVotes.plus(BigInt.fromI32(1))
   }
-  proposal.votes.push(voteID)
+
+  let proposalVotes = proposal.votes
+  proposalVotes.push(voteID)
+  proposal.votes = proposalVotes
   proposal.save()
 
   let applicant = Applicant.load(proposal.applicant.toHex())
-  applicant.votes.push(voteID)
+  let applicantVotes = applicant.votes
+  applicantVotes.push(voteID)
+  applicant.votes = applicantVotes
   applicant.save()
   
   let member = Member.load(event.params.memberAddress.toHex())
-  member.votes.push(voteID)
-  member.proposals.push(event.params.proposalIndex.toString())
+  let memberVotes = member.votes
+  memberVotes.push(voteID)
+  member.votes = memberVotes
+  
+  let memberProposals = member.proposals
+  memberProposals.push(event.params.proposalIndex.toString())
+  member.proposals = memberProposals
   member.save()
 }
 

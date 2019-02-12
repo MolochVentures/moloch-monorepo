@@ -231,6 +231,15 @@ export class Proposal extends Entity {
   set votes(value: Array<string>) {
     this.set("votes", Value.fromStringArray(value));
   }
+
+  get proposalVotes(): Array<string> {
+    let value = this.get("proposalVotes");
+    return value.toStringArray();
+  }
+
+  set proposalVotes(value: Array<string>) {
+    this.set("proposalVotes", Value.fromStringArray(value));
+  }
 }
 
 export class Applicant extends Entity {
