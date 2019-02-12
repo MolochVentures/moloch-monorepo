@@ -73,13 +73,8 @@ const NumProposals = () => (
 );
 
 class HomePage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      totalMembers: 0,
-      totalProposals: 0,
-      ethAmount: 0
-    }
+  state = {
+    ethAmount: 0
   }
 
   componentDidMount() {
@@ -99,20 +94,6 @@ class HomePage extends React.Component {
       .then((responseJson) => {
         this.setState({ ethAmount: (responseJson.items) ? (responseJson.items.amount ? responseJson.items.amount : 0) : 0 })
       })
-
-    let proposalParams = {
-      currentDate: moment(new Date()).format('YYYY-MM-DD')
-    }
-    let self = this;
-    this.props.fetchProposals(proposalParams)
-      .then((responseJson) => {
-        if (responseJson.items && Object.keys(responseJson.items).length > 0) {
-          // eslint-disable-next-line array-callback-return
-          Object.keys(responseJson.items).map((key, idx) => {
-            self.setState({ totalProposals: self.state.totalProposals+=responseJson.items[key].length });
-          })
-        }
-      });
   }
 
   render() {
