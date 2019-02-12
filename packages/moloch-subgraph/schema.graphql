@@ -1,10 +1,12 @@
 type Vote @entity {
   id: ID!
-  proposalIndex:BigInt!
   timestamp:String!
+  proposalIndex:BigInt!
   delegateKey: Bytes!
   memberAddress: Bytes!
   uintVote: Int!
+  proposal: Proposal!
+  member: Member!
 }
 
 type Proposal @entity {
@@ -12,8 +14,10 @@ type Proposal @entity {
   timestamp:String!
   proposalIndex: BigInt!
   delegateKey: Bytes!
+  member: Member!
   memberAddress: Bytes!
-  applicant: Bytes!
+  applicant: Applicant!
+  applicantAddress: Bytes!
   tokenTribute: BigInt!
   sharesRequested:BigInt!
   yesVotes: BigInt!
@@ -29,13 +33,15 @@ type Applicant @entity {
   timestamp:String!
   proposalIndex: BigInt!
   delegateKey: Bytes!
+  member: Member!
   memberAddress: Bytes!
-  applicant: Bytes!
+  applicantAddress: Bytes!
   tokenTribute: BigInt!
   sharesRequested:BigInt!
   didPass: Boolean!
   aborted: Boolean!
   votes: [Vote!]! 
+  proposal: Proposal!
 }
 
 type Member @entity {
@@ -47,12 +53,5 @@ type Member @entity {
   tokenTribute: BigInt!
   didRagequit: Boolean!
   votes: [Vote!]!
-  proposals: [Proposal!]!
-}
-
-type Txs @entity {
-  id: ID!
-  timestamp: String!
-  memberAddress: Bytes!
-  tokenTribute: BigInt!
+  submissions: [Proposal!]!
 }

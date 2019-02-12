@@ -1,14 +1,27 @@
 import { BigInt } from '@graphprotocol/graph-ts'
 import { Moloch as Contract, SummonComplete, SubmitProposal, SubmitVote, ProcessProposal, Ragequit, Abort, UpdateDelegateKey } from './types/Moloch/Moloch'
-import { Proposal, Member, Vote, Applicant, Txs } from './types/schema'
+import { Proposal, Member, Vote, Applicant } from './types/schema'
+
+export function handleSummonComplete(event: SummonComplete): void {
+  let member = new Member(event.params.summoner.toHex())
+  member.delegateKey = event.params.summoner
+  member.shares = event.params.shares
+  member.isActive = true
+  member.didRagequit = false
+  member.votes = new Array<string>()
+  member.submissions = new Array<string>()
+  member.save()
+}
 
 export function handleSubmitProposal(event: SubmitProposal): void {
   let proposal = new Proposal(event.params.proposalIndex.toString())
   proposal.timestamp = event.block.timestamp.toString()
   proposal.proposalIndex = event.params.proposalIndex
   proposal.delegateKey = event.params.delegateKey
+  proposal.member = event.params.memberAddress.toHex()
   proposal.memberAddress = event.params.memberAddress
-  proposal.applicant = event.params.applicant
+  proposal.applicant = event.params.applicant.toHex()
+  proposal.applicantAddress= event.params.applicant
   proposal.tokenTribute = event.params.tokenTribute
   proposal.sharesRequested = event.params.sharesRequested
   proposal.yesVotes = BigInt.fromI32(0)
@@ -23,23 +36,23 @@ export function handleSubmitProposal(event: SubmitProposal): void {
   applicant.timestamp = event.block.timestamp.toString()
   applicant.proposalIndex = event.params.proposalIndex
   applicant.delegateKey = event.params.delegateKey
+  applicant.member = event.params.memberAddress.toHex()
   applicant.memberAddress = event.params.memberAddress
-  applicant.applicant = event.params.applicant
+  applicant.applicantAddress = event.params.applicant
   applicant.tokenTribute = event.params.tokenTribute
   applicant.sharesRequested = event.params.sharesRequested
   applicant.didPass = false
+  applicant.aborted = false
   applicant.votes = new Array<string>()
+  applicant.proposal = event.params.proposalIndex.toString()
+  
   applicant.save()
-}
 
-export function handleSummonComplete(event: SummonComplete): void {
-  let member = new Member(event.params.summoner.toHex())
-  member.delegateKey = event.params.summoner
-  member.shares = event.params.shares
-  member.isActive = true
-  member.didRagequit = false
-  member.votes = new Array<string>()
-  member.proposals = new Array<string>()
+  let member = Member.load(event.params.memberAddress.toHex())
+  let submission = event.params.proposalIndex.toString()
+  let memberSubmissions = member.submissions
+  memberSubmissions.push(submission)
+  member.submissions = memberSubmissions
   member.save()
 }
 
@@ -52,6 +65,8 @@ export function handleSubmitVote(event: SubmitVote): void {
   vote.delegateKey = event.params.delegateKey
   vote.memberAddress = event.params.memberAddress
   vote.uintVote = event.params.uintVote
+  vote.proposal = event.params.proposalIndex.toString()
+  vote.member = event.params.memberAddress.toHex()
   vote.save()
 
   let proposal = Proposal.load(event.params.proposalIndex.toString())
@@ -67,7 +82,7 @@ export function handleSubmitVote(event: SubmitVote): void {
   proposal.votes = proposalVotes
   proposal.save()
 
-  let applicant = Applicant.load(proposal.applicant.toHex())
+  let applicant = Applicant.load(proposal.applicant)
   let applicantVotes = applicant.votes
   applicantVotes.push(voteID)
   applicant.votes = applicantVotes
@@ -77,16 +92,12 @@ export function handleSubmitVote(event: SubmitVote): void {
   let memberVotes = member.votes
   memberVotes.push(voteID)
   member.votes = memberVotes
-  
-  let memberProposals = member.proposals
-  memberProposals.push(event.params.proposalIndex.toString())
-  member.proposals = memberProposals
   member.save()
 }
 
 export function handleProcessProposal(event: ProcessProposal): void {
   let proposal = Proposal.load(event.params.proposalIndex.toString())
-  proposal.applicant = event.params.applicant
+  proposal.applicant = event.params.applicant.toHex()
   proposal.memberAddress = event.params.memberAddress
   proposal.tokenTribute = event.params.tokenTribute
   proposal.sharesRequested = event.params.sharesRequested
@@ -94,29 +105,20 @@ export function handleProcessProposal(event: ProcessProposal): void {
   proposal.save()
 
   if (event.params.didPass) {
-    let timestamp = event.block.timestamp.toString()
-    let txs = Txs.load(event.params.memberAddress.toHex().concat("-").concat(timestamp))
-    if (txs == null) {
-      let txs = new Txs(event.params.memberAddress.toHex().concat("-").concat(timestamp))
-      txs.memberAddress = event.params.memberAddress
-      txs.tokenTribute = event.params.tokenTribute
-      txs.save()
-    }
-
-    let applicant = Applicant.load(proposal.applicant.toHex())
+    let applicant = Applicant.load(event.params.applicant.toHex())
     applicant.didPass = true
     applicant.save()
 
     let member = Member.load(event.params.applicant.toHex())
     if (member == null) {
       let newMember = new Member(event.params.applicant.toHex())
+      newMember.delegateKey = event.params.applicant
       newMember.shares = event.params.sharesRequested
       newMember.isActive = true
-      newMember.highestIndexYesVote = BigInt.fromI32(0)
       newMember.tokenTribute = event.params.tokenTribute
       newMember.didRagequit = false
       member.votes = new Array<string>()
-      member.proposals = new Array<string>()
+      member.submissions = new Array<string>()
       newMember.save()
     } else {
       member.shares = member.shares.plus(event.params.sharesRequested)
@@ -131,15 +133,6 @@ export function handleRagequit(event: Ragequit): void {
   let member = Member.load(event.params.memberAddress.toHex())
   member.didRagequit = true
   member.save()
-
-  let timestamp = event.block.timestamp.toString()
-  let txs = Txs.load(event.params.memberAddress.toHex().concat("-").concat(timestamp))
-  if (txs == null) {
-    let txs = new Txs(event.params.memberAddress.toHex().concat("-").concat(timestamp))
-    txs.memberAddress = event.params.memberAddress
-    txs.tokenTribute = BigInt.fromI32(0).minus(event.params.sharesToBurn)
-    txs.save()
-  }
 }
 
 export function handleAbort(event: Abort): void {
