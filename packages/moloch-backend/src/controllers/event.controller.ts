@@ -239,22 +239,40 @@ export class EventController {
                 periodCreate.gracePeriod = new Date(periodCreate.end.getTime() + (1000 * 60 * 60 * 24 * gracePeriodLength));
                 // And create a period for it
                 return await this.periodRepository.create(periodCreate).then(async newPeriod => {
+                  let addedTribute = memberPatch.tribute ? memberPatch.tribute : 0;
+                  let addedShares = memberPatch.shares ? memberPatch.shares : 0;
+                  let addedETH = memberPatch.assets ? (memberPatch.assets[0] as any).amount : 0; // TODO: change this when assets other than ETH come into the system
                   if (memberPatch.applicantAddress === memberPatch.address) { // If the membership proposal is for the same user that submitted it
-                    memberPatch.period = newPeriod.id; // Assign the period
-                    memberPatch.status = 'inqueue'; // Assign the status
-                    // And update the member
-                    return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async result => {
-                      return await this.eventRepository.create(event);
-                    });
+                    // Get the preexisting info of the member to make the tribute cumulative
+                    return await this.memberRepository.findById(memberPatch.address).then(async matchingMember => {
+                      memberPatch.period = newPeriod.id; // Assign the period
+                      memberPatch.status = 'inqueue'; // Assign the status
+                      // Make the tribute, shares and assets cumulative
+                      memberPatch.tribute = matchingMember.tribute ? matchingMember.tribute + addedTribute : addedTribute;
+                      memberPatch.shares = matchingMember.shares ? matchingMember.shares + addedShares : addedShares;
+                      memberPatch.assets = matchingMember.assets ? 
+                        (matchingMember.assets[0] as any).amount = (matchingMember.assets[0] as any).amount + addedETH : 
+                        [{address: 'ETH', amount: addedETH}]; // TODO: change this when assets other than ETH come into the system
+                      // And update the member
+                      return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async result => {
+                        return await this.eventRepository.create(event);
+                      });
+                    })
                   } else { // If the membership proposal is for a different user than the one that submitted it
                     let applicantAddress = memberPatch.applicantAddress ? memberPatch.applicantAddress : '';
                     // First check if there was a proposal already submitted for that user
                     return await this.memberRepository.findById(applicantAddress).then(async matchingMember => {
                       if (matchingMember) { // If there is
-                        matchingMember.period = newPeriod.id; // Assign the period
-                        matchingMember.status = 'inqueue'; // Assign the status
+                        memberPatch.period = newPeriod.id; // Assign the period
+                        memberPatch.status = 'inqueue'; // Assign the status
+                        // Make the tribute, shares and assets cumulative
+                        memberPatch.tribute = matchingMember.tribute ? matchingMember.tribute + addedTribute : addedTribute;
+                        memberPatch.shares = matchingMember.shares ? matchingMember.shares + addedShares : addedShares;
+                        memberPatch.assets = matchingMember.assets ? 
+                          (matchingMember.assets[0] as any).amount = (matchingMember.assets[0] as any).amount + addedETH : 
+                          [{address: 'ETH', amount: addedETH}]; // TODO: change this when assets other than ETH come into the system
                         // And update the matching membership proposal
-                        return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
+                        return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async result => {
                           return await this.eventRepository.create(event);
                         });
                       } else { // If there isn't
