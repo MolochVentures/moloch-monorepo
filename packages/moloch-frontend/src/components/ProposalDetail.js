@@ -240,10 +240,10 @@ class ProposalDetail extends Component {
                   {this.state.proposal_detail.description}
                 </div>
                 {this.state.proposal_detail.assets ?
-                  <Grid columns="equal" className="tokens">
+                  <Grid columns="equal" textAlign="center" className="tokens">
                     <Grid.Row>
                       {this.state.proposal_detail.assets.map((token, idx) => (
-                        <Grid.Column key={idx} className="tributes">
+                        <Grid.Column key={idx} className="tributes"  mobile={16} tablet={16} computer={8} style={{marginBottom: 10}}>
                           <Segment className="pill" textAlign="center">
                             <Icon name="ethereum" />{token.amount} {(token.asset.length) > 5 ? token.asset.substring(0, 5) + '...' : token.asset}
                           </Segment>

@@ -203,7 +203,7 @@ import bull from 'assets/bull.png';
 import hood from 'assets/hood.png';
 
 import { connect } from 'react-redux';
-import { fetchMembers, fetchConfigFounders, fetchMemberDetail } from '../action/actions';
+import { fetchActiveMembers, fetchConfigFounders, fetchMemberDetail } from '../action/actions';
 
 const MemberAvatar = ({ address, shares }) => (
   <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={address}  >
@@ -234,13 +234,14 @@ const MemberList = (props) => {
       {props.user.status === 'founder' || props.user.status === 'active' ?
         <Grid>
           <Grid.Column textAlign="center">
-            <Link to={`/members/${props.user.name}`} className="uncolored">
+            <Link to={`/members/${props.user.address}`} className="uncolored">
               <Image centered src={bull} size='tiny' />
-              <p className="name">{!props.user.name ? '' : (props.user.name.length > 10 ? props.user.name.substring(0, 10) + '...' : props.user.name)}</p>
+              <p className="name">{!props.user.address ? '' : (props.user.address.length > 10 ? props.user.address.substring(0, 10) + '...' : props.user.address)}</p>
               <p className="subtext">{props.user.shares ? props.user.shares : 0} shares</p>
             </Link>
           </Grid.Column>
-        </Grid> : null
+        </Grid>
+         : null
       }
       <Grid className="member_item">
         <Grid.Row>
@@ -273,14 +274,14 @@ class MemberListView extends React.Component {
     this.state = {
       totalMembers: 0,
       user: {
-        name: loggedUser.address,
+        address: loggedUser.address,
         shares: 0,
         status: ''
       }
     }
   }
   componentDidMount() {
-    this.props.fetchMembers()
+    this.props.fetchActiveMembers()
       .then((responseJson) => {
         this.setState({ totalMembers: this.state.totalMembers + responseJson.items.length })
       });
@@ -289,7 +290,7 @@ class MemberListView extends React.Component {
         this.setState({ totalMembers: this.state.totalMembers + responseJson.items.length })
       });
 
-    this.props.fetchMemberDetail(this.state.user.name)
+    this.props.fetchMemberDetail(this.state.user.address)
       .then((responseJson) => {
         if (responseJson.type === 'FETCH_MEMBER_DETAIL_SUCCESS') {
           let user = this.state.user;
@@ -313,7 +314,7 @@ class MemberListView extends React.Component {
 // This function is used to convert redux global state to desired props.
 function mapStateToProps(state) {
   return {
-    members: state.members.items,
+    members: state.activeMembers.items,
     elders: state.founders.items
   };
 }
@@ -321,8 +322,8 @@ function mapStateToProps(state) {
 // This function is used to provide callbacks to container component.
 function mapDispatchToProps(dispatch) {
   return {
-    fetchMembers: function () {
-      return dispatch(fetchMembers());
+    fetchActiveMembers: function () {
+      return dispatch(fetchActiveMembers());
     },
     fetchConfigFounders: function () {
       return dispatch(fetchConfigFounders());

@@ -8,6 +8,7 @@ import FounderReducers from './FounderReducers';
 import AssetDataReducers from './AssetReducers';
 import AssetAmountReducers from './AssetAmountReducers';
 import MemberWithSharesReducers from './MemberWithSharesReducers';
+import ActiveMemberReducers from './ActiveMemberReducers';
 
 
 export default combineReducers({
@@ -19,5 +20,6 @@ export default combineReducers({
     founders: FounderReducers,
     assetData: AssetDataReducers,
     assetAmount: AssetAmountReducers,
-    membersWithShares: MemberWithSharesReducers
+    membersWithShares: MemberWithSharesReducers,
+    activeMembers: ActiveMemberReducers
 });
