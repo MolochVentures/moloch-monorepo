@@ -107,7 +107,7 @@ class GuildBank extends React.Component {
         if (responseJson.type === 'FETCH_MEMBER_DETAIL_SUCCESS') {
           if (responseJson.items.member.status && responseJson.items.member.shares && responseJson.items.member.shares > 0) {
             switch (responseJson.items.member.status) {
-              case 'active':
+              case 'passed':
                 this.setState({ isActive: true });
                 break;
               default:
