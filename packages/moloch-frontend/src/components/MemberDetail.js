@@ -35,10 +35,10 @@ class MemberDetail extends React.Component {
       <div id="member_detail">
         <p className="title"> {this.props.match.params.name} </p>
         <Divider />
-        <Grid columns={16}>
+        <Grid columns={16} >
           <Grid.Row className="details">
             <Grid.Column mobile={16} tablet={16} computer={6} className="user" >
-              <Segment className="blurred box">
+              <Segment className="blurred box" style={{overflowY: 'auto'}}>
                 <Grid columns="equal">
                   <Grid.Column>
                     <p className="subtext">Shares</p>
@@ -55,17 +55,17 @@ class MemberDetail extends React.Component {
                   </Grid.Column>
                 </Grid>
                 <p className="subtext">Tribute</p>
-                <Grid columns="equal">
+                <Grid columns="equal" textAlign="center">
                   <Grid.Row>
                     {this.state.member_detail.assets ? this.state.member_detail.assets.map((token, idx) => {
                       return (
-                        <Grid.Column key={idx}>
+                        <Grid.Column key={idx}  mobile={16} tablet={16} computer={4} style={{marginBottom: 10}}>
                           <Segment className="pill" textAlign="center">
                             <Icon name="ethereum" />{token.amount} {(token.asset.length) > 5 ? token.asset.substring(0, 5) + '...' : token.asset}
                           </Segment>
                         </Grid.Column>
                       )
-                    }) : null}
+                    }) : <Grid.Column>No tribute to show.</Grid.Column>}
                   </Grid.Row>
                   {/* <Grid.Row>
                     {this.state.member_detail.assets.map((token, idx) => (
@@ -77,6 +77,14 @@ class MemberDetail extends React.Component {
                     ))}
                   </Grid.Row> */}
                 </Grid>
+                <Grid columns="equal" textAlign="center">
+                  <Grid.Row style={{paddingBottom: 5}}>
+                    <p className="subtext">Delegate Key</p>
+                  </Grid.Row>
+                  <Grid.Row>
+                    <p className="amount delegate_key">{this.props.match.params.name}</p>
+                  </Grid.Row>
+                </Grid>
               </Segment>
             </Grid.Column>
             <Grid.Column mobile={16} tablet={16} computer={10} className="proposals" >
@@ -86,7 +94,7 @@ class MemberDetail extends React.Component {
                     History
                   </Grid.Row>
                 </Grid>
-                <Grid columns="equal">
+                <Grid columns="equal" className="history_detail">
                   <Grid.Row className="header">
                     <Grid.Column textAlign="center">
                       <p className="subtext">Proposal Title</p>
