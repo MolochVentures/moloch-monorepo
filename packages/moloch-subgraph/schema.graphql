@@ -9,9 +9,9 @@ type Vote @entity {
 type Proposal @entity {
   id: ID!
   timestamp:String!
+  proposalIndex: BigInt!
   delegateKey: Bytes!
   memberAddress: Bytes!
-  proposer: Bytes!
   applicant: Bytes!
   tokenTribute: BigInt!
   sharesRequested:BigInt!
@@ -29,6 +29,7 @@ type Applicant @entity {
   proposalIndex: BigInt!
   delegateKey: Bytes!
   memberAddress: Bytes!
+  applicant: Bytes!
   tokenTribute: BigInt!
   sharesRequested:BigInt!
   didPass: Boolean!
@@ -45,4 +46,11 @@ type Member @entity {
   tokenTribute: BigInt!
   didRagequit: Boolean!
   votes: [Vote!]
+}
+
+type Txs @entity {
+  id: ID!
+  timestamp: String!
+  memberAddress: Bytes!
+  tokenTribute: BigInt!
 }

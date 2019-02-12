@@ -115,6 +115,15 @@ export class Proposal extends Entity {
     this.set("timestamp", Value.fromString(value));
   }
 
+  get proposalIndex(): BigInt {
+    let value = this.get("proposalIndex");
+    return value.toBigInt();
+  }
+
+  set proposalIndex(value: BigInt) {
+    this.set("proposalIndex", Value.fromBigInt(value));
+  }
+
   get delegateKey(): Bytes {
     let value = this.get("delegateKey");
     return value.toBytes();
@@ -131,15 +140,6 @@ export class Proposal extends Entity {
 
   set memberAddress(value: Bytes) {
     this.set("memberAddress", Value.fromBytes(value));
-  }
-
-  get proposer(): Bytes {
-    let value = this.get("proposer");
-    return value.toBytes();
-  }
-
-  set proposer(value: Bytes) {
-    this.set("proposer", Value.fromBytes(value));
   }
 
   get applicant(): Bytes {
@@ -167,15 +167,6 @@ export class Proposal extends Entity {
 
   set sharesRequested(value: BigInt) {
     this.set("sharesRequested", Value.fromBigInt(value));
-  }
-
-  get startingPeriod(): BigInt {
-    let value = this.get("startingPeriod");
-    return value.toBigInt();
-  }
-
-  set startingPeriod(value: BigInt) {
-    this.set("startingPeriod", Value.fromBigInt(value));
   }
 
   get yesVotes(): BigInt {
@@ -221,15 +212,6 @@ export class Proposal extends Entity {
 
   set aborted(value: boolean) {
     this.set("aborted", Value.fromBoolean(value));
-  }
-
-  get details(): string {
-    let value = this.get("details");
-    return value.toString();
-  }
-
-  set details(value: string) {
-    this.set("details", Value.fromString(value));
   }
 
   get votes(): Array<string> | null {
@@ -314,6 +296,15 @@ export class Applicant extends Entity {
 
   set memberAddress(value: Bytes) {
     this.set("memberAddress", Value.fromBytes(value));
+  }
+
+  get applicant(): Bytes {
+    let value = this.get("applicant");
+    return value.toBytes();
+  }
+
+  set applicant(value: Bytes) {
+    this.set("applicant", Value.fromBytes(value));
   }
 
   get tokenTribute(): BigInt {
@@ -469,5 +460,63 @@ export class Member extends Entity {
     } else {
       this.set("votes", Value.fromStringArray(value as Array<string>));
     }
+  }
+}
+
+export class Txs extends Entity {
+  constructor(id: string) {
+    this.entries = new Array(0);
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Txs entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Txs entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Txs", id.toString(), this);
+  }
+
+  static load(id: string): Txs | null {
+    return store.get("Txs", id) as Txs | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get timestamp(): string {
+    let value = this.get("timestamp");
+    return value.toString();
+  }
+
+  set timestamp(value: string) {
+    this.set("timestamp", Value.fromString(value));
+  }
+
+  get memberAddress(): Bytes {
+    let value = this.get("memberAddress");
+    return value.toBytes();
+  }
+
+  set memberAddress(value: Bytes) {
+    this.set("memberAddress", Value.fromBytes(value));
+  }
+
+  get tokenTribute(): BigInt {
+    let value = this.get("tokenTribute");
+    return value.toBigInt();
+  }
+
+  set tokenTribute(value: BigInt) {
+    this.set("tokenTribute", Value.fromBigInt(value));
   }
 }

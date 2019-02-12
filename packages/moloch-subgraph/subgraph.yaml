@@ -8,7 +8,7 @@ dataSources:
     name: Moloch
     network: james
     source:
-      address: '0x39C0d6F3Df0ed1a5f4aBccAf6fA7eA25507Ef762'
+      address: '0xA122f67b5db28ee7b730bcfBa3996F68CC839aBE'
       abi: Moloch
     mapping:
       kind: ethereum/events
@@ -20,6 +20,8 @@ dataSources:
         - name: Moloch
           file: ./abis/Moloch.abi
       eventHandlers:
+        - event: SummonComplete(address,uint256)
+          handler: handleSummonComplete
         - event: SubmitProposal(uint256,address,address,address,uint256,uint256)
           handler: handleSubmitProposal
         - event: SubmitVote(uint256,address,address,uint8)
@@ -31,5 +33,5 @@ dataSources:
         - event: Abort(uint256,address)
           handler: handleAbort
         - event: UpdateDelegateKey(address,address)
-          handler: handleUpdateDelegateKey          
+          handler: handleUpdateDelegateKey       
       file: ./src/mapping.ts

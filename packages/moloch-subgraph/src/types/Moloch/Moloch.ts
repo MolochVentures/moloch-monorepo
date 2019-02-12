@@ -182,6 +182,28 @@ export class UpdateDelegateKeyParams {
   }
 }
 
+export class SummonComplete extends EthereumEvent {
+  get params(): SummonCompleteParams {
+    return new SummonCompleteParams(this);
+  }
+}
+
+export class SummonCompleteParams {
+  _event: SummonComplete;
+
+  constructor(event: SummonComplete) {
+    this._event = event;
+  }
+
+  get summoner(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get shares(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+}
+
 export class Moloch__membersResult {
   value0: Address;
   value1: BigInt;
