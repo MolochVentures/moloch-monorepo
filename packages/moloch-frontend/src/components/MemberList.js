@@ -31,24 +31,10 @@ const GET_LOGGED_IN_USER = gql`
   }
 `
 class LoggedInUser extends React.Component {
-  state = {
-    user: {
-      name: ""
-    }
-  }
-
-  componentDidMount() {
-    let loggedUser = JSON.parse(localStorage.getItem('loggedUser'));
-    this.setState({
-      user: {
-        name: loggedUser.address
-      }
-    })
-  }
-
   render() {
+    let loggedUser = JSON.parse(localStorage.getItem('loggedUser'));
     return (
-      <Query query={GET_LOGGED_IN_USER} variables={{ address: this.state.user.name }}>
+      <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedUser.address }}>
         {({ loading, error, data }) => {
           if (loading) return "...";
           if (error) throw new Error(`Error!: ${error}`);
@@ -80,7 +66,7 @@ const Elders = () => (
       if (error) throw new Error(`Error!: ${error}`);
       return (
         data.members.length > 0 ?
-        data.members.map((elder, idx) => <MemberAvatar address={elder.data.id} shares={elder.data.shares} key={idx} />) : 
+        data.members.map((elder, idx) => <MemberAvatar address={elder.id} shares={elder.shares} key={idx} />) : 
         <>No elders to show.</>
       )
     }}
@@ -102,7 +88,7 @@ const Contributors = () => (
       if (error) throw new Error(`Error!: ${error}`);
       return (
         data.members.length > 0 ?
-        data.members.map((contributor, idx) => <MemberAvatar address={contributor.data.id} shares={contributor.data.shares} key={idx} />) : 
+        data.members.map((contributor, idx) => <MemberAvatar address={contributor.id} shares={contributor.shares} key={idx} />) : 
         <>No contributors to show.</>
       )
     }}
