@@ -231,7 +231,7 @@ const MemberList = (props) => {
         </Grid.Column> */}
       </Grid>
 
-      {props.user.status === 'founder' || props.user.status === 'active' ?
+      {props.user.status === 'founder' || props.user.status === 'passed' ?
         <Grid>
           <Grid.Column textAlign="center">
             <Link to={`/members/${props.user.address}`} className="uncolored">

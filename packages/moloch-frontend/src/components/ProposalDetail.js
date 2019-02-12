@@ -82,7 +82,7 @@ class ProposalDetail extends Component {
           userShare: (responseJson.items.member.shares) ? responseJson.items.member.shares : 0,
           // userShare: 20,
           totalShares: responseJson.items.totalShares,
-          memberStatus: (responseJson.items.member.status) ? (responseJson.items.member.status === 'active' || responseJson.items.member.status === 'founder' ? 'active' : responseJson.items.member.status) : '',
+          memberStatus: (responseJson.items.member.status) ? (responseJson.items.member.status === 'passed' || responseJson.items.member.status === 'founder' ? 'passed' : responseJson.items.member.status) : '',
           // memberStatus: 'active'
         });
 
@@ -119,7 +119,7 @@ class ProposalDetail extends Component {
 
   loadData(responseJson) {
     let proposal = responseJson.items.member ? responseJson.items.member : responseJson.items;
-    this.setState({ proposal_detail: proposal, isAccepted: (proposal.status === 'accepted' || proposal.status === 'active' ? true : false) });
+    this.setState({ proposal_detail: proposal, isAccepted: (proposal.status === 'passed' ? true : false) });
     let voters = this.state.proposal_detail.voters ? this.state.proposal_detail.voters : [];
     let userHasVoted = voters.find(voter => voter.member === this.state.loggedUser) ? true : false;
     this.setState({ userHasVoted });
@@ -308,13 +308,13 @@ class ProposalDetail extends Component {
                 </Grid>
                 <Grid columns="equal" centered>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
-                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || this.state.status !== 'inprogress' || (!this.state.userShare || (this.state.memberStatus !== 'active'))} onClick={this.handleNo}>Vote No</Button>
+                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || this.state.status !== 'votingperiod' || (!this.state.userShare || (this.state.memberStatus !== 'passed'))} onClick={this.handleNo}>Vote No</Button>
                   </Grid.Column>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
-                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || this.state.status !== 'inprogress' || (!this.state.userShare || (this.state.memberStatus !== 'active'))} onClick={this.handleYes}>Vote Yes</Button>
+                    <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || this.state.status !== 'votingperiod' || (!this.state.userShare || (this.state.memberStatus !== 'passed'))} onClick={this.handleYes}>Vote Yes</Button>
                   </Grid.Column>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
-                    <Button className="btn" color='grey' onClick={this.handleProcess} disabled={(this.state.isAccepted || this.state.votedYes <= 50 || this.state.status !== 'inprogress' || (this.state.memberStatus !== 'active')) ? true : false}>Process Proposal</Button>
+                    <Button className="btn" color='grey' onClick={this.handleProcess} disabled={(this.state.isAccepted || this.state.votedYes <= 50 || this.state.status !== 'votingperiod' || (this.state.memberStatus !== 'passed')) ? true : false}>Process Proposal</Button>
                   </Grid.Column>
                 </Grid>
               </Grid.Column>

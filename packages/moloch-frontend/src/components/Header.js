@@ -12,7 +12,7 @@ class MainMenu extends Component {
   render() {
     return (
       <div className="dropdownItems">
-        {user.status === 'active' || user.status === 'founder' ?
+        {user.status === 'passed' || user.status === 'founder' ?
           <Dropdown.Item className="item" onClick={() => this.props._handleCloseDropdown()}>
             <Link to={`/members/${user.name}`} className="link">
               <p><Icon name="user" ></Icon>View Profile</p>

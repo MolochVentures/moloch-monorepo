@@ -214,7 +214,7 @@ class Login extends Component {
                                 // Create it.
                                 this.props.postEvents(JSON.stringify({ name: 'User creation', payload: { address: address, nonce: 0 } }))
                                     .then((resJson) => {
-                                        self.signWithAccessRequest(resJson.items.nonce, 0, 'pending');
+                                        self.signWithAccessRequest(resJson.items.nonce, 0, 'inqueue');
                                     })
                             }
                         } else { // If the user exists, ask for a signature.
@@ -249,7 +249,7 @@ class Login extends Component {
                     ).then((signature) => {
                         web3.personal.ecRecover(message, signature, function (error, result) {
                             if (!error) {
-                                localStorage.setItem("loggedUser", JSON.stringify({ status: (status ? status : 'pending'), shares: (shares ? shares : 0), address: result, nonce }));
+                                localStorage.setItem("loggedUser", JSON.stringify({ status: (status ? status : 'inqueue'), shares: (shares ? shares : 0), address: result, nonce }));
                                 if (nonce) {
                                     self.props.history.push('/');
                                 } else {
