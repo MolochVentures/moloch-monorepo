@@ -212,7 +212,7 @@ export class EventController {
           shares: memberPatch.shares ? memberPatch.shares : 0, 
           tribute: memberPatch.tribute ? memberPatch.tribute : 0, 
           vote: 'owner',
-          status: 'pending'
+          status: 'inqueue'
         });
         // Recover the config data to define a new period
         return await this.configRepository.find().then(async config => {
@@ -240,7 +240,7 @@ export class EventController {
                 // And create a period for it
                 return await this.periodRepository.create(periodCreate).then(async newPeriod => {
                   memberPatch.period = newPeriod.id; // Assign it to the member
-                  memberPatch.status = 'pending';
+                  memberPatch.status = 'inqueue';
                   // And update the member
                   return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async result => {
                     return await this.eventRepository.create(event);
@@ -254,7 +254,7 @@ export class EventController {
               // Create the period
               return await this.periodRepository.create(periodCreate).then(async newPeriod => {
                 memberPatch.period = newPeriod.id; // Assign it to the member
-                memberPatch.status = 'inprogress';
+                memberPatch.status = 'votingperiod';
                 // And create the member
                 return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async result => {
                   return await this.eventRepository.create(event);
@@ -298,7 +298,7 @@ export class EventController {
                 // And create a period for it
                 return await this.periodRepository.create(periodCreate).then(async newPeriod => {
                   projectCreate.period = newPeriod.id; // Assign it to the project
-                  projectCreate.status = 'pending';
+                  projectCreate.status = 'inqueue';
                   // And create the project
                   return await this.projectRepository.create(projectCreate).then(async project => {
                     // Get the member that submitted the project
@@ -314,7 +314,7 @@ export class EventController {
                         shares: 0, 
                         tribute: projectCreate.tribute, 
                         vote: 'owner',
-                        status: 'pending'
+                        status: 'inqueue'
                       });
                       return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
                         return await this.eventRepository.create(event);
@@ -345,7 +345,7 @@ export class EventController {
                       shares: 0, 
                       tribute: projectCreate.tribute, 
                       vote: 'owner',
-                      status: 'pending'
+                      status: 'inqueue'
                     });
                     return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
                       return await this.eventRepository.create(event);
@@ -374,7 +374,7 @@ export class EventController {
               shares: 0, 
               tribute: projectVoted.tribute, 
               vote: lastProjectVoter.vote,
-              status: 'inprogress'
+              status: 'votingperiod'
             });
             return await this.memberRepository.updateById(member.address, member).then(async updatedMember => {
               return await this.eventRepository.create(event);
@@ -383,7 +383,7 @@ export class EventController {
         });
       case 'Project proposal processed':
         let projectProcessed = event.payload as Project;
-        projectProcessed.status = 'accepted';
+        projectProcessed.status = 'passed';
         return await this.projectRepository.updateById(projectProcessed.id, projectProcessed).then(async result => {
           return await this.eventRepository.create(event);
         });
@@ -404,7 +404,7 @@ export class EventController {
               shares: memberVoted.shares ? memberVoted.shares : 0, 
               tribute: memberVoted.tribute ? memberVoted.tribute : 0, 
               vote: lastMemberVoter.vote,
-              status: 'inprogress'
+              status: 'votingperiod'
             });
             return await this.memberRepository.updateById(member.address, member).then(async updatedMember => {
               return await this.eventRepository.create(event);
@@ -413,7 +413,7 @@ export class EventController {
         });
       case 'Membership proposal processed':
         let memberProcessed = event.payload as Member;
-        memberProcessed.status = 'active';
+        memberProcessed.status = 'passed';
         return await this.memberRepository.updateById(memberProcessed.address, memberProcessed).then(async result => {
           return await this.eventRepository.create(event);
         });
@@ -459,7 +459,7 @@ export class EventController {
                   asset.amount = asset.amount - (asset.amount * redeemingMemberShares / totalShares);
                   this.assetRepository.updateById(asset.address, asset);
                 });
-                member.status = 'inactive';
+                member.status = 'failed';
                 member.shares = 0;
                 // And deactivate the member
                 return await this.memberRepository.updateById(member.address, member).then(async (result: Member) => {

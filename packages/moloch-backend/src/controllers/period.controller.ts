@@ -45,27 +45,31 @@ export class PeriodController {
     @param.query.string('currentDate') currentDate: string,
   ): Promise<any> {
     let organizedPeriods = {
-      pending: [] as Array<any>,
-      inProgress: [] as Array<any>,
-      accepted: [] as Array<any>,
-      rejected: [] as Array<any>,
+      inqueue: [] as Array<any>,
+      votingperiod: [] as Array<any>,
+      graceperiod: [] as Array<any>,
+      passed: [] as Array<any>,
+      failed: [] as Array<any>,
     }
 
     return await this.memberRepository.find().then(async members => {
       members.forEach(member => {
         if (member.status !== 'founder') {
           switch (member.status) {
-            case 'pending':
-              organizedPeriods.pending.push(member);
+            case 'inqueue':
+              organizedPeriods.inqueue.push(member);
               break;
-            case 'active':
-              organizedPeriods.accepted.push(member);
+            case 'passed':
+              organizedPeriods.passed.push(member);
               break;
-            case 'inactive':
-              organizedPeriods.rejected.push(member);
+            case 'failed':
+              organizedPeriods.failed.push(member);
               break;
-            case 'inprogress':
-              organizedPeriods.inProgress.push(member);
+            case 'votingperiod':
+              organizedPeriods.votingperiod.push(member);
+              break;
+            case 'graceperiod':
+              organizedPeriods.graceperiod.push(member);
               break;
           }
         }
@@ -73,17 +77,20 @@ export class PeriodController {
       return await this.projectRepository.find().then(async projects => {
         projects.forEach(project => {
           switch (project.status) {
-            case 'pending':
-              organizedPeriods.pending.push(project);
+            case 'inqueue':
+              organizedPeriods.inqueue.push(project);
               break;
-            case 'accepted':
-              organizedPeriods.accepted.push(project);
+            case 'passed':
+              organizedPeriods.passed.push(project);
               break;
-            case 'rejected':
-              organizedPeriods.rejected.push(project);
+            case 'failed':
+              organizedPeriods.failed.push(project);
               break;
-            case 'inprogress':
-              organizedPeriods.inProgress.push(project);
+            case 'votingperiod':
+              organizedPeriods.votingperiod.push(project);
+              break;
+            case 'graceperiod':
+              organizedPeriods.graceperiod.push(project);
               break;
           }
         });
