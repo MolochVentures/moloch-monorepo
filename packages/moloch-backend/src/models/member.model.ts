@@ -64,6 +64,12 @@ class Proposal {
     required: true,
   })
   status: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  type: string;
 }
 
 @model()

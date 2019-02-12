@@ -212,7 +212,8 @@ export class EventController {
           shares: memberPatch.shares ? memberPatch.shares : 0, 
           tribute: memberPatch.tribute ? memberPatch.tribute : 0, 
           vote: 'owner',
-          status: 'inqueue'
+          status: 'inqueue',
+          type: 'member'
         });
         // Recover the config data to define a new period
         return await this.configRepository.find().then(async config => {
@@ -365,7 +366,8 @@ export class EventController {
                         shares: 0, 
                         tribute: projectCreate.tribute, 
                         vote: 'owner',
-                        status: 'inqueue'
+                        status: 'inqueue',
+                        type: 'project'
                       });
                       return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
                         return await this.eventRepository.create(event);
@@ -396,7 +398,8 @@ export class EventController {
                       shares: 0, 
                       tribute: projectCreate.tribute, 
                       vote: 'owner',
-                      status: 'inqueue'
+                      status: 'inqueue',
+                      type: 'project'
                     });
                     return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
                       return await this.eventRepository.create(event);
@@ -425,7 +428,8 @@ export class EventController {
               shares: 0, 
               tribute: projectVoted.tribute, 
               vote: lastProjectVoter.vote,
-              status: 'votingperiod'
+              status: 'votingperiod',
+              type: 'project'
             });
             return await this.memberRepository.updateById(member.address, member).then(async updatedMember => {
               return await this.eventRepository.create(event);
@@ -455,7 +459,8 @@ export class EventController {
               shares: memberVoted.shares ? memberVoted.shares : 0, 
               tribute: memberVoted.tribute ? memberVoted.tribute : 0, 
               vote: lastMemberVoter.vote,
-              status: 'votingperiod'
+              status: 'votingperiod',
+              type: 'member'
             });
             return await this.memberRepository.updateById(member.address, member).then(async updatedMember => {
               return await this.eventRepository.create(event);
