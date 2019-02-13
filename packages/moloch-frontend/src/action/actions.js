@@ -196,7 +196,7 @@ export function fetchConfigFounders() {
       type: "FETCH_FOUNDERS_REQUEST"
     });
     return (
-      fetch(url + "/configs/getfounders", {
+      fetch(url + "/members/getElders", {
         method: "GET",
         headers: { Accept: "application/json", "Content-Type": "application/json" }
       })
@@ -300,7 +300,7 @@ export function fetchMembersWithShares() {
       type: "FETCH_MEMBERS_WITH_SHARES_REQUEST"
     });
     return (
-      fetch(url + "/members/getMembersWithShares", {
+      fetch(url + "/members/getMembersCount", {
         method: "GET",
         headers: { Accept: "application/json", "Content-Type": "application/json" }
       })
@@ -334,7 +334,7 @@ export function fetchActiveMembers() {
       type: "FETCH_ACTIVE_MEMBER_REQUEST"
     });
     return (
-      fetch(url + "/members/getActiveMembers", {
+      fetch(url + "/members/getContributors", {
         method: "GET",
         headers: { Accept: "application/json", "Content-Type": "application/json" }
       })

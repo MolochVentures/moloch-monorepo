@@ -173,7 +173,7 @@ import Graph from './Graph';
 import moment from 'moment';
 
 import { connect } from 'react-redux';
-import { fetchMemberDetail, fetchMembersWithShares, fetchProposals, getAssetAmount } from '../action/actions';
+import { fetchMemberDetail, fetchMembersWithShares, fetchProposals, getAssetAmount, getAssetData } from '../action/actions';
 
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -187,7 +187,10 @@ class HomePage extends React.Component {
     this.state = {
       totalMembers: 0,
       totalProposals: 0,
-      ethAmount: 0
+      ethAmount: 0,
+      totalShares: 0,
+      shareValue: 0,
+      guildBankValue: 0
     }
   }
 
@@ -200,6 +203,17 @@ class HomePage extends React.Component {
             loggedUser.shares = responseJson.items.member.shares;
             loggedUser.status = responseJson.items.member.status;
             localStorage.setItem('loggedUser', JSON.stringify(loggedUser));
+            this.setState({totalShares: responseJson.items.totalShares});
+            this.props.getAssetAmount()
+              .then((responseJson) => {
+                this.setState({ ethAmount: (responseJson.items) ? responseJson.items.amount : 0 })
+                this.props.getAssetData()
+                  .then((responseJson) => {
+                    let guildBankValue = this.state.ethAmount * responseJson.items[0].price_usd;
+                    let shareValue = guildBankValue/this.state.totalShares;
+                    this.setState({shareValue: shareValue, guildBankValue: guildBankValue});
+                  })
+              });
           }
         })
     }
@@ -209,10 +223,6 @@ class HomePage extends React.Component {
         this.setState({ totalMembers: parseInt(responseJson.items) })
       });
 
-    this.props.getAssetAmount()
-      .then((responseJson) => {
-        this.setState({ ethAmount: (responseJson.items) ? (responseJson.items.amount ? responseJson.items.amount : 0) : 0 })
-      })
 
     let proposalParams = {
       currentDate: moment(new Date()).format('YYYY-MM-DD')
@@ -236,7 +246,7 @@ class HomePage extends React.Component {
           <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value" >
             <Link to='/guildbank' className="text_link">
               <p className="subtext">Guild Bank Value</p>
-              <p className="amount">{formatter.format(this.state.ethAmount)}</p>
+              <p className="amount">{formatter.format(typeof(this.state.guildBankValue) === 'number' && this.state.guildBankValue >= 0 ? this.state.guildBankValue : 0) }</p>
             </Link>
           </Grid.Column>
           <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons" >
@@ -255,15 +265,15 @@ class HomePage extends React.Component {
               <Grid columns="equal" className="graph_values">
                 <Grid.Column textAlign="left">
                   <p className="subtext">Total Shares</p>
-                  <p className="amount">378</p>
+                  <p className="amount">{this.state.totalShares}</p>
                 </Grid.Column>
                 <Grid.Column textAlign="center">
                   <p className="subtext">Total ETH</p>
-                  <p className="amount">541</p>
+                  <p className="amount">{this.state.ethAmount}</p>
                 </Grid.Column>
                 <Grid.Column textAlign="right">
                   <p className="subtext">Share Value</p>
-                  <p className="amount">128 USD</p>
+                  <p className="amount">{formatter.format(typeof(this.state.shareValue) === 'number' && this.state.shareValue >= 0 ? this.state.shareValue : 0) }</p>
                 </Grid.Column>
               </Grid>
               <div className="graph">
@@ -298,6 +308,9 @@ function mapDispatchToProps(dispatch) {
     getAssetAmount: function () {
       return dispatch(getAssetAmount());
     },
+    getAssetData: function () {
+      return dispatch(getAssetData());
+    }
   };
 }
 

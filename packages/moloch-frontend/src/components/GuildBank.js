@@ -13,7 +13,7 @@ import stellarIcon from 'assets/stellarIcon.png';
 import stormIcon from 'assets/stormIcon.png';
 
 import { connect } from 'react-redux';
-import { fetchMemberDetail, postEvents, getAssetInfo } from '../action/actions';
+import { fetchMemberDetail, postEvents, getAssetInfo, getAssetAmount, getAssetData } from '../action/actions';
 
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -41,7 +41,8 @@ class GuildBank extends React.Component {
     super(props);
     this.state = {
       isActive: false,
-      loggedUser: ''
+      loggedUser: '',
+      guildBankValue: 0
     };
     this.redeemToken = this.redeemToken.bind(this);
   }
@@ -64,6 +65,16 @@ class GuildBank extends React.Component {
         }
       });
     this.props.getAssetInfo();
+    let ethAmount = 0;
+    this.props.getAssetAmount()
+      .then((responseJson) => {
+        ethAmount = (responseJson.items) ? responseJson.items.amount : 0;
+        this.props.getAssetData()
+          .then((responseJson) => {
+            let guildBankValue = ethAmount * responseJson.items[0].price_usd;
+            this.setState({guildBankValue: guildBankValue});
+          })
+      });
   }
 
   redeemToken() {
@@ -99,7 +110,7 @@ class GuildBank extends React.Component {
         <Grid>
           <Grid.Column textAlign="center" className="guild_value">
             <p className="subtext">Guild Bank Value</p>
-            <p className="amount">$53,640,918</p>
+            <p className="amount">{formatter.format(typeof(this.state.guildBankValue) === 'number' && this.state.guildBankValue >= 0 ? this.state.guildBankValue : 0) }</p>
             <Button size='large' color='grey' disabled={this.state.isActive ? false : true} onClick={this.redeemToken}>Redeem Loot Token</Button>
           </Grid.Column>
         </Grid>
@@ -134,7 +145,13 @@ function mapDispatchToProps(dispatch) {
       return dispatch(postEvents(data));
     },
     getAssetInfo: function () {
-      return dispatch(getAssetInfo())
+      return dispatch(getAssetInfo());
+    },
+    getAssetAmount: function () {
+      return dispatch(getAssetAmount());
+    },
+    getAssetData: function () {
+      return dispatch(getAssetData());
     }
   };
 }

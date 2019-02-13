@@ -78,7 +78,6 @@ class ProposalDetail extends Component {
     // get loggedin user details
     this.props.fetchMemberDetail(this.state.loggedUser)
       .then((responseJson) => {
-        console.log(responseJson.items.totalShares)
         this.setState({
           userShare: (responseJson.items.member.shares) ? responseJson.items.member.shares : 0,
           // userShare: 20,
