@@ -245,7 +245,7 @@ export class EventController {
                   let addedTribute = memberPatch.tribute ? memberPatch.tribute : 0;
                   let addedShares = memberPatch.shares ? memberPatch.shares : 0;
                   let addedETH = memberPatch.assets ? (memberPatch.assets[0] as any).amount : 0; // TODO: change this when assets other than ETH come into the system
-                  let addressToRecover = memberPatch.applicantAddress ? memberPatch.applicantAddress : '';
+                  let addressToRecover = memberPatch.applicantAddress ? memberPatch.applicantAddress.toLowerCase() : '';
                   console.log(memberPatch.address);
                   console.log(memberPatch.applicantAddress);
                   // Check if the member to which the proposal is for exists
