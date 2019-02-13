@@ -236,7 +236,7 @@ class ProjectProposalSubmission extends Component {
                     }
                 });
         } else {
-            alert('Please, fill any missing field');
+            alert('Please, fill any missing fields.');
         }
     };
 

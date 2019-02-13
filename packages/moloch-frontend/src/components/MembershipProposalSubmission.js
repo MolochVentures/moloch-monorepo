@@ -242,7 +242,7 @@ class MembershipProposalSubmission extends Component {
                     switch (responseJson.type) {
                         case 'POST_EVENTS_SUCCESS':
                             if (responseJson.items.id) {
-                                self.props.history.push('/members');
+                                self.props.history.push('/proposals');
                             } else {
                                 alert('Error processing proposal');
                             }
@@ -255,7 +255,7 @@ class MembershipProposalSubmission extends Component {
                     }
                 });
         } else {
-            alert('Please, fill any missing field');
+            alert('Please, fill any missing fields.');
         }
     };
 
