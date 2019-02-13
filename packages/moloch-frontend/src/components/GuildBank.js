@@ -13,77 +13,24 @@ import stellarIcon from 'assets/stellarIcon.png';
 import stormIcon from 'assets/stormIcon.png';
 
 import { connect } from 'react-redux';
-import { fetchMemberDetail, postEvents } from '../action/actions';
+import { fetchMemberDetail, postEvents, getAssetInfo } from '../action/actions';
 
-const currencies = [
-  {
-    "name": "BT",
-    "shares": 508,
-    "value": 32000,
-    "icon": bitcoinIcon
-  },
-  {
-    "name": "ET",
-    "shares": 508,
-    "value": 32000,
-    "icon": ethereumIcon
-  },
-  {
-    "name": "SPANK",
-    "shares": 508,
-    "value": 32000,
-    "icon": spankchainIcon
-  },
-  {
-    "name": "Aragon",
-    "shares": 508,
-    "value": 32000,
-    "icon": aragonIcon
-  },
-  {
-    "name": "District0x",
-    "shares": 508,
-    "value": 32000,
-    "icon": district0xIcon
-  },
-  {
-    "name": "XLM",
-    "shares": 508,
-    "value": 32000,
-    "icon": stellarIcon
-  },
-  {
-    "name": "MKR",
-    "shares": 508,
-    "value": 32000,
-    "icon": makerIcon
-  },
-  {
-    "name": "FUN",
-    "shares": 508,
-    "value": 32000,
-    "icon": funfairIcon
-  },
-  {
-    "name": "STORM",
-    "shares": 508,
-    "value": 32000,
-    "icon": stormIcon
-  },
-  {
-    "name": "ZRX",
-    "shares": 508,
-    "value": 32000,
-    "icon": xIcon
-  }
-];
+const formatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2
+});
 
-const CurrencyElement = ({ name, shares, icon, value }) => (
+const CurrencyElement = ({ symbol, amount, logo, price }) => (
   <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="currency_element" >
-    <Image src={icon} centered size='tiny' circular />
-    <p className="name">{name}</p>
-    <p className="shares">{shares}</p>
-    <p className="subtext">{'$' + value}</p>
+    <div style={{ backgroundColor: 'transparent' }}>
+      <div style={{ backgroundColor: 'white', width: 50, height: 50, margin: '0 auto', borderRadius: '50%' }}>
+        <Image src={logo} centered size='tiny' circular />
+      </div>
+    </div>
+    <p className="name">{symbol}</p>
+    <p className="shares">{amount}</p>
+    <p className="subtext">{formatter.format(price)}</p>
   </Grid.Column>
 );
 
@@ -116,6 +63,7 @@ class GuildBank extends React.Component {
           }
         }
       });
+    this.props.getAssetInfo();
   }
 
   redeemToken() {
@@ -132,7 +80,7 @@ class GuildBank extends React.Component {
         switch (responseJson.type) {
           case 'POST_EVENTS_SUCCESS':
             message = 'You have successfully redeem the token.';
-            this.setState({isActive: false});
+            this.setState({ isActive: false });
             break;
           case 'POST_EVENTS_FAILURE':
             message = responseJson.error.message;
@@ -161,7 +109,7 @@ class GuildBank extends React.Component {
           </Grid.Row>
           <Divider />
           <Grid.Row centered>
-            {currencies.map((elder, idx) => <CurrencyElement {...elder} key={idx} />)}
+            {this.props.assetInfo.map((elder, idx) => <CurrencyElement {...elder} key={idx} />)}
           </Grid.Row>
         </Grid>
       </div>
@@ -171,7 +119,9 @@ class GuildBank extends React.Component {
 
 // This function is used to convert redux global state to desired props.
 function mapStateToProps(state) {
-  return {};
+  return {
+    assetInfo: state.assetInfo.items
+  };
 }
 
 // This function is used to provide callbacks to container component.
@@ -182,6 +132,9 @@ function mapDispatchToProps(dispatch) {
     },
     postEvents: function (data) {
       return dispatch(postEvents(data));
+    },
+    getAssetInfo: function () {
+      return dispatch(getAssetInfo())
     }
   };
 }

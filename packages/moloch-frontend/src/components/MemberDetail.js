@@ -1,6 +1,8 @@
 import React from 'react';
+import { Link, Route } from "react-router-dom";
 import { Divider, Grid, Segment, Image, Icon, Label, Header } from 'semantic-ui-react';
 import moment from 'moment';
+import ProposalDetail from "./ProposalDetail";
 
 import bull from 'assets/bull.png';
 
@@ -123,7 +125,10 @@ class MemberDetail extends React.Component {
                             <Grid.Column textAlign="center">
                               {p.vote === "yes" && <Label className="dot" circular color="green" empty />}
                               {p.vote === "no" && <Label className="dot" circular color="red" empty />}
-                              {p.title}
+                              {p.type ? 
+                              <Link to={{ pathname: `/proposals/${p.id}`, state: { type: p.type, status: p.status, gracePeriod: 0, end: 0 } }} className="uncolored">
+                                {p.title}
+                              </Link> : <>{p.title}</> }
                             </Grid.Column>
                             <Grid.Column textAlign="center">
                               <p className="subtext date">{moment(p.date).format('MM/MDD/YYYY')}</p>
@@ -153,6 +158,7 @@ class MemberDetail extends React.Component {
             </Grid.Column>
           </Grid.Row>
         </Grid>
+        <Route path="/proposals/:id" component={ProposalDetail} />
       </div>
     )
   }

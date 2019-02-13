@@ -25,17 +25,17 @@ const ProgressBar = ({ yes, no }) => (
     </div>
     <Grid columns="equal">
       <Grid.Column floated="left">
-        {typeof (yes) === 'number' ? yes : 0}% Yes
+      {(typeof (yes) === 'number' && yes >= 0) ? yes : 0}% Yes
       </Grid.Column>
       <Grid.Column floated="right" textAlign="right">
-        {typeof (no) === 'number' ? no : 0}% No
+      {(typeof (no) === 'number' && no >= 0) ? no : 0}% No
       </Grid.Column>
     </Grid>
   </>
 );
 
 const ProposalCard = ({ proposal }) => {
-  let type = proposal.address ? 'members' : 'projects';
+  let type = proposal.address ? 'member' : 'project';
   let id = proposal.shares ? (proposal.name ? proposal.name : proposal.address) : (proposal.id ? proposal.id : proposal.address);
   let gracePeriod = proposal.status === 'votingperiod' ? proposal.gracePeriod : 0;
   let end = proposal.status === 'votingperiod' ? proposal.end : 0;
@@ -221,8 +221,9 @@ class ProposalListView extends React.Component {
         }
       });
     }
-    let percentYes = typeof ((parseInt((totalNumberVotedYes / this.state.totalShares) * 100))) !== 'number' ? 0 : (parseInt((totalNumberVotedYes / this.state.totalShares) * 100));
-    let percentNo = typeof (parseInt(((totalNumberVotedNo / this.state.totalShares) * 100))) !== 'number' ? 0 : parseInt(((totalNumberVotedNo / this.state.totalShares) * 100));
+    let percentYes = parseInt((totalNumberVotedYes / this.state.totalShares) * 100);
+    let percentNo = parseInt((totalNumberVotedNo / this.state.totalShares) * 100);
+
     return {
       votedYes: percentYes,
       votedNo: percentNo
