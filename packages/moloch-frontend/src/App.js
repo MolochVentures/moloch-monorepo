@@ -17,7 +17,8 @@ import { ApolloProvider } from "react-apollo";
 import ApolloClient from "apollo-boost";
 
 const client = new ApolloClient({
-  uri: "http://127.0.0.1:8000/subgraphs/name/moloch"
+  uri: "http://127.0.0.1:8000/subgraphs/name/moloch",
+  connectToDevTools: true
 });
 
 const Provider = require('react-redux').Provider;
