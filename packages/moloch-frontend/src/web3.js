@@ -1,5 +1,7 @@
-import Web3 from "web3"
+
 import SafeProvider from "safe-web3-provider"
+const Web3 = require("web3")
+
 const molochAbi = require('./abi/Moloch.abi.json')
 
 let web3
