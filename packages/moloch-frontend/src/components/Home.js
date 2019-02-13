@@ -206,7 +206,7 @@ class HomePage extends React.Component {
             this.setState({totalShares: responseJson.items.totalShares});
             this.props.getAssetAmount()
               .then((responseJson) => {
-                this.setState({ ethAmount: (responseJson.items) ? responseJson.items.amount : 0 })
+                this.setState({ ethAmount: (responseJson.items) ? responseJson.items : 0 })
                 this.props.getAssetData()
                   .then((responseJson) => {
                     let guildBankValue = this.state.ethAmount * responseJson.items[0].price_usd;

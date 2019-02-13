@@ -68,7 +68,7 @@ class GuildBank extends React.Component {
     let ethAmount = 0;
     this.props.getAssetAmount()
       .then((responseJson) => {
-        ethAmount = (responseJson.items) ? responseJson.items.amount : 0;
+        ethAmount = (responseJson.items) ? responseJson.items : 0;
         this.props.getAssetData()
           .then((responseJson) => {
             let guildBankValue = ethAmount * responseJson.items[0].price_usd;
