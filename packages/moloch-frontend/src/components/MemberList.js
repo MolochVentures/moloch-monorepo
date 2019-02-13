@@ -203,7 +203,7 @@ import bull from 'assets/bull.png';
 import hood from 'assets/hood.png';
 
 import { connect } from 'react-redux';
-import { fetchActiveMembers, fetchConfigFounders, fetchMemberDetail } from '../action/actions';
+import { fetchActiveMembers, fetchConfigFounders, fetchMemberDetail, fetchMembersWithShares } from '../action/actions';
 
 const MemberAvatar = ({ address, shares }) => (
   <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={address}  >
@@ -281,13 +281,11 @@ class MemberListView extends React.Component {
     }
   }
   componentDidMount() {
-    this.props.fetchActiveMembers()
+    this.props.fetchActiveMembers();
+    this.props.fetchConfigFounders();
+    this.props.fetchMembersWithShares()
       .then((responseJson) => {
-        this.setState({ totalMembers: this.state.totalMembers + responseJson.items.length })
-      });
-    this.props.fetchConfigFounders()
-      .then((responseJson) => {
-        this.setState({ totalMembers: this.state.totalMembers + responseJson.items.length })
+        this.setState({ totalMembers: parseInt(responseJson.items) })
       });
 
     this.props.fetchMemberDetail(this.state.user.address)
@@ -330,6 +328,9 @@ function mapDispatchToProps(dispatch) {
     },
     fetchMemberDetail: function (id) {
       return dispatch(fetchMemberDetail(id))
+    },
+    fetchMembersWithShares: function() {
+      return dispatch(fetchMembersWithShares());
     }
   };
 }

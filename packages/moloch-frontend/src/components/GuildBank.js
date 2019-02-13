@@ -21,7 +21,7 @@ const formatter = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 2
 });
 
-const CurrencyElement = ({ symbol, amount, logo, price }) => (
+const CurrencyElement = ({ symbol, amount, logo, ethPrice }) => (
   <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="currency_element" >
     <div style={{ backgroundColor: 'transparent' }}>
       <div style={{ backgroundColor: 'white', width: 50, height: 50, margin: '0 auto', borderRadius: '50%' }}>
@@ -30,7 +30,7 @@ const CurrencyElement = ({ symbol, amount, logo, price }) => (
     </div>
     <p className="name">{symbol}</p>
     <p className="shares">{amount}</p>
-    <p className="subtext">{formatter.format(price)}</p>
+    <p className="subtext">{formatter.format(ethPrice)}</p>
   </Grid.Column>
 );
 
@@ -42,7 +42,7 @@ class GuildBank extends React.Component {
     this.state = {
       isActive: false,
       loggedUser: '',
-      guildBankValue: 0
+      guildBankValue: 0,
     };
     this.redeemToken = this.redeemToken.bind(this);
   }
@@ -120,7 +120,7 @@ class GuildBank extends React.Component {
           </Grid.Row>
           <Divider />
           <Grid.Row centered>
-            {this.props.assetInfo.map((elder, idx) => <CurrencyElement {...elder} key={idx} />)}
+            {this.props.assetInfo.map((elder, idx) => <CurrencyElement ethPrice={this.state.guildBankValue} {...elder} key={idx} />)}
           </Grid.Row>
         </Grid>
       </div>
