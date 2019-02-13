@@ -1,21 +1,19 @@
-import React from 'react';
-import { Grid, Image, Divider } from 'semantic-ui-react';
-import { Switch, Route, Link } from 'react-router-dom';
+import React from "react";
+import { Grid, Image, Divider } from "semantic-ui-react";
+import { Switch, Route, Link } from "react-router-dom";
 
-import MemberDetail from './MemberDetail';
-import bull from 'assets/bull.png';
-import hood from 'assets/hood.png';
+import MemberDetail from "./MemberDetail";
+import bull from "assets/bull.png";
+import hood from "assets/hood.png";
 
-import { connect } from 'react-redux';
-import { fetchMembers, fetchConfigFounders, fetchMemberDetail } from '../action/actions';
-import { Query } from 'react-apollo';
-import gql from 'graphql-tag';
+import { Query } from "react-apollo";
+import gql from "graphql-tag";
 
 const MemberAvatar = ({ address, shares }) => (
-  <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={address}  >
+  <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={address}>
     <Link to={`/members/${address}`} className="uncolored">
-      <Image src={hood} centered size='tiny' />
-      <p className="name">{!address ? '' : (address.length > 10 ? address.substring(0, 10) + '...' : address)}</p>
+      <Image src={hood} centered size="tiny" />
+      <p className="name">{!address ? "" : address.length > 10 ? address.substring(0, 10) + "..." : address}</p>
       <p className="subtext">{shares} shares</p>
     </Link>
   </Grid.Column>
@@ -24,32 +22,32 @@ const MemberAvatar = ({ address, shares }) => (
 const GET_LOGGED_IN_USER = gql`
   query User($address: String!) {
     member(id: $address) {
-      id,
-      shares,
+      id
+      shares
       isActive
     }
   }
-`
-class LoggedInUser extends React.Component {
-  render() {
-    let loggedUser = JSON.parse(localStorage.getItem('loggedUser'));
-    return (
-      <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedUser.address }}>
-        {({ loading, error, data }) => {
-          if (loading) return "...";
-          if (error) throw new Error(`Error!: ${error}`);
-          return data.member && data.member.isActive
-          ? <Link to={`/members/${data.member.id}`} className="uncolored">
-              <Image centered src={bull} size='tiny' />
-              <p className="name">{!data.member.id ? '' : (data.member.id.length > 10 ? data.member.id.substring(0, 10) + '...' : data.member.id)}</p>
-              <p className="subtext">{data.member.shares ? data.member.shares : 0} shares</p>
-            </Link>
-          : <div />
-        }}
-      </Query>
-    )
-  }
-}
+`;
+const LoggedInUser = () => {
+  let loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+  return (
+    <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedUser.address }}>
+      {({ loading, error, data }) => {
+        if (loading) return "...";
+        if (error) throw new Error(`Error!: ${error}`);
+        return data.member && data.member.isActive ? (
+          <Link to={`/members/${data.member.id}`} className="uncolored">
+            <Image centered src={bull} size="tiny" />
+            <p className="name">{!data.member.id ? "" : data.member.id.length > 10 ? data.member.id.substring(0, 10) + "..." : data.member.id}</p>
+            <p className="subtext">{data.member.shares ? data.member.shares : 0} shares</p>
+          </Link>
+        ) : (
+          <div />
+        );
+      }}
+    </Query>
+  );
+};
 
 const GET_ELDERS = gql`
   {
@@ -58,20 +56,20 @@ const GET_ELDERS = gql`
       shares
     }
   }
-`
+`;
 const Elders = () => (
   <Query query={GET_ELDERS}>
     {({ loading, error, data }) => {
       if (loading) return "...";
       if (error) throw new Error(`Error!: ${error}`);
-      return (
-        data.members.length > 0 ?
-        data.members.map((elder, idx) => <MemberAvatar address={elder.id} shares={elder.shares} key={idx} />) : 
+      return data.members.length > 0 ? (
+        data.members.map((elder, idx) => <MemberAvatar address={elder.id} shares={elder.shares} key={idx} />)
+      ) : (
         <>No elders to show.</>
-      )
+      );
     }}
   </Query>
-)
+);
 
 const GET_NON_ELDERS = gql`
   {
@@ -80,20 +78,20 @@ const GET_NON_ELDERS = gql`
       shares
     }
   }
-`
+`;
 const Contributors = () => (
   <Query query={GET_NON_ELDERS}>
     {({ loading, error, data }) => {
       if (loading) return "...";
       if (error) throw new Error(`Error!: ${error}`);
-      return (
-        data.members.length > 0 ?
-        data.members.map((contributor, idx) => <MemberAvatar address={contributor.id} shares={contributor.shares} key={idx} />) : 
+      return data.members.length > 0 ? (
+        data.members.map((contributor, idx) => <MemberAvatar address={contributor.id} shares={contributor.shares} key={idx} />)
+      ) : (
         <>No contributors to show.</>
-      )
+      );
     }}
   </Query>
-)
+);
 
 const GET_MEMBERS = gql`
   {
@@ -101,18 +99,18 @@ const GET_MEMBERS = gql`
       id
     }
   }
-`
+`;
 const MemberList = () => (
   <Query query={GET_MEMBERS}>
     {({ loading, error, data }) => {
-      let members
+      let members;
       if (error) {
-        members = 'NA'
-        console.error(`Could not load members: ${error}`)
+        members = "NA";
+        console.error(`Could not load members: ${error}`);
       } else if (loading) {
-        members = '-'
+        members = "-";
       } else {
-        members = data.members.length
+        members = data.members.length;
       }
       return (
         <div id="member_list">
@@ -136,7 +134,7 @@ const MemberList = () => (
           </Grid>
           <Grid className="member_item">
             <Grid.Row>
-              <p style={{ paddingLeft: '1rem' }}>Elders (100+ shares)</p>
+              <p style={{ paddingLeft: "1rem" }}>Elders (100+ shares)</p>
             </Grid.Row>
             <Divider />
             <Grid.Row className="members_row" centered>
@@ -145,7 +143,7 @@ const MemberList = () => (
           </Grid>
           <Grid className="member_item">
             <Grid.Row>
-              <p style={{ paddingLeft: '1rem' }}>Contributors</p>
+              <p style={{ paddingLeft: "1rem" }}>Contributors</p>
             </Grid.Row>
             <Divider />
             <Grid.Row className="members_row" centered>
@@ -160,36 +158,9 @@ const MemberList = () => (
 
 const MemberListView = () => (
   <Switch>
-    <Route 
-      exact 
-      path="/members" 
-      render={() => <MemberList />} 
-    />
+    <Route exact path="/members" render={() => <MemberList />} />
     <Route path="/members/:name" component={MemberDetail} />
   </Switch>
-)
+);
 
-// This function is used to convert redux global state to desired props.
-function mapStateToProps(state) {
-  return {
-    members: state.members.items,
-    elders: state.founders.items
-  };
-}
-
-// This function is used to provide callbacks to container component.
-function mapDispatchToProps(dispatch) {
-  return {
-    fetchMembers: function () {
-      return dispatch(fetchMembers());
-    },
-    fetchConfigFounders: function () {
-      return dispatch(fetchConfigFounders());
-    },
-    fetchMemberDetail: function (id) {
-      return dispatch(fetchMemberDetail(id))
-    }
-  };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(MemberListView);
+export default MemberListView;
