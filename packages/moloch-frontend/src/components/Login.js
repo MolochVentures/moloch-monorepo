@@ -3,14 +3,22 @@ import { Grid, Button } from "semantic-ui-react";
 
 import { connect } from "react-redux";
 import { fetchMemberDetail, postEvents } from "../action/actions";
+import { initMetmask, initGnosisSafe } from "../web3";
+import gql from "graphql-tag";
+import { ApolloConsumer } from "react-apollo";
 
-import Web3 from "web3";
-import SafeProvider from "safe-web3-provider";
-
-let web3
 let coinbase
 
-class Login extends Component {
+const GET_CURRENT_USER = gql`
+  query Member($id: String!) {
+    member(id: $id) {
+      id
+      shares
+      isActive
+    }
+  }
+`;
+export default class Login extends Component {
   constructor(props) {
     super(props);
 
@@ -20,49 +28,17 @@ class Login extends Component {
     this.signWithAccessRequest = this.signWithAccessRequest.bind(this);
   }
 
-  async loginWithMetamask() {
-    if (!window.ethereum && !window.web3) {
-      // Non-DApp browsers won't work.
-      alert("Metamask needs to be installed and configured.");
-    }
-    if (window.ethereum) {
-      // Modern DApp browsers need to enable Metamask access.
-      try {
-        await window.ethereum.enable()
-      } catch (error) {
-        alert("Metamask needs to be enabled.")
-      }
-    }
-    web3 = new Web3(Web3.givenProvider)
-    await this.doLogin()
+  async loginWithMetamask(client) {
+    const web3 = await initMetmask()
+    await this.doLogin(client, web3)
   }
 
-  async loginWithGnosisSafe() {
-    console.log("Logging in with Gnosis Safe.");
-
-    /**
-     *  Create Safe Provider
-     */
-    const provider = new SafeProvider({
-      // TODO: CHANGE THIS TO INFURA/ALCHEMY
-      rpcUrl: "http://localhost:8545"
-    });
-
-    /**
-     *  Create Web3
-     */
-    web3 = new Web3(provider);
-
-    /**
-     *  Get Accounts
-     */
-    const accounts = await web3.eth.getAccounts();
-    console.log("accounts: ", accounts);
-    await this.doLogin()
-    
+  async loginWithGnosisSafe(client) {
+    const web3 = initGnosisSafe()
+    await this.doLogin(client, web3)
   }
 
-  async doLogin() {
+  async doLogin(client, web3) {
     coinbase = (await web3.eth.getAccounts())[0];
 
     if (!coinbase) {
@@ -70,32 +46,32 @@ class Login extends Component {
       await this.signWithAccessRequest(null);
     } else {
       // Try getting a user by their public address.
-      const responseJson = await this.props.fetchMemberDetail(coinbase)
-      if (responseJson.type === "FETCH_MEMBER_DETAIL_FAILURE") {
-        if (responseJson.error && responseJson.error.statusCode === 404) {
-          // If the user didn't exist.
-          // Create it.
-          const resJson = await this.props.postEvents(JSON.stringify({ id: "", name: "User creation", payload: { address: coinbase, nonce: 0 } }))
-          await this.signWithAccessRequest(resJson.items.nonce, 0);
-        }
+      const { data } = await client.query({
+        query: GET_CURRENT_USER,
+        variables: { id: coinbase }
+      });
+      
+      if (!data.member) {
+        // If the user didn't exist.
+        await this.signWithAccessRequest(web3, 99, 0);
       } else {
         // If the user exists, ask for a signature.
-        localStorage.setItem("totalShares", responseJson.items.totalShares);
-        await this.signWithAccessRequest(responseJson.items.member.nonce, responseJson.items.member.shares);
+        localStorage.setItem("totalShares", data.member.totalShares);
+        await this.signWithAccessRequest(web3, 99, data.member.totalShares, data.member.isActive);
       }
     }
   }
 
-  async signWithAccessRequest(nonce, shares, status) {
+  async signWithAccessRequest(web3, nonce, shares, isActive) {
     let message = "Please, sign the following one-time message to authenticate: " + nonce;
     // Request account access if needed.
     if (!localStorage.getItem("loggedUser")) {
       try {
-        const signature = await web3.eth.personal.sign(web3.utils.utf8ToHex(message), coinbase)
-        const result = await web3.eth.personal.ecRecover(message, signature)
+        const signature = await web3.eth.personal.sign(web3.utils.utf8ToHex(message), coinbase, "")
+        const result = await web3.eth.personal.ecRecover(web3.utils.utf8ToHex(message), signature)
         localStorage.setItem(
           "loggedUser",
-          JSON.stringify({ status: status ? status : "pending", shares: shares ? shares : 0, address: result, nonce })
+          JSON.stringify({ isActive, shares: shares ? shares : 0, address: result, nonce })
         );
         if (nonce) {
           this.props.history.push("/");
@@ -115,44 +91,26 @@ class Login extends Component {
 
   render() {
     return (
-      <div id="login">
-        <Grid columns={16} centered>
-          <Grid.Column width={16}>
-            <Grid.Row>
-              <Button size="large" color="grey" onClick={this.loginWithMetamask}>
-                Login With Metamask
-              </Button>
-            </Grid.Row>
-            <Grid.Row>
-              <Button size="large" color="grey" onClick={this.loginWithGnosisSafe}>
-                Login With Gnosis Safe
-              </Button>
-            </Grid.Row>
-          </Grid.Column>
-        </Grid>
-      </div>
+      <ApolloConsumer>
+        {client => (
+          <div id="login">
+            <Grid columns={16} centered>
+              <Grid.Column width={16}>
+                <Grid.Row>
+                  <Button size="large" color="grey" onClick={() => this.loginWithMetamask(client)}>
+                    Login With Metamask
+                  </Button>
+                </Grid.Row>
+                <Grid.Row>
+                  <Button size="large" color="grey" onClick={() => this.loginWithGnosisSafe(client)}>
+                    Login With Gnosis Safe
+                  </Button>
+                </Grid.Row>
+              </Grid.Column>
+            </Grid>
+          </div>
+        )}
+      </ApolloConsumer>
     );
   }
 }
-
-// This function is used to convert redux global state to desired props.
-function mapStateToProps(state) {
-  return {};
-}
-
-// This function is used to provide callbacks to container component.
-function mapDispatchToProps(dispatch) {
-  return {
-    fetchMemberDetail: function(id) {
-      return dispatch(fetchMemberDetail(id));
-    },
-    postEvents: function(data) {
-      return dispatch(postEvents(data));
-    }
-  };
-}
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Login);
