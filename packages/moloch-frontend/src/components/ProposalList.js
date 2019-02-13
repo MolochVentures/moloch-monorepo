@@ -1,5 +1,5 @@
 import React from "react";
-import { Divider, Segment, Grid, Progress, Button } from "semantic-ui-react";
+import { Segment, Grid, Progress, Button } from "semantic-ui-react";
 import { Route, Switch, Link } from "react-router-dom";
 
 import ProposalDetail from "./ProposalDetail";
@@ -25,11 +25,15 @@ const formatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2
 });
 
-const ProgressBar = ({ yes, no }) => (
+const ProgressBar = ({ yes, no }) => {
+  const total = yes + no
+  const percentYes = Math.round((yes / total) * 100)
+  const percentNo = Math.round((no / total) * 100)
+  return (
   <>
     <div style={{ position: "relative" }}>
       <Progress
-        percent={yes + no}
+        percent={percentYes + percentNo}
         color="red"
         size="small"
         style={{
@@ -38,16 +42,16 @@ const ProgressBar = ({ yes, no }) => (
           width: "100%"
         }}
       />
-      <Progress percent={yes} color="green" size="small" />
+      <Progress percent={percentYes} color="green" size="small" />
     </div>
     <Grid columns="equal">
-      <Grid.Column floated="left">{typeof yes === "number" ? yes : 0}% Yes</Grid.Column>
+      <Grid.Column floated="left">{percentYes}% Yes</Grid.Column>
       <Grid.Column floated="right" textAlign="right">
-        {typeof no === "number" ? no : 0}% No
+        {percentNo}% No
       </Grid.Column>
     </Grid>
   </>
-);
+)};
 
 const ProposalCard = ({ proposal }) => {
   let id = proposal.id;
@@ -63,7 +67,6 @@ const ProposalCard = ({ proposal }) => {
                 <p className="subtext">Shares</p>
                 <p className="amount">{proposal.sharesRequested}</p>
               </Grid.Column>
-              <Divider vertical />
               <Grid.Column textAlign="center">
                 <p className="subtext">Total USD Value</p>
                 <p className="amount">{formatter.format(0)}</p>
@@ -75,18 +78,18 @@ const ProposalCard = ({ proposal }) => {
               <Grid.Column textAlign="center">
                 <Segment className="voting pill" textAlign="center">
                   <span className="subtext">Voting Ends: </span>
-                  <span>1 day</span>
+                  <span>{proposal.votingEnds ? proposal.votingEnds : "-"} periods</span>
                 </Segment>
               </Grid.Column>
               <Grid.Column textAlign="center">
                 <Segment className="grace pill" textAlign="center">
                   <span className="subtext">Grace Period: </span>
-                  <span>1 day</span>
+                  <span>{proposal.gracePeriod ? proposal.gracePeriod : "-"} periods</span>
                 </Segment>
               </Grid.Column>
             </Grid.Row>
           </Grid>
-          <ProgressBar yes={proposal.yesVotes} no={proposal.noVotes} />
+          <ProgressBar yes={parseInt(proposal.yesVotes)} no={parseInt(proposal.noVotes)} />
         </Segment>
       </Link>
     </Grid.Column>
@@ -146,6 +149,8 @@ class ProposalList extends React.Component {
     for (const proposal of proposals) {
       proposal.proposalIndex = parseInt(proposal.proposalIndex);
       const proposalFromChain = await moloch.methods.proposalQueue(proposal.proposalIndex).call();
+      proposal.votingEnds = 0
+      proposal.gracePeriod = 0
       if (proposal.aborted) {
         proposal.status = ProposalStatus.Aborted;
       } else if (proposal.processed && proposal.didPass) {
@@ -157,8 +162,10 @@ class ProposalList extends React.Component {
         proposal.status = ProposalStatus.InQueue;
       } else if (inGracePeriod(proposalFromChain)) {
         proposal.status = ProposalStatus.GracePeriod;
+        proposal.gracePeriod = proposal.startingPeriod + VOTING_PERIOD_LENGTH + GRACE_PERIOD_LENGTH - currentPeriod
       } else if (inVotingPeriod(proposalFromChain)) {
         proposal.status = ProposalStatus.VotingPeriod;
+        proposal.votingEnds = proposal.startingPeriod + VOTING_PERIOD_LENGTH - currentPeriod
       } else {
         proposal.status = ProposalStatus.InQueue;
       }
