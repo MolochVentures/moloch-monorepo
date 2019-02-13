@@ -7,6 +7,7 @@ export function handleSummonComplete(event: SummonComplete): void {
   member.delegateKey = event.params.summoner
   member.shares = event.params.shares
   member.isActive = true
+  member.tokenTribute = BigInt.fromI32(0)
   member.didRagequit = false
   member.votes = new Array<string>()
   member.submissions = new Array<string>()
