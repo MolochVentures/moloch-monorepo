@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import { Grid, Button } from "semantic-ui-react";
 
-import { connect } from "react-redux";
-import { fetchMemberDetail, postEvents } from "../action/actions";
 import { initMetmask, initGnosisSafe } from "../web3";
 import gql from "graphql-tag";
 import { ApolloConsumer } from "react-apollo";
