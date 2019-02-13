@@ -2,14 +2,14 @@ import React, { Component } from 'react';
 import { Link } from "react-router-dom";
 import { Grid, Icon, Dropdown, Form, Button } from "semantic-ui-react";
 
-const user = {
-  "name": localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')).address : '',
-  "status": localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')).status : '',
-};
+let user;
 
 class MainMenu extends Component {
-
   render() {
+    user = {
+      "name": localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')).address : '',
+      "status": localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')).status : '',
+    };
     return (
       <div className="dropdownItems">
         {user.status === 'passed' || user.status === 'founder' ?

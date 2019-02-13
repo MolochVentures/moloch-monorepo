@@ -14,22 +14,22 @@ const formatter = new Intl.NumberFormat('en-US', {
 
 const ProgressBar = ({ yes, no }) => (
   <>
-    <div style={{ "position": "relative" }}>
-      <Progress percent={yes + no} color="red" size="big" style={{
-        "position": "absolute",
-        "top": "0",
-        "width": "100%"
-      }} />
-      <Progress percent={yes} color="green" size="big" />
-    </div>
-    <Grid columns="equal">
-      <Grid.Column floated="left">
-        {typeof (yes) === 'number' ? yes : 0}% Yes
+  <div style={{ "position": "relative" }}>
+    <Progress percent={yes + no} color="red" size="big" style={{
+      "position": "absolute",
+      "top": "0",
+      "width": "100%"
+    }} />
+    <Progress percent={yes} color="green" size="big" />
+  </div>
+  <Grid columns="equal">
+    <Grid.Column floated="left">
+      {(typeof (yes) === 'number' && yes >= 0) ? yes : 0}% Yes
       </Grid.Column>
-      <Grid.Column floated="right" textAlign="right">
-        {typeof (no) === 'number' ? no : 0}% No
+    <Grid.Column floated="right" textAlign="right">
+      {(typeof (no) === 'number' && no >= 0) ? no : 0}% No
       </Grid.Column>
-    </Grid>
+  </Grid>
   </>
 );
 
@@ -78,6 +78,7 @@ class ProposalDetail extends Component {
     // get loggedin user details
     this.props.fetchMemberDetail(this.state.loggedUser)
       .then((responseJson) => {
+        console.log(responseJson.items.totalShares)
         this.setState({
           userShare: (responseJson.items.member.shares) ? responseJson.items.member.shares : 0,
           // userShare: 20,
@@ -85,41 +86,40 @@ class ProposalDetail extends Component {
           memberStatus: (responseJson.items.member.status) ? (responseJson.items.member.status === 'passed' || responseJson.items.member.status === 'founder' ? 'passed' : responseJson.items.member.status) : '',
           // memberStatus: 'active'
         });
-
+        // Retrieve the data of the proposal.
+        let id = this.props.match.params.id
+        this.setState({ type: params.type, status: params.status, gracePeriod: params.gracePeriod, end: params.end });
+        switch (params.type) {
+          case 'member':
+            this.props.fetchMemberDetail(id)
+              .then((responseJson) => {
+                if (responseJson.type === "FETCH_MEMBER_DETAIL_SUCCESS") {
+                  this.loadData(responseJson);
+                } else {
+                  alert('Error retrieving the proposal.');
+                }
+              });
+            break;
+          case 'project':
+            this.props.fetchProposalDetail(id)
+              .then((responseJson) => {
+                if (responseJson.type === "FETCH_PROPOSAL_DETAIL_SUCCESS") {
+                  this.loadData(responseJson);
+                } else {
+                  alert('Error retrieving the proposal.');
+                }
+              });
+            break;
+          default:
+            break;
+        }
       })
-    // Retrieve the data of the proposal.
-    let id = this.props.match.params.id
-    this.setState({ type: params.type, status: params.status, gracePeriod: params.gracePeriod, end: params.end });
-    switch (params.type) {
-      case 'members':
-        this.props.fetchMemberDetail(id)
-          .then((responseJson) => {
-            if (responseJson.type === "FETCH_MEMBER_DETAIL_SUCCESS") {
-              this.loadData(responseJson);
-            } else {
-              alert('Error retrieving the proposal.');
-            }
-          });
-        break;
-      case 'projects':
-        this.props.fetchProposalDetail(id)
-          .then((responseJson) => {
-            if (responseJson.type === "FETCH_PROPOSAL_DETAIL_SUCCESS") {
-              this.loadData(responseJson);
-            } else {
-              alert('Error retrieving the proposal.');
-            }
-          });
-        break;
-      default:
-        break;
-    }
     // this.props.fetchMembers();
   }
 
   loadData(responseJson) {
     let proposal = responseJson.items.member ? responseJson.items.member : responseJson.items;
-    this.setState({ proposal_detail: proposal, isAccepted: (proposal.status === 'passed' ? true : false) });
+    this.setState({ proposal_detail: proposal, isAccepted: (proposal.status === 'passed' ? true : false), gracePeriod: (proposal.gracePeriod ? proposal.gracePeriod : 0), end: (proposal.end ? proposal.end : 0) });
     let voters = this.state.proposal_detail.voters ? this.state.proposal_detail.voters : [];
     let userHasVoted = voters.find(voter => voter.member === this.state.loggedUser) ? true : false;
     this.setState({ userHasVoted });
@@ -146,8 +146,9 @@ class ProposalDetail extends Component {
           }
         }
       });
-      let percentYes = typeof ((parseInt((totalNumberVotedYes / this.state.totalShares) * 100))) !== 'number' ? 0 : (parseInt((totalNumberVotedYes / this.state.totalShares) * 100));
-      let percentNo = typeof (parseInt(((totalNumberVotedNo / this.state.totalShares) * 100))) !== 'number' ? 0 : parseInt(((totalNumberVotedNo / this.state.totalShares) * 100));
+      let percentYes = parseInt((totalNumberVotedYes / this.state.totalShares) * 100)
+      let percentNo = parseInt((totalNumberVotedNo / this.state.totalShares) * 100);
+      
       this.setState({
         votedYes: percentYes,
         votedNo: percentNo
@@ -209,7 +210,7 @@ class ProposalDetail extends Component {
               break;
           }
           self.calculateVote(proposal.voters);
-          if(!voter){
+          if (!voter) {
             self.setState({ isAccepted: true });
           }
         } else {
@@ -243,7 +244,7 @@ class ProposalDetail extends Component {
                   <Grid columns="equal" textAlign="center" className="tokens">
                     <Grid.Row>
                       {this.state.proposal_detail.assets.map((token, idx) => (
-                        <Grid.Column key={idx} className="tributes"  mobile={16} tablet={16} computer={8} style={{marginBottom: 10}}>
+                        <Grid.Column key={idx} className="tributes" mobile={16} tablet={16} computer={8} style={{ marginBottom: 10 }}>
                           <Segment className="pill" textAlign="center">
                             <Icon name="ethereum" />{token.amount} {(token.asset.length) > 5 ? token.asset.substring(0, 5) + '...' : token.asset}
                           </Segment>
