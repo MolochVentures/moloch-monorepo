@@ -63,7 +63,7 @@ class MemberDetail extends React.Component {
                       return (
                         <Grid.Column key={idx}  mobile={16} tablet={16} computer={4} style={{marginBottom: 10}}>
                           <Segment className="pill" textAlign="center">
-                            <Icon name="ethereum" />{token.amount} {(token.asset.length) > 5 ? token.asset.substring(0, 5) + '...' : token.asset}
+                            <Icon name="ethereum" />{token.amount} {(token.address && token.address.length) > 5 ? token.address.substring(0, 5) + '...' : token.address}
                           </Segment>
                         </Grid.Column>
                       )

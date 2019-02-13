@@ -71,6 +71,7 @@ export class EventController {
     },
   })
   async create(@requestBody() event: Event): Promise<any> {
+    let self = this;
     var S4 = function () {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
     };
@@ -219,36 +220,47 @@ export class EventController {
         */
        // This function is called after the period is created correctly to create the member and add the assets to the system
         var createMember = async function(newPeriod: Period, status: string) {
+          console.log(1);
           let addedTribute = memberPatch.tribute ? memberPatch.tribute : 0;
           let addedShares = memberPatch.shares ? memberPatch.shares : 0;
           let addedETH = memberPatch.assets ? (memberPatch.assets[0] as any).amount : 0; // TODO: change this when assets other than ETH come into the system
           let addressToRecover = memberPatch.applicantAddress ? memberPatch.applicantAddress.toLowerCase() : '';
           // Check if the member to which the proposal is for exists
           try {
-            return await this.memberRepository.findById(addressToRecover).then(async (recoveredMember: Member) => {
+            console.log(2);
+            return await self.memberRepository.findById(addressToRecover).then(async recoveredMember => {
+              console.log(3);
               if (recoveredMember) { // If there is a matching member, we modify it
+                console.log(4);
                 recoveredMember.period = newPeriod.id; // Assign the period
                 recoveredMember.status = status; // Assign the status
+                recoveredMember.title = memberPatch.title;
+                recoveredMember.name = recoveredMember.address;
+                recoveredMember.description = memberPatch.description;
                 // Make the tribute, shares and assets cumulative
-                recoveredMember.tribute = recoveredMember.tribute ? recoveredMember.tribute + addedTribute : addedTribute;
-                recoveredMember.shares = recoveredMember.shares ? recoveredMember.shares + addedShares : addedShares;
+                recoveredMember.tribute = recoveredMember.tribute ? (recoveredMember.tribute as number) + (addedTribute as number) : addedTribute;
+                recoveredMember.shares = recoveredMember.shares ? (recoveredMember.shares as number) + (addedShares as number) : addedShares;
                 recoveredMember.assets = recoveredMember.assets ? 
                   (recoveredMember.assets[0] as any).amount = (recoveredMember.assets[0] as any).amount + addedETH : 
                   [{address: 'ETH', amount: addedETH}]; // TODO: change this when assets other than ETH come into the system
                 // And update the matching membership proposal
-                return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async (result: Member) => {
+                return await self.memberRepository.updateById(recoveredMember.address, recoveredMember).then(async result => {
                   // After the member is modified, we add the assets amount to the system
                   try { // TODO: change this when assets other than ETH come into the system
-                    return await this.assetRepository.findById('ETH').then(async (assetETH: Asset) => {
-                      assetETH.amount = assetETH.amount + addedETH;
-                      return await this.assetRepository.updateById('ETH', assetETH).then(async (result: Asset) => {
-                        return await this.eventRepository.create(event);
+                    console.log(6);
+                    return await self.assetRepository.findById('ETH').then(async assetETH => {
+                      console.log(7);
+                      assetETH.amount = assetETH.amount + (addedETH as number);
+                      return await self.assetRepository.updateById('ETH', assetETH).then(async result => {
+                        console.log(8);
+                        return await self.eventRepository.create(event);
                       });
                     });
                   } catch {
                     if (recoveredMember.assets) {
-                      return await this.assetRepository.create(recoveredMember.assets[0]).then(async (result: Asset) => {
-                        return await this.eventRepository.create(event);
+                      console.log(9);
+                      return await self.assetRepository.create(recoveredMember.assets[0]).then(async result => {
+                        return await self.eventRepository.create(event);
                       });
                     }
                   }
@@ -257,6 +269,7 @@ export class EventController {
             })
           } catch {
             // Prepare the data for a new membership proposal
+            console.log(10);
             let newMembershipProposal = {
               address: addressToRecover,
               nonce: Math.floor(Math.random() * 1000000),
@@ -270,19 +283,25 @@ export class EventController {
               assets: memberPatch.assets
             } as Member;
             // And create it
-            return await this.memberRepository.create(newMembershipProposal).then(async (result: Member) => {
+            return await self.memberRepository.create(newMembershipProposal).then(async (result: Member) => {
+              console.log(11);
               // After the member is modified, we add the assets amount to the system
               try { // TODO: change this when assets other than ETH come into the system
-                return await this.assetRepository.findById('ETH').then(async (assetETH: Asset) => {
-                  assetETH.amount = assetETH.amount + addedETH;
-                  return await this.assetRepository.updateById('ETH', assetETH).then(async (result: Asset) => {
-                    return await this.eventRepository.create(event);
+                console.log(12);
+                return await self.assetRepository.findById('ETH').then(async (assetETH: Asset) => {
+                  console.log(13);
+                  assetETH.amount = assetETH.amount + (addedETH as number);
+                  return await self.assetRepository.updateById('ETH', assetETH).then(async result => {
+                    console.log(14);
+                    return await self.eventRepository.create(event);
                   });
                 });
               } catch {
                 if (newMembershipProposal.assets) {
-                  return await this.assetRepository.create(newMembershipProposal.assets[0]).then(async (result: Asset) => {
-                    return await this.eventRepository.create(event);
+                  console.log(15);
+                  return await self.assetRepository.create(newMembershipProposal.assets[0]).then(async result => {
+                    console.log(16);
+                    return await self.eventRepository.create(event);
                   });
                 }
               }
@@ -314,7 +333,7 @@ export class EventController {
                 periodCreate.gracePeriod = new Date(periodCreate.end.getTime() + (1000 * 60 * 60 * 24 * gracePeriodLength));
                 // And create a period for it
                 return await this.periodRepository.create(periodCreate).then(async newPeriod => {
-                  createMember(newPeriod, 'inqueue');
+                  return await createMember(newPeriod, 'inqueue');
                 });
               });
             } else { // If there isn't a period on that date
@@ -323,7 +342,7 @@ export class EventController {
               periodCreate.gracePeriod = new Date(periodCreate.end.getTime() + (1000 * 60 * 60 * 24 * gracePeriodLength));
               // Create the period
               return await this.periodRepository.create(periodCreate).then(async newPeriod => {
-                createMember(newPeriod, 'votingperiod');
+                return await createMember(newPeriod, 'votingperiod');
               });
             }
           });
@@ -528,7 +547,7 @@ export class EventController {
             allMembers.forEach(member => { totalShares = totalShares + (member.shares ? member.shares : 0) });
             var redeem = async function () {
               // We deduct the assets proportionately to the shares of the member
-              return await this.assetRepository.find().then(async (assets: Array<Asset>) => {
+              return await self.assetRepository.find().then(async assets => {
                 let redeemingMemberShares = member.shares ? member.shares : 0;
                 assets.forEach(asset => {
                   asset.amount = asset.amount - (asset.amount * redeemingMemberShares / totalShares);
@@ -537,14 +556,14 @@ export class EventController {
                 member.status = 'failed';
                 member.shares = 0;
                 // And deactivate the member
-                return await this.memberRepository.updateById(member.address, member).then(async (result: Member) => {
-                  return await this.eventRepository.create(event);
+                return await self.memberRepository.updateById(member.address, member).then(async result => {
+                  return await self.eventRepository.create(event);
                 });
               });
             };
             var noRedeem = async function () {
               event.name = "Error on Redeem loot token";
-              return await this.eventRepository.create(event).then(async (result: Event) => {
+              return await self.eventRepository.create(event).then(async result => {
                 let error: HttpError = new HttpError;
                 error.status = 400;
                 error.message = "The member is still within the grace period of a voted proposal."
