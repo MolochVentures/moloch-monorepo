@@ -53,7 +53,7 @@ class ProposalDetail extends Component {
       loggedUser: JSON.parse(localStorage.getItem('loggedUser')).address,
       proposal_detail: this.props.proposal_detail,
       limitTo: 4,
-      type: '', //membership or project
+      type: '', //member or project
       userShare: 0,
       totalShares: 0,
       votedYes: 0,
@@ -163,7 +163,7 @@ class ProposalDetail extends Component {
       shares: this.state.userShare
     };
     this.setState({ userHasVoted: true });
-    let name = (this.state.type === 'members') ? 'Membership proposal voted' : 'Project proposal voted';
+    let name = (this.state.type === 'member') ? 'Membership proposal voted' : 'Project proposal voted';
     this.sendProposalUpdate(name, voters);
   }
 
@@ -175,12 +175,12 @@ class ProposalDetail extends Component {
       shares: this.state.userShare
     };
     this.setState({ userHasVoted: true });
-    let name = (this.state.type === 'members') ? 'Membership proposal voted' : 'Project proposal voted';
+    let name = (this.state.type === 'member') ? 'Membership proposal voted' : 'Project proposal voted';
     this.sendProposalUpdate(name, voters);
   }
 
   handleProcess() {
-    let name = (this.state.type === 'members') ? 'Membership proposal processed' : 'Project proposal processed';
+    let name = (this.state.type === 'member') ? 'Membership proposal processed' : 'Project proposal processed';
     this.sendProposalUpdate(name, null);
   }
 
