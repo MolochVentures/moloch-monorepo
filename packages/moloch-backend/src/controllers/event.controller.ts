@@ -223,7 +223,7 @@ export class EventController {
           console.log(1);
           let addedTribute = memberPatch.tribute ? memberPatch.tribute : 0;
           let addedShares = memberPatch.shares ? memberPatch.shares : 0;
-          let addedETH = memberPatch.assets ? (memberPatch.assets[0] as any).amount : 0; // TODO: change this when assets other than ETH come into the system
+          let addedETH = memberPatch.assets ? ((memberPatch.assets[0] as any).amount as number) : 0; // TODO: change this when assets other than ETH come into the system
           let addressToRecover = memberPatch.applicantAddress ? memberPatch.applicantAddress.toLowerCase() : '';
           // Check if the member to which the proposal is for exists
           try {

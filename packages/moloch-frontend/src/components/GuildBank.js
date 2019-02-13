@@ -11,6 +11,7 @@ import makerIcon from 'assets/makerIcon.png';
 import spankchainIcon from 'assets/spankchainIcon.png';
 import stellarIcon from 'assets/stellarIcon.png';
 import stormIcon from 'assets/stormIcon.png';
+import ETHLogo from 'assets/ETHLogo.png';
 
 import { connect } from 'react-redux';
 import { fetchMemberDetail, postEvents, getAssetInfo, getAssetAmount, getAssetData } from '../action/actions';
@@ -25,7 +26,7 @@ const CurrencyElement = ({ symbol, amount, logo, ethPrice }) => (
   <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="currency_element" >
     <div style={{ backgroundColor: 'transparent' }}>
       <div style={{ backgroundColor: 'white', width: 50, height: 50, margin: '0 auto', borderRadius: '50%' }}>
-        <Image src={logo} centered size='tiny' circular />
+        <Image src={ETHLogo} centered size='tiny' circular />
       </div>
     </div>
     <p className="name">{symbol}</p>
@@ -104,6 +105,8 @@ class GuildBank extends React.Component {
       });
   }
 
+  //<Button size='large' color='grey' disabled={this.state.isActive ? false : true} onClick={this.redeemToken}>Redeem Loot Token</Button>
+
   render() {
     return (
       <div id="guild_bank">
@@ -111,7 +114,6 @@ class GuildBank extends React.Component {
           <Grid.Column textAlign="center" className="guild_value">
             <p className="subtext">Guild Bank Value</p>
             <p className="amount">{formatter.format(typeof(this.state.guildBankValue) === 'number' && this.state.guildBankValue >= 0 ? this.state.guildBankValue : 0) }</p>
-            <Button size='large' color='grey' disabled={this.state.isActive ? false : true} onClick={this.redeemToken}>Redeem Loot Token</Button>
           </Grid.Column>
         </Grid>
 
