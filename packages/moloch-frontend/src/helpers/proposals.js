@@ -26,6 +26,7 @@ export async function getProposalDetailsFromOnChain(proposal) {
   proposal.proposalIndex = parseInt(proposal.proposalIndex);
 
   const proposalFromChain = await moloch.methods.proposalQueue(proposal.proposalIndex).call();
+  proposal.startingPeriod = parseInt(proposalFromChain.startingPeriod);
 
   proposal.votingEnds = 0;
   proposal.gracePeriod = 0;
@@ -35,10 +36,10 @@ export async function getProposalDetailsFromOnChain(proposal) {
     proposal.status = ProposalStatus.Passed;
   } else if (proposal.processed && !proposal.didPass) {
     proposal.status = ProposalStatus.Failed;
-  } else if (inGracePeriod(proposalFromChain)) {
+  } else if (inGracePeriod(proposal)) {
     proposal.status = ProposalStatus.GracePeriod;
     proposal.gracePeriod = proposal.startingPeriod + VOTING_PERIOD_LENGTH + GRACE_PERIOD_LENGTH - currentPeriod;
-  } else if (inVotingPeriod(proposalFromChain)) {
+  } else if (inVotingPeriod(proposal)) {
     proposal.status = ProposalStatus.VotingPeriod;
     proposal.votingEnds = proposal.startingPeriod + VOTING_PERIOD_LENGTH - currentPeriod;
   } else {
@@ -52,11 +53,17 @@ export async function getProposalDetailsFromOnChain(proposal) {
   try {
     details = JSON.parse(proposalFromChain.details);
   } catch (e) {
-    console.log(`Could not parse details from proposalFromChain: ${JSON.stringify(proposalFromChain, null, 2)}`);
+    console.log(
+      `Could not parse details from proposal.proposalIndex: ${proposal.proposalIndex} proposalFromChain: ${JSON.stringify(
+        proposalFromChain,
+        null,
+        2
+      )}`
+    );
   }
 
   proposal.title = details.title;
   proposal.description = details.description;
 
-  return proposal
+  return proposal;
 }
