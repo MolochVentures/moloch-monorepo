@@ -217,6 +217,78 @@ export class EventController {
           type: 'member'
         });
         */
+       // This function is called after the period is created correctly to create the member and add the assets to the system
+        var createMember = async function(newPeriod: Period, status: string) {
+          let addedTribute = memberPatch.tribute ? memberPatch.tribute : 0;
+          let addedShares = memberPatch.shares ? memberPatch.shares : 0;
+          let addedETH = memberPatch.assets ? (memberPatch.assets[0] as any).amount : 0; // TODO: change this when assets other than ETH come into the system
+          let addressToRecover = memberPatch.applicantAddress ? memberPatch.applicantAddress.toLowerCase() : '';
+          // Check if the member to which the proposal is for exists
+          try {
+            return await this.memberRepository.findById(addressToRecover).then(async (recoveredMember: Member) => {
+              if (recoveredMember) { // If there is a matching member, we modify it
+                recoveredMember.period = newPeriod.id; // Assign the period
+                recoveredMember.status = status; // Assign the status
+                // Make the tribute, shares and assets cumulative
+                recoveredMember.tribute = recoveredMember.tribute ? recoveredMember.tribute + addedTribute : addedTribute;
+                recoveredMember.shares = recoveredMember.shares ? recoveredMember.shares + addedShares : addedShares;
+                recoveredMember.assets = recoveredMember.assets ? 
+                  (recoveredMember.assets[0] as any).amount = (recoveredMember.assets[0] as any).amount + addedETH : 
+                  [{address: 'ETH', amount: addedETH}]; // TODO: change this when assets other than ETH come into the system
+                // And update the matching membership proposal
+                return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async (result: Member) => {
+                  // After the member is modified, we add the assets amount to the system
+                  try { // TODO: change this when assets other than ETH come into the system
+                    return await this.assetRepository.findById('ETH').then(async (assetETH: Asset) => {
+                      assetETH.amount = assetETH.amount + addedETH;
+                      return await this.assetRepository.updateById('ETH', assetETH).then(async (result: Asset) => {
+                        return await this.eventRepository.create(event);
+                      });
+                    });
+                  } catch {
+                    if (recoveredMember.assets) {
+                      return await this.assetRepository.create(recoveredMember.assets[0]).then(async (result: Asset) => {
+                        return await this.eventRepository.create(event);
+                      });
+                    }
+                  }
+                });
+              }
+            })
+          } catch {
+            // Prepare the data for a new membership proposal
+            let newMembershipProposal = {
+              address: addressToRecover,
+              nonce: Math.floor(Math.random() * 1000000),
+              name: addressToRecover,
+              title: memberPatch.title,
+              description: memberPatch.description,
+              shares: memberPatch.shares,
+              tribute: memberPatch.tribute,
+              status: status,
+              period: newPeriod.id,
+              assets: memberPatch.assets
+            } as Member;
+            // And create it
+            return await this.memberRepository.create(newMembershipProposal).then(async (result: Member) => {
+              // After the member is modified, we add the assets amount to the system
+              try { // TODO: change this when assets other than ETH come into the system
+                return await this.assetRepository.findById('ETH').then(async (assetETH: Asset) => {
+                  assetETH.amount = assetETH.amount + addedETH;
+                  return await this.assetRepository.updateById('ETH', assetETH).then(async (result: Asset) => {
+                    return await this.eventRepository.create(event);
+                  });
+                });
+              } catch {
+                if (newMembershipProposal.assets) {
+                  return await this.assetRepository.create(newMembershipProposal.assets[0]).then(async (result: Asset) => {
+                    return await this.eventRepository.create(event);
+                  });
+                }
+              }
+            });
+          }
+        }
         // Recover the config data to define a new period
         return await this.configRepository.find().then(async config => {
           // Config data
@@ -242,47 +314,7 @@ export class EventController {
                 periodCreate.gracePeriod = new Date(periodCreate.end.getTime() + (1000 * 60 * 60 * 24 * gracePeriodLength));
                 // And create a period for it
                 return await this.periodRepository.create(periodCreate).then(async newPeriod => {
-                  let addedTribute = memberPatch.tribute ? memberPatch.tribute : 0;
-                  let addedShares = memberPatch.shares ? memberPatch.shares : 0;
-                  let addedETH = memberPatch.assets ? (memberPatch.assets[0] as any).amount : 0; // TODO: change this when assets other than ETH come into the system
-                  let addressToRecover = memberPatch.applicantAddress ? memberPatch.applicantAddress.toLowerCase() : '';
-                  // Check if the member to which the proposal is for exists
-                  try {
-                    return await this.memberRepository.findById(addressToRecover).then(async recoveredMember => {
-                      if (recoveredMember) { // If there is a matching member, we modify it
-                        recoveredMember.period = newPeriod.id; // Assign the period
-                        recoveredMember.status = 'inqueue'; // Assign the status
-                        // Make the tribute, shares and assets cumulative
-                        recoveredMember.tribute = recoveredMember.tribute ? recoveredMember.tribute + addedTribute : addedTribute;
-                        recoveredMember.shares = recoveredMember.shares ? recoveredMember.shares + addedShares : addedShares;
-                        recoveredMember.assets = recoveredMember.assets ? 
-                          (recoveredMember.assets[0] as any).amount = (recoveredMember.assets[0] as any).amount + addedETH : 
-                          [{address: 'ETH', amount: addedETH}]; // TODO: change this when assets other than ETH come into the system
-                        // And update the matching membership proposal
-                        return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async result => {
-                          return await this.eventRepository.create(event);
-                        });
-                      }
-                    })
-                  } catch {
-                    // Prepare the data for a new membership proposal
-                    let newMembershipProposal = {
-                      address: addressToRecover,
-                      nonce: Math.floor(Math.random() * 1000000),
-                      name: addressToRecover,
-                      title: memberPatch.title,
-                      description: memberPatch.description,
-                      shares: memberPatch.shares,
-                      tribute: memberPatch.tribute,
-                      status: 'inqueue',
-                      period: newPeriod.id,
-                      assets: memberPatch.assets
-                    } as Member;
-                    // And create it
-                    return await this.memberRepository.create(newMembershipProposal).then(async result => {
-                      return await this.eventRepository.create(event);
-                    });
-                  }
+                  createMember(newPeriod, 'inqueue');
                 });
               });
             } else { // If there isn't a period on that date
@@ -291,12 +323,7 @@ export class EventController {
               periodCreate.gracePeriod = new Date(periodCreate.end.getTime() + (1000 * 60 * 60 * 24 * gracePeriodLength));
               // Create the period
               return await this.periodRepository.create(periodCreate).then(async newPeriod => {
-                memberPatch.period = newPeriod.id; // Assign it to the member
-                memberPatch.status = 'votingperiod';
-                // And create the member
-                return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async result => {
-                  return await this.eventRepository.create(event);
-                });
+                createMember(newPeriod, 'votingperiod');
               });
             }
           });
