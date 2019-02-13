@@ -246,13 +246,10 @@ export class EventController {
                   let addedShares = memberPatch.shares ? memberPatch.shares : 0;
                   let addedETH = memberPatch.assets ? (memberPatch.assets[0] as any).amount : 0; // TODO: change this when assets other than ETH come into the system
                   let addressToRecover = memberPatch.applicantAddress ? memberPatch.applicantAddress.toLowerCase() : '';
-                  console.log(memberPatch.address);
-                  console.log(memberPatch.applicantAddress);
                   // Check if the member to which the proposal is for exists
                   try {
                     return await this.memberRepository.findById(addressToRecover).then(async recoveredMember => {
                       if (recoveredMember) { // If there is a matching member, we modify it
-                        console.log('The member exists');
                         recoveredMember.period = newPeriod.id; // Assign the period
                         recoveredMember.status = 'inqueue'; // Assign the status
                         // Make the tribute, shares and assets cumulative
@@ -268,7 +265,6 @@ export class EventController {
                       }
                     })
                   } catch {
-                    console.log('The member does not exist');
                     // Prepare the data for a new membership proposal
                     let newMembershipProposal = {
                       address: addressToRecover,
