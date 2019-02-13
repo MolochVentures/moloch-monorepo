@@ -128,7 +128,7 @@ class MemberDetail extends React.Component {
                               {p.vote === "no" && <Label className="dot" circular color="red" empty />}
                               {p.type ? 
                               <Link to={{ pathname: `/proposals/${p.shares ? p.address : p.id}`, state: { type: p.type, status: p.status, gracePeriod: 0, end: 0 } }} className="uncolored">
-                                {p.title + p.shares}
+                                {p.title}
                               </Link> : <>{p.title}</> }
                             </Grid.Column>
                             <Grid.Column textAlign="center">

@@ -316,7 +316,7 @@ class ProposalDetail extends Component {
                   </Grid.Column>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
                     {/* <Button className="btn" color='grey' onClick={this.handleProcess} disabled={(this.state.isAccepted || this.state.votedYes <= 50 || this.state.status !== 'votingperiod' || (this.state.memberStatus !== 'passed' && this.state.userShare)) ? true : false}>Process Proposal</Button> */}
-                    <Button className="btn" color='grey' onClick={this.handleProcess} disabled={(!this.state.isAccepted && this.state.votedYes > 50 && this.state.status === 'votingperiod' && this.state.memberStatus === 'passed' && this.state.userShare) ? false : true}>Process Proposal</Button>
+                    <Button className="btn" color='grey' onClick={this.handleProcess} disabled={(!this.state.isAccepted && this.state.votedYes > 50 && (this.state.status === 'graceperiod' || this.state.status === 'inqueue' ) && this.state.memberStatus === 'passed' && this.state.userShare) ? false : true}>Process Proposal</Button>
                   </Grid.Column>
                 </Grid>
               </Grid.Column>
