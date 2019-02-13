@@ -3,8 +3,6 @@ import { Divider, Segment, Grid, Progress, Button } from "semantic-ui-react";
 import { Route, Switch, Link } from "react-router-dom";
 
 import ProposalDetail from "./ProposalDetail";
-import { connect } from "react-redux";
-import { fetchProposals, fetchMemberDetail } from "../action/actions";
 import { Query, withApollo } from "react-apollo";
 import gql from "graphql-tag";
 import { initMoloch } from "../web3";
@@ -277,47 +275,22 @@ const GET_LOGGED_IN_USER = gql`
     }
   }
 `;
-class ProposalListView extends React.Component {
-  render() {
-    let loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
-
-    return (
-      <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedUser.address }}>
-        {({ loading, error, data }) => {
-          if (loading) return "Loading...";
-          if (error) throw new Error(`Error!: ${error}`);
-          return (
-            <Switch>
-              <Route exact path="/proposals" render={() => <ProposalListHOC isActive={data.member.isActive} />} />
-              <Route path="/proposals/:id" component={ProposalDetail} />
-            </Switch>
-          );
-        }}
-      </Query>
-    );
-  }
+const ProposalListView = () => {
+  let loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+  return (
+    <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedUser.address }}>
+      {({ loading, error, data }) => {
+        if (loading) return "Loading...";
+        if (error) throw new Error(`Error!: ${error}`);
+        return (
+          <Switch>
+            <Route exact path="/proposals" render={() => <ProposalListHOC isActive={data.member.isActive} />} />
+            <Route path="/proposals/:id" component={ProposalDetail} />
+          </Switch>
+        );
+      }}
+    </Query>
+  );
 }
 
-// This function is used to convert redux global state to desired props.
-function mapStateToProps(state) {
-  return {
-    proposals: state.proposals.items ? state.proposals.items : {}
-  };
-}
-
-// This function is used to provide callbacks to container component.
-function mapDispatchToProps(dispatch) {
-  return {
-    fetchProposals: function(params) {
-      dispatch(fetchProposals(params));
-    },
-    fetchMemberDetail: function(id) {
-      return dispatch(fetchMemberDetail(id));
-    }
-  };
-}
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ProposalListView);
+export default ProposalListView
