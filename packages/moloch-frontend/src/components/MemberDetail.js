@@ -119,7 +119,6 @@ class MemberDetail extends React.Component {
                   </Grid.Row>
                   {this.state.member_detail.proposals && this.state.member_detail.proposals.length > 0 ?
                     this.state.member_detail.proposals.map((p, idx) => {
-                      console.log(p)
                       return (
                         <React.Fragment key={idx}>
                           <Grid.Row verticalAlign="middle">
@@ -127,7 +126,7 @@ class MemberDetail extends React.Component {
                               {p.vote === "yes" && <Label className="dot" circular color="green" empty />}
                               {p.vote === "no" && <Label className="dot" circular color="red" empty />}
                               {p.type ? 
-                              <Link to={{ pathname: `/proposals/${p.shares ? p.address : p.id}`, state: { type: p.type, status: p.status, gracePeriod: 0, end: 0 } }} className="uncolored">
+                              <Link to={{ pathname: `/proposals/${p.id}`, state: { type: p.type, status: p.status, gracePeriod: 0, end: 0 } }} className="uncolored">
                                 {p.title}
                               </Link> : <>{p.title}</> }
                             </Grid.Column>
