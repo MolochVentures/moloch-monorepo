@@ -190,7 +190,7 @@ class MembershipProposalSubmission extends Component {
                 let totalShares = parseInt(localStorage.getItem('totalShares'));
                 let requestedShare = parseInt(value);
                 let totalValueWithRequestedShare = totalShares+requestedShare;
-                shareValue = ((this.props.assetDetails.price_usd * this.props.assetAmount.amount * requestedShare)/totalValueWithRequestedShare);
+                shareValue = ((this.props.assetDetails.price_usd * this.props.assetAmount * requestedShare)/totalValueWithRequestedShare);
             } 
             this.setState({ [name]: value, shareValue: shareValue },
                 () => {
@@ -340,9 +340,10 @@ class MembershipProposalSubmission extends Component {
 
 // This function is used to convert redux global state to desired props.
 function mapStateToProps(state) {
+    // console.log(state)
     return {
         assetDetails: state.assetData.items ? state.assetData.items[0] : { price_usd: 1 },
-        assetAmount: state.assetAmount.items ? state.assetData.items[0] : { amount: 1 },
+        assetAmount: state.assetAmount.items ? state.assetAmount.items : 0,
         memberDetail: state.members.items
     };
 }

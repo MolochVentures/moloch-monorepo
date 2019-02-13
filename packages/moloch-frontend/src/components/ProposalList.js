@@ -36,7 +36,7 @@ const ProgressBar = ({ yes, no }) => (
 
 const ProposalCard = ({ proposal }) => {
   let type = proposal.address ? 'member' : 'project';
-  let id = proposal.shares ? (proposal.name ? proposal.name : proposal.address) : (proposal.id ? proposal.id : proposal.address);
+  let id = proposal.shares ? proposal.address : proposal.id;
   let gracePeriod = proposal.status === 'votingperiod' ? proposal.gracePeriod : 0;
   let end = proposal.status === 'votingperiod' ? proposal.end : 0;
   return (

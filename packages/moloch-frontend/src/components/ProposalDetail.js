@@ -193,6 +193,7 @@ class ProposalDetail extends Component {
       proposal.voters.push(voter);
     }
     let self = this;
+    console.log(proposal)
     this.props.postEvents(JSON.stringify({ id: '', name: eventName, payload: proposal }))
       .then((responseJson) => {
         if (responseJson.type === "POST_EVENTS_SUCCESS") {
@@ -314,7 +315,8 @@ class ProposalDetail extends Component {
                     <Button className="btn" color='grey' disabled={this.state.userHasVoted || this.state.isAccepted || this.state.status !== 'votingperiod' || (!this.state.userShare || (this.state.memberStatus !== 'passed'))} onClick={this.handleYes}>Vote Yes</Button>
                   </Grid.Column>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5} >
-                    <Button className="btn" color='grey' onClick={this.handleProcess} disabled={(this.state.isAccepted || this.state.votedYes <= 50 || this.state.status !== 'votingperiod' || (this.state.memberStatus !== 'passed')) ? true : false}>Process Proposal</Button>
+                    {/* <Button className="btn" color='grey' onClick={this.handleProcess} disabled={(this.state.isAccepted || this.state.votedYes <= 50 || this.state.status !== 'votingperiod' || (this.state.memberStatus !== 'passed' && this.state.userShare)) ? true : false}>Process Proposal</Button> */}
+                    <Button className="btn" color='grey' onClick={this.handleProcess} disabled={(!this.state.isAccepted && this.state.votedYes > 50 && this.state.status === 'votingperiod' && this.state.memberStatus === 'passed' && this.state.userShare) ? false : true}>Process Proposal</Button>
                   </Grid.Column>
                 </Grid>
               </Grid.Column>
