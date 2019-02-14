@@ -3,9 +3,11 @@ import SafeProvider from "safe-web3-provider"
 const Web3 = require("web3")
 
 const molochAbi = require('./abi/Moloch.abi.json')
+const erc20Abi = require('./abi/ERC20.abi.json')
 
 let web3
 let moloch
+let token
 
 export async function initMetmask() {
   if (!window.ethereum && !window.web3) {
@@ -31,7 +33,7 @@ export function initGnosisSafe() {
    */
   const provider = new SafeProvider({
     // TODO: CHANGE THIS TO INFURA/ALCHEMY
-    rpcUrl: "http://localhost:8545"
+    rpcUrl: process.env.REACT_APP_ETH_URL
   });
 
   /**
@@ -52,9 +54,22 @@ export async function initMoloch() {
       throw new Error("Not logged in with web3.")
     }
   }
-  // TODO
-  moloch = new web3.eth.Contract(molochAbi, "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6")
+  moloch = new web3.eth.Contract(molochAbi, process.env.REACT_APP_MOLOCH_ADDRESS)
   return moloch
+}
+
+export async function initToken() {
+  if (!web3) {
+    if (localStorage.getItem("loginType") === "metamask") {
+      web3 = await initMetmask()
+    } else if (localStorage.getItem("loginType") === "gnosis") {
+      web3 = await initGnosisSafe()
+    } else {
+      throw new Error("Not logged in with web3.")
+    }
+  }
+  token = new web3.eth.Contract(erc20Abi, process.env.REACT_APP_TOKEN_ADDRESS)
+  return token
 }
 
 export function getWeb3() {
@@ -69,4 +84,11 @@ export async function getMoloch() {
     await initMoloch()
   }
   return moloch
+}
+
+export async function getToken() {
+  if (!token) {
+    await initToken()
+  }
+  return token
 }
