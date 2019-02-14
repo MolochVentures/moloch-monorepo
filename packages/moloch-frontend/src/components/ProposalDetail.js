@@ -16,6 +16,12 @@ const formatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2
 });
 
+const Vote = {
+  Null: 0, // default value, counted as abstention
+  Yes: 1,
+  No: 2
+}
+
 const MemberAvatar = ({ member, shares }) => {
   return (
     <Grid.Column mobile={4} tablet={3} computer={3} textAlign="center" className="member_avatar" title={member}>
@@ -111,18 +117,19 @@ class ProposalDetail extends Component {
   }
 
   handleNo() {
-    // Add the voter to the voters of the proposal.
+    const { proposal, moloch, user } = this.state
+    moloch.methods.submitVote(proposal.proposalIndex, Vote.No).send({ from: user.id })
   }
 
   handleYes() {
-    // Add the voter to the voters of the proposal.
+    const { proposal, moloch, user } = this.state
+    moloch.methods.submitVote(proposal.proposalIndex, Vote.Yes).send({ from: user.id })
   }
 
-  handleProcess() {}
-
-  sendProposalUpdate(eventName, voter) {}
-
-  onLoadMore() {}
+  handleProcess() {
+    const { proposal, moloch, user } = this.state
+    moloch.methods.processProposal(proposal.proposalIndex).send({ from: user.id })
+  }
 
   render() {
     return (
