@@ -1,5 +1,7 @@
-import Web3 from "web3"
+
 import SafeProvider from "safe-web3-provider"
+const Web3 = require("web3")
+
 const molochAbi = require('./abi/Moloch.abi.json')
 
 let web3
@@ -62,9 +64,9 @@ export function getWeb3() {
   return web3
 }
 
-export function getMoloch() {
+export async function getMoloch() {
   if (!moloch) {
-    initMoloch()
+    await initMoloch()
   }
   return moloch
 }
