@@ -41,5 +41,5 @@
   "devDependencies": {
     "gh-pages": "^2.0.1"
   },
-  "homepage": "http://molochventures.github.io/moloch-monorepo/"
+  "homepage": "http://molochventures.github.io/moloch-monorepo"
 }
