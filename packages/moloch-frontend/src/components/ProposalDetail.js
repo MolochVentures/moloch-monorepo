@@ -8,6 +8,7 @@ import ProgressBar from "./ProgressBar";
 import gql from "graphql-tag";
 import { withApollo } from "react-apollo";
 import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
+import { getMoloch } from "../web3";
 
 const formatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -64,10 +65,18 @@ class ProposalDetail extends Component {
 
     this.state = {
       proposal: {},
-      user: {}
+      user: {},
+      moloch: null
     };
 
     this.fetchData(props);
+  }
+
+  async componentDidMount() {
+    const moloch = await getMoloch();
+    this.setState({
+      moloch
+    });
   }
 
   async fetchData(props) {
@@ -122,12 +131,12 @@ class ProposalDetail extends Component {
           <Segment className="transparent box segment" textAlign="center">
             <Grid centered columns={14}>
               <Grid.Column mobile={16} tablet={16} computer={12}>
-                <span className="title">{this.state.proposal.title}</span>
+                <span className="title">{this.state.proposal.title ? this.state.proposal.title : "N/A"}</span>
               </Grid.Column>
             </Grid>
             <Grid centered columns={14}>
               <Grid.Column mobile={16} tablet={16} computer={4}>
-                <div className="subtext description">{this.state.proposal.description}</div>
+                <div className="subtext description">{this.state.proposal.description ? this.state.proposal.description : "N/A"}</div>
                 {this.state.proposal.assets ? (
                   <Grid columns="equal" className="tokens">
                     <Grid.Row>
