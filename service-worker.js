@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/molochdao/precache-manifest.0159cc9e066607324dbdb92f38d40a6f.js"
+  "/moloch-monorepo/precache-manifest.836db5ccbdd401a9ec4d30d2fe7f99fd.js"
 );
 
 workbox.clientsClaim();
@@ -28,7 +28,7 @@ self.__precacheManifest = [].concat(self.__precacheManifest || []);
 workbox.precaching.suppressWarnings();
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
 
-workbox.routing.registerNavigationRoute("/molochdao/index.html", {
+workbox.routing.registerNavigationRoute("/moloch-monorepo/index.html", {
   
   blacklist: [/^\/_/,/\/[^\/]+\.[^\/]+$/],
 });
