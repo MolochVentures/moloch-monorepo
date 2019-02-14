@@ -27,7 +27,7 @@ class MemberDetail extends React.Component {
     this.props.fetchMemberDetail(this.props.match.params.name)
       .then((responseJson) => {
         if (responseJson.type === 'FETCH_MEMBER_DETAIL_SUCCESS') {
-          this.setState({member_detail: responseJson.items.member})
+          this.setState({ member_detail: responseJson.items.member })
         }
       });
   }
@@ -35,18 +35,18 @@ class MemberDetail extends React.Component {
   render() {
     return (
       <div id="member_detail">
-        <p className="title"> {this.props.match.params.name} </p>
+        <p className="title"> {this.state.member_detail.name ? this.state.member_detail.name : this.state.member_detail.address} </p>
         <Divider />
         <Grid columns={16} >
           <Grid.Row className="details">
             <Grid.Column mobile={16} tablet={16} computer={6} className="user" >
-              <Segment className="blurred box" style={{overflowY: 'auto'}}>
+              <Segment className="blurred box" style={{ overflowY: 'auto' }}>
                 <Grid columns="equal">
                   <Grid.Column>
                     <p className="subtext">Shares</p>
                     <p className="amount">{this.state.member_detail.shares ? this.state.member_detail.shares : 0}</p>
                   </Grid.Column>
-                  <Grid.Column  textAlign="right">
+                  <Grid.Column textAlign="right">
                     <p className="subtext">Total USD Value</p>
                     <p className="amount">{formatter.format(this.state.member_detail.tribute ? this.state.member_detail.tribute : 0)}</p>
                   </Grid.Column>
@@ -61,9 +61,9 @@ class MemberDetail extends React.Component {
                   <Grid.Row>
                     {this.state.member_detail.assets ? this.state.member_detail.assets.map((token, idx) => {
                       return (
-                        <Grid.Column key={idx}  mobile={16} tablet={16} computer={4} style={{marginBottom: 10}}>
+                        <Grid.Column key={idx} mobile={16} tablet={16} computer={4} style={{ marginBottom: 10 }}>
                           <Segment className="pill" textAlign="center">
-                            <Icon name="ethereum" />{token.amount} {(token.address && token.address.length) > 5 ? token.address.substring(0, 5) + '...' : token.address}
+                            <Icon name="ethereum" />{token.amount} {token.symbol}
                           </Segment>
                         </Grid.Column>
                       )
@@ -80,7 +80,7 @@ class MemberDetail extends React.Component {
                   </Grid.Row> */}
                 </Grid>
                 <Grid columns="equal" textAlign="center">
-                  <Grid.Row style={{paddingBottom: 5}}>
+                  <Grid.Row style={{ paddingBottom: 5 }}>
                     <p className="subtext">Delegate Key</p>
                   </Grid.Row>
                   <Grid.Row>
@@ -92,7 +92,7 @@ class MemberDetail extends React.Component {
             <Grid.Column mobile={16} tablet={16} computer={10} className="proposals" >
               <Segment className="blurred box">
                 <Grid columns="equal" textAlign="center">
-                  <Grid.Row className="subtext" style={{fontSize: 20}}>
+                  <Grid.Row className="subtext" style={{ fontSize: 20 }}>
                     History
                   </Grid.Row>
                 </Grid>
@@ -125,10 +125,10 @@ class MemberDetail extends React.Component {
                             <Grid.Column textAlign="center">
                               {p.vote === "yes" && <Label className="dot" circular color="green" empty />}
                               {p.vote === "no" && <Label className="dot" circular color="red" empty />}
-                              {p.type ? 
-                              <Link to={{ pathname: `/proposals/${p.id}`, state: { type: p.type, status: p.status, gracePeriod: 0, end: 0 } }} className="uncolored">
-                                {p.title}
-                              </Link> : <>{p.title}</> }
+                              {p.type ?
+                                <Link to={{ pathname: `/proposals/${p.id}`, state: { type: p.type, status: p.status, gracePeriod: 0, end: 0 } }} className="uncolored">
+                                  {p.title}
+                                </Link> : <>{p.title}</>}
                             </Grid.Column>
                             <Grid.Column textAlign="center">
                               <p className="subtext date">{moment(p.date).format('MM/MDD/YYYY')}</p>
@@ -139,7 +139,7 @@ class MemberDetail extends React.Component {
                             <Grid.Column textAlign="center">
                               <p className="subtext date">{formatter.format(p.tribute ? p.tribute : 0)}</p>
                             </Grid.Column>
-                            <Grid.Column  textAlign="center">
+                            <Grid.Column textAlign="center">
                               <Header as="p"
                                 color={p.vote === "yes" ? "green" : p.vote === "no" ? "red" : null}>
                                 {p.vote.charAt(0).toUpperCase()}

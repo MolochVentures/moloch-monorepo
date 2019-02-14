@@ -1,16 +1,16 @@
 import React from 'react';
-import { Grid, Image, Divider, Button } from 'semantic-ui-react';
+import { Grid, Image, Divider } from 'semantic-ui-react';
 
-import xIcon from 'assets/0xIcon.png';
-import aragonIcon from 'assets/aragonIcon.png';
-import bitcoinIcon from 'assets/bitcoinIcon.png';
-import district0xIcon from 'assets/district0xIcon.png';
-import ethereumIcon from 'assets/ethereumIcon.png';
-import funfairIcon from 'assets/funfairIcon.png';
-import makerIcon from 'assets/makerIcon.png';
-import spankchainIcon from 'assets/spankchainIcon.png';
-import stellarIcon from 'assets/stellarIcon.png';
-import stormIcon from 'assets/stormIcon.png';
+// import xIcon from 'assets/0xIcon.png';
+// import aragonIcon from 'assets/aragonIcon.png';
+// import bitcoinIcon from 'assets/bitcoinIcon.png';
+// import district0xIcon from 'assets/district0xIcon.png';
+// import ethereumIcon from 'assets/ethereumIcon.png';
+// import funfairIcon from 'assets/funfairIcon.png';
+// import makerIcon from 'assets/makerIcon.png';
+// import spankchainIcon from 'assets/spankchainIcon.png';
+// import stellarIcon from 'assets/stellarIcon.png';
+// import stormIcon from 'assets/stormIcon.png';
 import ETHLogo from 'assets/ETHLogo.png';
 
 import { connect } from 'react-redux';

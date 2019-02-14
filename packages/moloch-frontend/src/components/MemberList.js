@@ -205,15 +205,18 @@ import hood from 'assets/hood.png';
 import { connect } from 'react-redux';
 import { fetchActiveMembers, fetchConfigFounders, fetchMemberDetail, fetchMembersWithShares } from '../action/actions';
 
-const MemberAvatar = ({ address, shares }) => (
-  <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={address}  >
-    <Link to={`/members/${address}`} className="uncolored">
-      <Image src={hood} centered size='tiny' />
-      <p className="name">{!address ? '' : (address.length > 10 ? address.substring(0, 10) + '...' : address)}</p>
-      <p className="subtext">{shares} shares</p>
-    </Link>
-  </Grid.Column>
-);
+const MemberAvatar = ({ address, shares, name }) => {
+  let displayedName = name ? name : address;
+  return (
+    <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={address}  >
+      <Link to={`/members/${address}`} className="uncolored">
+        <Image src={hood} centered size='tiny' />
+        <p className="name">{!displayedName ? '' : (displayedName.length > 10 ? displayedName.substring(0, 10) + '...' : displayedName)}</p>
+        <p className="subtext">{shares} shares</p>
+      </Link>
+    </Grid.Column>
+  )
+};
 
 const MemberList = (props) => {
   return (
@@ -241,7 +244,7 @@ const MemberList = (props) => {
             </Link>
           </Grid.Column>
         </Grid>
-         : null
+        : null
       }
       <Grid className="member_item">
         <Grid.Row>
@@ -329,7 +332,7 @@ function mapDispatchToProps(dispatch) {
     fetchMemberDetail: function (id) {
       return dispatch(fetchMemberDetail(id))
     },
-    fetchMembersWithShares: function() {
+    fetchMembersWithShares: function () {
       return dispatch(fetchMembersWithShares());
     }
   };
