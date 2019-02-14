@@ -39,14 +39,32 @@ const ProposalCard = ({ proposal }) => {
             <Grid.Row>
               <Grid.Column textAlign="center">
                 <Segment className="voting pill" textAlign="center">
-                  <span className="subtext">Voting Ends: </span>
-                  <span>{proposal.votingEnds ? proposal.votingEnds : "-"} periods</span>
+                  {proposal.votingEnded ? (
+                    <span className="subtext">Voting Ended</span>
+                  ) : (
+                    <>
+                      <span className="subtext">Voting Ends: </span>
+                      <span>
+                        {proposal.votingEnds ? proposal.votingEnds : "-"} period$
+                        {proposal.votingEnds === 1 ? null : "s"}
+                      </span>
+                    </>
+                  )}
                 </Segment>
               </Grid.Column>
               <Grid.Column textAlign="center">
                 <Segment className="grace pill" textAlign="center">
-                  <span className="subtext">Grace Period: </span>
-                  <span>{proposal.gracePeriod ? proposal.gracePeriod : "-"} periods</span>
+                  {proposal.graceEnded ? (
+                    <span className="subtext">Grace Ended</span>
+                  ) : (
+                    <>
+                      <span className="subtext">Grace Period Ends: </span>
+                      <span>
+                        {proposal.gracePeriod ? proposal.gracePeriod : "-"} period$
+                        {proposal.gracePeriod === 1 ? null : "s"}
+                      </span>
+                    </>
+                  )}
                 </Segment>
               </Grid.Column>
             </Grid.Row>
@@ -93,10 +111,15 @@ class ProposalList extends React.Component {
     const result = await client.query({
       query: GET_PROPOSAL_LIST
     });
-    await this.determineProposalStatuses(result.data.proposals);
-    this.setState({
-      loading: false
-    });
+    try {
+      await this.determineProposalStatuses(result.data.proposals);
+    } catch(e) {
+      console.error(e)
+    } finally {
+      this.setState({
+        loading: false
+      });
+    }
   }
 
   determineProposalStatuses = async proposals => {
