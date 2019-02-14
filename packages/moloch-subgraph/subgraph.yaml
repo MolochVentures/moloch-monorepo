@@ -6,9 +6,9 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: Moloch
-    network: james
+    network: mainnet
     source:
-      address: '0xacd2A62497701420fD8278De9b3225Ac0f0854f1'
+      address: '0x1fd169A4f5c59ACf79d0Fd5d91D1201EF1Bce9f1'
       abi: Moloch
     mapping:
       kind: ethereum/events
