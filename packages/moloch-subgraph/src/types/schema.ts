@@ -268,15 +268,6 @@ export class Proposal extends Entity {
     this.set("votes", Value.fromStringArray(value));
   }
 
-  get startingPeriod(): BigInt {
-    let value = this.get("startingPeriod");
-    return value.toBigInt();
-  }
-
-  set startingPeriod(value: BigInt) {
-    this.set("startingPeriod", Value.fromBigInt(value));
-  }
-
   get details(): string {
     let value = this.get("details");
     return value.toString();
