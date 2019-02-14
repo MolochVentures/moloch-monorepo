@@ -220,18 +220,17 @@ export class EventController {
         */
        // This function is called after the period is created correctly to create the member and add the assets to the system
         var createMember = async function(newPeriod: Period, status: string) {
-          console.log(1);
           let addedTribute = memberPatch.tribute ? memberPatch.tribute : 0;
           let addedShares = memberPatch.shares ? memberPatch.shares : 0;
-          let addedETH = memberPatch.assets ? ((memberPatch.assets[0] as any).amount as number) : 0; // TODO: change this when assets other than ETH come into the system
+          let addedETH = memberPatch.assets ? memberPatch.assets[0].amount : 0; // TODO: change this when assets other than ETH come into the system
+          console.log(addedTribute);
+          console.log(addedTribute);
+          console.log(addedTribute);
           let addressToRecover = memberPatch.applicantAddress ? memberPatch.applicantAddress.toLowerCase() : '';
           // Check if the member to which the proposal is for exists
           try {
-            console.log(2);
             return await self.memberRepository.findById(addressToRecover).then(async recoveredMember => {
-              console.log(3);
               if (recoveredMember) { // If there is a matching member, we modify it
-                console.log(4);
                 recoveredMember.period = newPeriod.id; // Assign the period
                 recoveredMember.status = status; // Assign the status
                 recoveredMember.title = memberPatch.title;
@@ -247,18 +246,14 @@ export class EventController {
                 return await self.memberRepository.updateById(recoveredMember.address, recoveredMember).then(async result => {
                   // After the member is modified, we add the assets amount to the system
                   try { // TODO: change this when assets other than ETH come into the system
-                    console.log(6);
                     return await self.assetRepository.findById('ETH').then(async assetETH => {
-                      console.log(7);
                       assetETH.amount = assetETH.amount + (addedETH as number);
                       return await self.assetRepository.updateById('ETH', assetETH).then(async result => {
-                        console.log(8);
                         return await self.eventRepository.create(event);
                       });
                     });
                   } catch {
                     if (recoveredMember.assets) {
-                      console.log(9);
                       return await self.assetRepository.create(recoveredMember.assets[0]).then(async result => {
                         return await self.eventRepository.create(event);
                       });

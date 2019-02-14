@@ -11,6 +11,7 @@ export class Asset extends Entity {
 
   @property({
     type: 'string',
+    required: true,
   })
   symbol: string;
 
@@ -22,18 +23,15 @@ export class Asset extends Entity {
 
   @property({
     type: 'number',
+    required: true,
   })
   price: number;
 
   @property({
     type: 'string',
+    required: true,
   })
   logo: string;
-
-  @property({
-    type: 'string',
-  })
-  priceFeed: string;
 
   @property({
     type: 'string',
