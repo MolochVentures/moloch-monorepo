@@ -116,7 +116,6 @@ class ProposalDetail extends Component {
   onLoadMore() {}
 
   render() {
-    console.log(this.state.proposal)
     return (
       <div id="proposal_detail">
         <Grid centered columns={16}>
@@ -161,23 +160,32 @@ class ProposalDetail extends Component {
                 <Grid columns={16}>
                   <Grid.Column textAlign="left" mobile={16} tablet={8} computer={8} className="pill_column">
                     <span className="pill">
-                      <span className="subtext">
-                        {this.state.proposal.votingEnded
-                          ? "Voting Finished"
-                          : `Voting Ends: ${this.state.proposal.votingEnds ? this.state.proposal.votingEnds : "-"} period${
-                              this.state.proposal.votingEnds === 1 ? null : "s"
-                            }`}
-                      </span>
+                      {this.state.proposal.votingEnded ? (
+                        <span className="subtext">Voting Ended</span>
+                      ) : (
+                        <>
+                          <span className="subtext">Voting Ends: </span>
+                          <span>
+                            {this.state.proposal.votingEnds ? this.state.proposal.votingEnds : "-"} period$
+                            {this.state.proposal.votingEnds === 1 ? null : "s"}
+                          </span>
+                        </>
+                      )}
                     </span>
                   </Grid.Column>
                   <Grid.Column textAlign="right" className="pill_column grace" mobile={16} tablet={8} computer={8}>
                     <span className="pill">
-                      <span className="subtext">{this.state.proposal.graceEnded
-                          ? "Grace Period Finished"
-                          : `Grace Period Ends: ${this.state.proposal.gracePeriod ? this.state.proposal.gracePeriod : "-"} period${
-                              this.state.proposal.gracePeriod === 1 ? null : "s"
-                            }`}
-                      </span>
+                      {this.state.proposal.graceEnded ? (
+                        <span className="subtext">Grace Ended</span>
+                      ) : (
+                        <>
+                          <span className="subtext">Grace Period Ends: </span>
+                          <span>
+                            {this.state.proposal.gracePeriod ? this.state.proposal.gracePeriod : "-"} period$
+                            {this.state.proposal.gracePeriod === 1 ? null : "s"}
+                          </span>
+                        </>
+                      )}
                     </span>
                   </Grid.Column>
                 </Grid>
