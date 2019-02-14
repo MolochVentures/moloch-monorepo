@@ -178,15 +178,6 @@ export class Proposal extends Entity {
     this.set("memberAddress", Value.fromBytes(value));
   }
 
-  get applicant(): string {
-    let value = this.get("applicant");
-    return value.toString();
-  }
-
-  set applicant(value: string) {
-    this.set("applicant", Value.fromString(value));
-  }
-
   get applicantAddress(): Bytes {
     let value = this.get("applicantAddress");
     return value.toBytes();

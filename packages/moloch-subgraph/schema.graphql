@@ -16,7 +16,6 @@ type Proposal @entity {
   delegateKey: Bytes!
   member: Member!
   memberAddress: Bytes!
-  applicant: Applicant!
   applicantAddress: Bytes!
   tokenTribute: BigInt!
   sharesRequested:BigInt!
