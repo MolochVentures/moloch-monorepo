@@ -1,12 +1,11 @@
 import React from "react";
-import { Segment, Grid, Progress, Button } from "semantic-ui-react";
+import { Segment, Grid, Button } from "semantic-ui-react";
 import { Route, Switch, Link } from "react-router-dom";
 
 import ProposalDetail from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
 import { Query, withApollo } from "react-apollo";
 import gql from "graphql-tag";
-import { initMoloch } from "../web3";
 import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
 
 const formatter = new Intl.NumberFormat("en-US", {
