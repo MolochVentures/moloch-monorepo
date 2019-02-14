@@ -178,6 +178,15 @@ export class Proposal extends Entity {
     this.set("memberAddress", Value.fromBytes(value));
   }
 
+  get applicant(): string {
+    let value = this.get("applicant");
+    return value.toString();
+  }
+
+  set applicant(value: string) {
+    this.set("applicant", Value.fromString(value));
+  }
+
   get applicantAddress(): Bytes {
     let value = this.get("applicantAddress");
     return value.toBytes();
@@ -257,6 +266,33 @@ export class Proposal extends Entity {
 
   set votes(value: Array<string>) {
     this.set("votes", Value.fromStringArray(value));
+  }
+
+  get startingPeriod(): BigInt {
+    let value = this.get("startingPeriod");
+    return value.toBigInt();
+  }
+
+  set startingPeriod(value: BigInt) {
+    this.set("startingPeriod", Value.fromBigInt(value));
+  }
+
+  get details(): string {
+    let value = this.get("details");
+    return value.toString();
+  }
+
+  set details(value: string) {
+    this.set("details", Value.fromString(value));
+  }
+
+  get maxTotalSharesAtYesVote(): BigInt {
+    let value = this.get("maxTotalSharesAtYesVote");
+    return value.toBigInt();
+  }
+
+  set maxTotalSharesAtYesVote(value: BigInt) {
+    this.set("maxTotalSharesAtYesVote", Value.fromBigInt(value));
   }
 }
 

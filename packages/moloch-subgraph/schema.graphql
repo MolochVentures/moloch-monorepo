@@ -16,6 +16,7 @@ type Proposal @entity {
   delegateKey: Bytes!
   member: Member!
   memberAddress: Bytes!
+  applicant: Applicant!
   applicantAddress: Bytes!
   tokenTribute: BigInt!
   sharesRequested:BigInt!
@@ -25,6 +26,8 @@ type Proposal @entity {
   didPass: Boolean!
   aborted: Boolean!
   votes: [Vote!]!
+  details: String!
+  maxTotalSharesAtYesVote: BigInt!
 }
 
 type Applicant @entity {
