@@ -205,10 +205,7 @@ class ProposalDetail extends Component {
                         <Grid>
                           <Grid.Row className="members_row">
                             {/* centered */}
-                            {this.state.proposal.votes.map((vote, idx) => {
-                              console.log("vote: ", vote);
-                              return <MemberAvatar member={vote.member.id} shares={vote.member.shares} key={idx} />;
-                            })}
+                            {this.state.proposal.votes.map((vote, idx) => <MemberAvatar member={vote.member.id} shares={vote.member.shares} key={idx} />)}
                           </Grid.Row>
                         </Grid>
                       ) : null}
