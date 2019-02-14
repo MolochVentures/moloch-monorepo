@@ -16,8 +16,10 @@ import { store } from './store';
 import { ApolloProvider } from "react-apollo";
 import ApolloClient from "apollo-boost";
 
+console.log('process.env.REACT_APP_GRAPH_NODE_URI: ', process.env.REACT_APP_GRAPH_NODE_URI);
+console.log(process.env);
 const client = new ApolloClient({
-  uri: "http://127.0.0.1:8000/subgraphs/name/moloch",
+  uri: process.env.REACT_APP_GRAPH_NODE_URI,
   connectToDevTools: true
 });
 
