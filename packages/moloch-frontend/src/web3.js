@@ -64,9 +64,9 @@ export function getWeb3() {
   return web3
 }
 
-export function getMoloch() {
+export async function getMoloch() {
   if (!moloch) {
-    initMoloch()
+    await initMoloch()
   }
   return moloch
 }
