@@ -23,6 +23,12 @@ export async function getProposalDetailsFromOnChain(proposal) {
 
   const inVotingPeriod = proposal => currentPeriod > proposal.startingPeriod && currentPeriod < proposal.startingPeriod + VOTING_PERIOD_LENGTH;
 
+  const enoughPassingVotes = proposal => Math.round((parseInt(proposal.yesVotes) / (parseInt(proposal.yesVotes) + parseInt(proposal.noVotes))) * 100) > 50
+
+  const passedVotingAndGrace = proposal => currentPeriod > proposal.startingPeriod + VOTING_PERIOD_LENGTH + GRACE_PERIOD_LENGTH
+
+  const passedVoting = proposal => currentPeriod > proposal.startingPeriod + VOTING_PERIOD_LENGTH
+
   proposal.proposalIndex = parseInt(proposal.proposalIndex);
 
   const proposalFromChain = await moloch.methods.proposalQueue(proposal.proposalIndex).call();
@@ -44,6 +50,18 @@ export async function getProposalDetailsFromOnChain(proposal) {
     proposal.votingEnds = proposal.startingPeriod + VOTING_PERIOD_LENGTH - currentPeriod;
   } else {
     proposal.status = ProposalStatus.InQueue;
+  }
+
+  proposal.votingEnded = passedVoting(proposal);
+  proposal.graceEnded = passedVotingAndGrace(proposal);
+
+  proposal.readyForProcessing = false;
+  if (
+    proposal.status === ProposalStatus.InQueue &&
+    passedVotingAndGrace(proposal) &&
+    enoughPassingVotes(proposal)
+  ) {
+    proposal.readyForProcessing = true;
   }
 
   let details = {

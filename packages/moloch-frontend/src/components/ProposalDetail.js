@@ -7,7 +7,7 @@ import ProgressBar from "./ProgressBar";
 
 import gql from "graphql-tag";
 import { withApollo } from "react-apollo";
-import { getProposalDetailsFromOnChain } from "../helpers/proposals";
+import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
 
 const formatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -26,6 +26,15 @@ const MemberAvatar = ({ member, shares }) => {
   );
 };
 
+const GET_LOGGED_IN_USER = gql`
+  query User($address: String!) {
+    member(id: $address) {
+      id
+      shares
+      isActive
+    }
+  }
+`;
 const GET_PROPOSAL_DETAIL = gql`
   query Proposal($id: String!) {
     proposal(id: $id) {
@@ -54,7 +63,8 @@ class ProposalDetail extends Component {
     super(props);
 
     this.state = {
-      proposal: {}
+      proposal: {},
+      user: {}
     };
 
     this.fetchData(props);
@@ -62,12 +72,21 @@ class ProposalDetail extends Component {
 
   async fetchData(props) {
     const { client } = props;
-    const result = await client.query({
+    const proposalResult = await client.query({
       query: GET_PROPOSAL_DETAIL,
       variables: { id: this.props.match.params.id }
     });
 
-    const proposal = await getProposalDetailsFromOnChain(result.data.proposal);
+    const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+    const userResult = await client.query({
+      query: GET_LOGGED_IN_USER,
+      variables: { address: loggedUser.address }
+    });
+    this.setState({
+      user: userResult.data.member
+    });
+
+    const proposal = await getProposalDetailsFromOnChain(proposalResult.data.proposal);
     this.setState({
       proposal
     });
@@ -97,6 +116,7 @@ class ProposalDetail extends Component {
   onLoadMore() {}
 
   render() {
+    console.log(this.state.proposal)
     return (
       <div id="proposal_detail">
         <Grid centered columns={16}>
@@ -141,13 +161,23 @@ class ProposalDetail extends Component {
                 <Grid columns={16}>
                   <Grid.Column textAlign="left" mobile={16} tablet={8} computer={8} className="pill_column">
                     <span className="pill">
-                      <span className="subtext">Voting Ends:</span>&nbsp; {this.state.proposal.votingEnds ? this.state.proposal.votingEnds : "-"} day
-                      {this.state.proposal.votingEnds === 1 ? null : "s"}
+                      <span className="subtext">
+                        {this.state.proposal.votingEnded
+                          ? "Voting Finished"
+                          : `Voting Ends: ${this.state.proposal.votingEnds ? this.state.proposal.votingEnds : "-"} period${
+                              this.state.proposal.votingEnds === 1 ? null : "s"
+                            }`}
+                      </span>
                     </span>
                   </Grid.Column>
                   <Grid.Column textAlign="right" className="pill_column grace" mobile={16} tablet={8} computer={8}>
                     <span className="pill">
-                      <span className="subtext">Grace Period:</span>&nbsp; {this.state.gracePeriod} day{this.state.gracePeriod > 0 ? "s" : null}
+                      <span className="subtext">{this.state.proposal.graceEnded
+                          ? "Grace Period Finished"
+                          : `Grace Period Ends: ${this.state.proposal.gracePeriod ? this.state.proposal.gracePeriod : "-"} period${
+                              this.state.proposal.gracePeriod === 1 ? null : "s"
+                            }`}
+                      </span>
                     </span>
                   </Grid.Column>
                 </Grid>
@@ -180,9 +210,8 @@ class ProposalDetail extends Component {
                       color="grey"
                       disabled={
                         this.state.userHasVoted ||
-                        this.state.isAccepted ||
-                        this.state.status !== "inprogress" ||
-                        (!this.state.userShare || this.state.memberStatus !== "active")
+                        this.state.proposal.status !== ProposalStatus.VotingPeriod ||
+                        (!this.state.user.shares || this.state.user.isActive)
                       }
                       onClick={this.handleNo}
                     >
@@ -195,9 +224,8 @@ class ProposalDetail extends Component {
                       color="grey"
                       disabled={
                         this.state.userHasVoted ||
-                        this.state.isAccepted ||
-                        this.state.status !== "inprogress" ||
-                        (!this.state.userShare || this.state.memberStatus !== "active")
+                        this.state.proposal.status !== ProposalStatus.VotingPeriod ||
+                        (!this.state.user.shares || this.state.user.isActive)
                       }
                       onClick={this.handleYes}
                     >
@@ -205,19 +233,7 @@ class ProposalDetail extends Component {
                     </Button>
                   </Grid.Column>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                    <Button
-                      className="btn"
-                      color="grey"
-                      onClick={this.handleProcess}
-                      disabled={
-                        this.state.isAccepted ||
-                        this.state.votedYes <= 50 ||
-                        this.state.status !== "inprogress" ||
-                        this.state.memberStatus !== "active"
-                          ? true
-                          : false
-                      }
-                    >
+                    <Button className="btn" color="grey" onClick={this.handleProcess} disabled={!this.state.proposal.readyForProcessing}>
                       Process Proposal
                     </Button>
                   </Grid.Column>
