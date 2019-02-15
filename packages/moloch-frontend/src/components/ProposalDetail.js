@@ -119,11 +119,17 @@ class ProposalDetail extends Component {
   handleNo = () => {
     const { proposal, moloch, user } = this.state
     moloch.methods.submitVote(proposal.proposalIndex, Vote.No).send({ from: user.id })
+    this.setState({
+      userHasVoted: true
+    })
   }
 
   handleYes = () => {
     const { proposal, moloch, user } = this.state
     moloch.methods.submitVote(proposal.proposalIndex, Vote.Yes).send({ from: user.id })
+    this.setState({
+      userHasVoted: true
+    })
   }
 
   handleProcess = () => {
