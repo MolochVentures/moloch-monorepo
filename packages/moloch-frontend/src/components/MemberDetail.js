@@ -61,7 +61,7 @@ class MemberDetail extends React.Component {
                   <Grid.Row>
                     {this.state.member_detail.assets ? this.state.member_detail.assets.map((token, idx) => {
                       return (
-                        <Grid.Column key={idx} mobile={16} tablet={16} computer={4} style={{ marginBottom: 10 }}>
+                        <Grid.Column key={idx} mobile={16} tablet={16} computer={5} style={{ marginBottom: 10 }}>
                           <Segment className="pill" textAlign="center">
                             <Icon name="ethereum" />{token.amount} {token.symbol}
                           </Segment>

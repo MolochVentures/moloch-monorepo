@@ -52,6 +52,10 @@ body {
   padding: 30px;
 }
 
+.highcharts-credits, .highcharts-tick {
+  display: none !important;
+}
+
 #background {
   .blurred_image {
     position: fixed;
