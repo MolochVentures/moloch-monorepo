@@ -208,7 +208,7 @@ import { fetchActiveMembers, fetchConfigFounders, fetchMemberDetail, fetchMember
 const MemberAvatar = ({ address, shares, name }) => {
   let displayedName = name ? name : address;
   return (
-    <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={address}  >
+    <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={displayedName}  >
       <Link to={`/members/${address}`} className="uncolored">
         <Image src={hood} centered size='tiny' />
         <p className="name">{!displayedName ? '' : (displayedName.length > 10 ? displayedName.substring(0, 10) + '...' : displayedName)}</p>
@@ -219,6 +219,7 @@ const MemberAvatar = ({ address, shares, name }) => {
 };
 
 const MemberList = (props) => {
+  console.log(props)
   return (
     <div id="member_list">
       <Grid columns={16} verticalAlign="middle">
@@ -236,10 +237,10 @@ const MemberList = (props) => {
 
       {props.user.status === 'founder' || props.user.status === 'passed' ?
         <Grid>
-          <Grid.Column textAlign="center">
+          <Grid.Column textAlign="center" title={props.user.name}>
             <Link to={`/members/${props.user.address}`} className="uncolored">
               <Image centered src={bull} size='tiny' />
-              <p className="name">{!props.user.address ? '' : (props.user.address.length > 10 ? props.user.address.substring(0, 10) + '...' : props.user.address)}</p>
+              <p className="name">{(props.user.name.length > 10 ? props.user.name.substring(0, 10) + '...' : props.user.name)}</p>
               <p className="subtext">{props.user.shares ? props.user.shares : 0} shares</p>
             </Link>
           </Grid.Column>
@@ -297,6 +298,8 @@ class MemberListView extends React.Component {
           let user = this.state.user;
           user.shares = responseJson.items.member.shares;
           user.status = responseJson.items.member.status;
+          user.name = responseJson.items.member.name ? responseJson.items.member.name : responseJson.items.member.address;
+          console.log('res', responseJson)
           this.setState({ user: user });
         }
       })
