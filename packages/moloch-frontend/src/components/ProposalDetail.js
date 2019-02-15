@@ -248,7 +248,7 @@ class ProposalDetail extends Component {
                       disabled={
                         this.state.userHasVoted ||
                         this.state.proposal.status !== ProposalStatus.VotingPeriod ||
-                        (!this.state.user.shares || !this.state.user.isActive)
+                        (!(this.state.user && this.state.user.shares) || !(this.state.user && this.state.user.isActive))
                       }
                       onClick={this.handleNo}
                     >
@@ -262,7 +262,7 @@ class ProposalDetail extends Component {
                       disabled={
                         this.state.userHasVoted ||
                         this.state.proposal.status !== ProposalStatus.VotingPeriod ||
-                        (!this.state.user.shares || !this.state.user.isActive)
+                        (!(this.state.user && this.state.user.shares) || !(this.state.user && this.state.user.isActive))
                       }
                       onClick={this.handleYes}
                     >
