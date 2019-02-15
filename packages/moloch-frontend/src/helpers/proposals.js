@@ -21,7 +21,7 @@ export async function getProposalDetailsFromOnChain(proposal) {
     currentPeriod > proposal.startingPeriod + VOTING_PERIOD_LENGTH &&
     currentPeriod < proposal.startingPeriod + VOTING_PERIOD_LENGTH + GRACE_PERIOD_LENGTH;
 
-  const inVotingPeriod = proposal => currentPeriod > proposal.startingPeriod && currentPeriod < proposal.startingPeriod + VOTING_PERIOD_LENGTH;
+  const inVotingPeriod = proposal => currentPeriod >= proposal.startingPeriod && currentPeriod <= proposal.startingPeriod + VOTING_PERIOD_LENGTH;
 
   const enoughPassingVotes = proposal => Math.round((parseInt(proposal.yesVotes) / (parseInt(proposal.yesVotes) + parseInt(proposal.noVotes))) * 100) > 50
 
@@ -40,6 +40,7 @@ export async function getProposalDetailsFromOnChain(proposal) {
   proposal.proposalIndex = parseInt(proposal.proposalIndex);
 
   const proposalFromChain = await moloch.methods.proposalQueue(proposal.proposalIndex).call();
+  console.log('proposalFromChain: ', proposalFromChain);
   proposal.startingPeriod = parseInt(proposalFromChain.startingPeriod);
 
   proposal.votingEnds = 0;
