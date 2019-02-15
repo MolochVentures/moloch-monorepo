@@ -4,8 +4,8 @@ import { Progress, Grid } from 'semantic-ui-react';
 
 const ProgressBar = ({ yes, no }) => {
   const total = yes + no
-  const percentYes = Math.round((yes / total) * 100)
-  const percentNo = Math.round((no / total) * 100)
+  const percentYes = yes === 0 ? 0 : Math.round((yes / total) * 100)
+  const percentNo = no === 0 ? 0 : Math.round((no / total) * 100)
   return (
   <>
     <div style={{ position: "relative" }}>
