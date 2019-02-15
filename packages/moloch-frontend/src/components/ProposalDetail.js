@@ -116,17 +116,17 @@ class ProposalDetail extends Component {
     this.calculateVote(voters);
   }
 
-  handleNo() {
+  handleNo = () => {
     const { proposal, moloch, user } = this.state
     moloch.methods.submitVote(proposal.proposalIndex, Vote.No).send({ from: user.id })
   }
 
-  handleYes() {
+  handleYes = () => {
     const { proposal, moloch, user } = this.state
     moloch.methods.submitVote(proposal.proposalIndex, Vote.Yes).send({ from: user.id })
   }
 
-  handleProcess() {
+  handleProcess = () => {
     const { proposal, moloch, user } = this.state
     moloch.methods.processProposal(proposal.proposalIndex).send({ from: user.id })
   }
@@ -182,7 +182,7 @@ class ProposalDetail extends Component {
                         <>
                           <span className="subtext">Voting Ends: </span>
                           <span>
-                            {this.state.proposal.votingEnds ? this.state.proposal.votingEnds : "-"} period$
+                            {this.state.proposal.votingEnds ? this.state.proposal.votingEnds : "-"} period
                             {this.state.proposal.votingEnds === 1 ? null : "s"}
                           </span>
                         </>
@@ -197,7 +197,7 @@ class ProposalDetail extends Component {
                         <>
                           <span className="subtext">Grace Period Ends: </span>
                           <span>
-                            {this.state.proposal.gracePeriod ? this.state.proposal.gracePeriod : "-"} period$
+                            {this.state.proposal.gracePeriod ? this.state.proposal.gracePeriod : "-"} period
                             {this.state.proposal.gracePeriod === 1 ? null : "s"}
                           </span>
                         </>
@@ -232,7 +232,7 @@ class ProposalDetail extends Component {
                       disabled={
                         this.state.userHasVoted ||
                         this.state.proposal.status !== ProposalStatus.VotingPeriod ||
-                        (!this.state.user.shares || this.state.user.isActive)
+                        (!this.state.user.shares || !this.state.user.isActive)
                       }
                       onClick={this.handleNo}
                     >
@@ -246,7 +246,7 @@ class ProposalDetail extends Component {
                       disabled={
                         this.state.userHasVoted ||
                         this.state.proposal.status !== ProposalStatus.VotingPeriod ||
-                        (!this.state.user.shares || this.state.user.isActive)
+                        (!this.state.user.shares || !this.state.user.isActive)
                       }
                       onClick={this.handleYes}
                     >
