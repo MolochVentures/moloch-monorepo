@@ -5,7 +5,7 @@ import { initMetmask, initGnosisSafe } from "../web3";
 import gql from "graphql-tag";
 import { ApolloConsumer } from "react-apollo";
 
-let coinbase
+let coinbase;
 
 const GET_CURRENT_USER = gql`
   query Member($id: String!) {
@@ -22,18 +22,18 @@ export default class Login extends Component {
 
     this.loginWithMetamask = this.loginWithMetamask.bind(this);
     this.loginWithGnosisSafe = this.loginWithGnosisSafe.bind(this);
-    this.doLogin = this.doLogin.bind(this)
+    this.doLogin = this.doLogin.bind(this);
     this.signWithAccessRequest = this.signWithAccessRequest.bind(this);
   }
 
   async loginWithMetamask(client) {
-    const web3 = await initMetmask()
-    await this.doLogin(client, web3)
+    const web3 = await initMetmask();
+    await this.doLogin(client, web3);
   }
 
   async loginWithGnosisSafe(client) {
-    const web3 = initGnosisSafe()
-    await this.doLogin(client, web3)
+    const web3 = initGnosisSafe();
+    await this.doLoginBypassAuth(client, web3);
   }
 
   async doLogin(client, web3) {
@@ -48,7 +48,7 @@ export default class Login extends Component {
         query: GET_CURRENT_USER,
         variables: { id: coinbase }
       });
-      
+
       if (!data.member) {
         // If the user didn't exist.
         await this.signWithAccessRequest(web3, 99, 0);
@@ -60,17 +60,41 @@ export default class Login extends Component {
     }
   }
 
+  async doLoginBypassAuth(client, web3) {
+    coinbase = (await web3.eth.getAccounts())[0];
+
+    if (!coinbase) {
+      alert("Could not retrieve address from Gnosis Safe, is it configured and this domain whitelisted?");
+    } else {
+      // Try getting a user by their public address.
+      const { data } = await client.query({
+        query: GET_CURRENT_USER,
+        variables: { id: coinbase }
+      });
+      console.log(data.member);
+
+      localStorage.setItem("totalShares", data.member ? data.member.totalShares : 0);
+      localStorage.setItem(
+        "loggedUser",
+        JSON.stringify({
+          isActive: data.member ? data.member.isActive : false,
+          shares: data.member ? data.member.totalShares : 0,
+          address: coinbase,
+          nonce: 99
+        })
+      );
+      this.props.history.push("/");
+    }
+  }
+
   async signWithAccessRequest(web3, nonce, shares, isActive) {
     let message = "Please, sign the following one-time message to authenticate: " + nonce;
     // Request account access if needed.
     if (!localStorage.getItem("loggedUser")) {
       try {
-        const signature = await web3.eth.personal.sign(web3.utils.utf8ToHex(message), coinbase, "")
-        const result = await web3.eth.personal.ecRecover(web3.utils.utf8ToHex(message), signature)
-        localStorage.setItem(
-          "loggedUser",
-          JSON.stringify({ isActive, shares: shares ? shares : 0, address: result, nonce })
-        );
+        const signature = await web3.eth.personal.sign(web3.utils.utf8ToHex(message), coinbase, "");
+        const result = await web3.eth.personal.ecRecover(web3.utils.utf8ToHex(message), signature);
+        localStorage.setItem("loggedUser", JSON.stringify({ isActive, shares: shares ? shares : 0, address: result, nonce }));
         if (nonce) {
           this.props.history.push("/");
         } else {
