@@ -133,7 +133,7 @@ class ProposalList extends React.Component {
     }
 
     this.setState({
-      proposals
+      proposals: fullProps
     });
     return;
   };
@@ -239,14 +239,16 @@ const GET_LOGGED_IN_USER = gql`
 `;
 const ProposalListView = () => {
   let loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+  console.log('loggedUser: ', loggedUser);
   return (
     <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedUser.address }}>
       {({ loading, error, data }) => {
         if (loading) return "Loading...";
         if (error) throw new Error(`Error!: ${error}`);
+        console.log(data);
         return (
           <Switch>
-            <Route exact path="/proposals" render={() => <ProposalListHOC isActive={data.member.isActive} />} />
+            <Route exact path="/proposals" render={() => <ProposalListHOC isActive={data.member ? data.member.isActive : false} />} />
             <Route path="/proposals/:id" component={ProposalDetail} />
           </Switch>
         );
