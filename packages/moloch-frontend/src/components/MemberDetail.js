@@ -1,19 +1,10 @@
 import React from "react";
 import { Divider, Grid, Segment, Image, Icon, Label, Header } from "semantic-ui-react";
-import moment from "moment";
 
 import bull from "assets/bull.png";
 
-import { connect } from "react-redux";
-import { fetchMemberDetail } from "../action/actions";
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
-
-const formatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 2
-});
 
 const GET_MEMBER_DETAIL = gql`
   query Member($id: String!) {
