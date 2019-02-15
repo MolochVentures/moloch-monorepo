@@ -152,7 +152,7 @@ class MemberDetail extends React.Component {
                           <Divider />
                         </React.Fragment>
                       )
-                    }) : <>This member hasn't voted on any proposals yet.</>}
+                    }) : <div className="no-results">This member hasn't voted on any proposals yet.</div>}
                 </Grid>
               </Segment>
             </Grid.Column>
