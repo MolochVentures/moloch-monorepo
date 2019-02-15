@@ -1,10 +1,10 @@
 import React from "react";
-import { Grid, Button, Segment, Modal, Header, Form } from "semantic-ui-react";
+import { Grid, Button, Segment, Modal, Form } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import Graph from "./Graph";
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
-import { getMoloch, getToken } from "../web3";
+import { getToken } from "../web3";
 
 const GET_MEMBERS = gql`
   {
