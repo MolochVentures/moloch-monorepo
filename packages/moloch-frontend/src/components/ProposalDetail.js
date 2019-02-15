@@ -70,8 +70,20 @@ class ProposalDetail extends Component {
     super(props);
 
     this.state = {
-      proposal: {},
-      user: {},
+      proposal: {
+        tokenTribute: 0,
+        sharesRequested: 0,
+        votingEnded: true,
+        graceEnded: true,
+        yesVotes: 0,
+        noVotes: 0,
+        status: ProposalStatus.InQueue
+      },
+      user: {
+        id: 0,
+        shares: 0,
+        isActive: false
+      },
       moloch: null
     };
 
@@ -150,18 +162,16 @@ class ProposalDetail extends Component {
             <Grid centered columns={14}>
               <Grid.Column mobile={16} tablet={16} computer={4}>
                 <div className="subtext description">{this.state.proposal.description ? this.state.proposal.description : "N/A"}</div>
-                {this.state.proposal.assets ? (
-                  <Grid columns="equal" className="tokens">
-                    <Grid.Row>
-                      <Grid.Column className="tributes">
-                        <Segment className="pill" textAlign="center">
-                          <Icon name="ethereum" />
-                          {this.state.proposal.tokenTribute} ETH}
-                        </Segment>
-                      </Grid.Column>
-                    </Grid.Row>
-                  </Grid>
-                ) : null}
+                <Grid columns="equal" className="tokens">
+                  <Grid.Row>
+                    <Grid.Column className="tributes">
+                      <Segment className="pill" textAlign="center">
+                        <Icon name="ethereum" />
+                        {this.state.proposal.tokenTribute} ETH
+                      </Segment>
+                    </Grid.Column>
+                  </Grid.Row>
+                </Grid>
                 <Grid columns="equal">
                   <Grid.Column>
                     <p className="subtext voting">Shares</p>
