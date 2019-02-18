@@ -193,7 +193,6 @@ class ProposalDetail extends Component {
       proposal.voters.push(voter);
     }
     let self = this;
-    console.log(proposal)
     this.props.postEvents(JSON.stringify({ id: '', name: eventName, payload: proposal }))
       .then((responseJson) => {
         if (responseJson.type === "POST_EVENTS_SUCCESS") {
