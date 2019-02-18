@@ -141,7 +141,7 @@ export class EventController {
                             member.gracePeriod = 0;
                             break;
                         }
-                      } else { // The proposal is below the voting period or doesn't have a period. Assign the status accordingly
+                      } else if (member.status !== 'passed' && member.status !== 'failed' && member.status !== 'aborted') { // The proposal is below the voting period or doesn't have a period. Assign the status accordingly
                         member.period ? member.status = 'inqueue' : member.status = '';
                       }
                       this.memberRepository.updateById(member.address, member);
