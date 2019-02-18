@@ -202,22 +202,6 @@ export class EventController {
         // Current date at midnight
         let currentDate = new Date();
         currentDate.setHours(1, 0, 0, 0);
-        // Add the new proposal to the list of proposals of the member that submitted it
-        /* TODO: this is being kept in case the vote 'owner' comes back
-        if (!memberPatch.proposals) {
-          memberPatch.proposals = [];
-        }
-        memberPatch.proposals.push({
-          id: memberPatch.address, 
-          title: memberPatch.title ? memberPatch.title : '', 
-          date: currentDate, 
-          shares: memberPatch.shares ? memberPatch.shares : 0, 
-          tribute: memberPatch.tribute ? memberPatch.tribute : 0, 
-          vote: 'owner',
-          status: 'inqueue',
-          type: 'member'
-        });
-        */
        // This function is called after the period is created correctly to create the member and add the assets to the system
         var createMember = async function(newPeriod: Period, status: string) {
           let addedTribute: number = memberPatch.tribute ? memberPatch.tribute : 0;
@@ -374,29 +358,7 @@ export class EventController {
                   projectCreate.status = 'inqueue';
                   // And create the project
                   return await this.projectRepository.create(projectCreate).then(async project => {
-                    return await this.eventRepository.create(event);
-                    // Get the member that submitted the project
-                    /* TODO: this is being kept in case the vote 'owner' comes back
-                    return await this.memberRepository.findById(ownerAddress).then(async matchingMember => {
-                      // And add the new proposal that they have submitted to their list of proposals
-                      if (!matchingMember.proposals) {
-                        matchingMember.proposals = [];
-                      }
-                      matchingMember.proposals.push({
-                        id: projectCreate.id, 
-                        title: projectCreate.title, 
-                        date: currentDate, 
-                        shares: 0, 
-                        tribute: projectCreate.tribute, 
-                        vote: 'owner',
-                        status: 'inqueue',
-                        type: 'project'
-                      });
-                      return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
-                        return await this.eventRepository.create(event);
-                      });
-                    });
-                    */                   
+                    return await this.eventRepository.create(event);                 
                   });
                 });
               });
@@ -410,28 +372,6 @@ export class EventController {
                 // And create the project
                 return await this.projectRepository.create(projectCreate).then(async result => {
                   return await this.eventRepository.create(event);
-                  // Get the member that submitted the project
-                  /* TODO: this is being kept in case the vote 'owner' comes back
-                  return await this.memberRepository.findById(ownerAddress).then(async matchingMember => {
-                    // And add the new proposal that they have submitted to their list of proposals
-                    if (!matchingMember.proposals) {
-                      matchingMember.proposals = [];
-                    }
-                    matchingMember.proposals.push({
-                      id: projectCreate.id, 
-                      title: projectCreate.title, 
-                      date: currentDate, 
-                      shares: 0, 
-                      tribute: projectCreate.tribute, 
-                      vote: 'owner',
-                      status: 'inqueue',
-                      type: 'project'
-                    });
-                    return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
-                      return await this.eventRepository.create(event);
-                    });
-                  });
-                  */
                 });
               });
             }
@@ -628,40 +568,6 @@ export class EventController {
             }
           });
         });
-      // case 'Graph update':
-      //   let apiData = event.payload as any;
-      //   let currentPointDate = new Date(1, 0, 0, 0);
-      //   let newGraphPoint;
-      //   let ethAsset: Asset;
-      //   return await this.assetRepository.find().then(async assets => {
-      //     if (assets && assets.length > 0) {
-      //       assets.forEach(asset => {
-      //         if (asset.address === "ETH") {
-      //           ethAsset = asset;
-      //         }
-      //       });
-      //       ethAsset.price = apiData.price_usd;
-      //       newGraphPoint = { date: currentPointDate, value: ethAsset.price * ethAsset.amount}
-      //       return await this.assetRepository.updateById(ethAsset.address, ethAsset).then(async updatedAsset => {
-      //         // Add new point to the graph
-      //         return await this.eventRepository.create(event);
-      //       });
-      //     } else {
-      //       ethAsset = {
-      //         address: 'ETH',
-      //         symbol: 'ETH',
-      //         logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
-      //         amount: 0,
-      //         price: apiData.price_usd
-      //       } as Asset;
-      //       newGraphPoint = { date: currentPointDate, value: 0}
-      //       return await this.assetRepository.create(ethAsset).then(async createdAsset => {
-      //         // Add new point to the graph
-      //         return await this.eventRepository.create(event);
-      //       });
-      //     }
-      //   });
-      //   break;
     }
     event.name = "Error: Unidentified event";
     return await this.eventRepository.create(event).then(result => { return event });
