@@ -221,8 +221,8 @@ class ProposalListView extends React.Component {
         }
       });
     }
-    let percentYes = parseInt((totalNumberVotedYes / this.state.totalShares) * 100);
-    let percentNo = parseInt((totalNumberVotedNo / this.state.totalShares) * 100);
+    let percentYes = Math.ceil((totalNumberVotedYes / this.state.totalShares) * 100);
+    let percentNo =  Math.ceil((totalNumberVotedNo / this.state.totalShares) * 100);
 
     return {
       votedYes: percentYes,
