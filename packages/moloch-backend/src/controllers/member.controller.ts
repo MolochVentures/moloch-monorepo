@@ -32,13 +32,13 @@ export class MemberController {
     },
   })
   async findAll(): Promise<Member[]> {
-    return await this.memberRepository.find({where: { status: { inq: ['active', 'founder']}}});
+    return await this.memberRepository.find({where: { status: { inq: ['passed', 'founder']}}});
   }
 
   /**
-   * Returns all existing members that have at least 1 share.
+   * Returns the count of members.
    */
-  @get('/members/getMembersWithShares', {
+  @get('/members/getMembersCount', {
     responses: {
       '200': {
         description: 'Returned all members.',
@@ -50,16 +50,16 @@ export class MemberController {
       },
     },
   })
-  async findMembersWithShares(): Promise<number> {
-    return await this.memberRepository.count({ status: { inq: ['active', 'founder']}, shares: { gte: 1 }}).then(async result => {
+  async countMembers(): Promise<number> {
+    return await this.memberRepository.count({ status: { inq: ['passed', 'founder']}, shares: { gte: 1 }}).then(async result => {
       return await result.count;
     });
   }
 
   /**
-   * Returns all existing members that are active.
+   * Returns all existing contributors.
    */
-  @get('/members/getActiveMembers', {
+  @get('/members/getContributors', {
     responses: {
       '200': {
         description: 'Returned all members.',
@@ -71,14 +71,14 @@ export class MemberController {
       },
     },
   })
-  async findActiveMembers(): Promise<Member[]> {
-    return await this.memberRepository.find({ where: { status: 'active', shares: { gte: 1 }}});
+  async findContributors(): Promise<Member[]> {
+    return await this.memberRepository.find({ where: { status: { inq: ['passed', 'founder']}, shares: { gte: 1, lt: 100 }}});
   }
 
   /**
-   * Returns all existing founders.
+   * Returns all existing elders.
    */
-  @get('/members/getFounders', {
+  @get('/members/getElders', {
     responses: {
       '200': {
         description: 'Returned all members.',
@@ -90,8 +90,8 @@ export class MemberController {
       },
     },
   })
-  async findFounders(): Promise<Member[]> {
-    return await this.memberRepository.find({ where: { status: 'founder'}});
+  async findElders(): Promise<Member[]> {
+    return await this.memberRepository.find({ where: { status: { inq: ['passed', 'founder']}, shares: { gte: 100 }}});
   }
 
   /**
@@ -112,7 +112,7 @@ export class MemberController {
       let totalShares = 0;
       // Only add the shares of the members
       members.forEach(member => {
-        if (member.status === 'active' || member.status === 'founder') {
+        if (member.status === 'passed' || member.status === 'founder') {
           totalShares = totalShares + (member.shares ? member.shares : 0)
         }
       });

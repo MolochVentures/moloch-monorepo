@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Divider, Grid, Icon, Segment, Button, Image } from "semantic-ui-react";
+import { Divider, Grid, Icon, Segment, Button, Image, Progress } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import hood from "assets/hood.png";
 
@@ -21,6 +21,26 @@ const Vote = {
   Yes: 1,
   No: 2
 }
+// const ProgressBar = ({ yes, no }) => (
+//   <>
+//   <div style={{ "position": "relative" }}>
+//     <Progress percent={yes + no} color="red" size="big" style={{
+//       "position": "absolute",
+//       "top": "0",
+//       "width": "100%"
+//     }} />
+//     <Progress percent={yes} color="green" size="big" />
+//   </div>
+//   <Grid columns="equal">
+//     <Grid.Column floated="left">
+//       {(typeof (yes) === 'number' && yes >= 0) ? yes : 0}% Yes
+//       </Grid.Column>
+//     <Grid.Column floated="right" textAlign="right">
+//       {(typeof (no) === 'number' && no >= 0) ? no : 0}% No
+//       </Grid.Column>
+//   </Grid>
+//   </>
+// );
 
 const MemberAvatar = ({ member, shares }) => {
   return (
@@ -84,7 +104,18 @@ class ProposalDetail extends Component {
         shares: 0,
         isActive: false
       },
-      moloch: null
+      moloch: null,
+      limitTo: 4,
+      type: '', //member or project
+      userShare: 0,
+      totalShares: 0,
+      votedYes: 0,
+      votedNo: 0,
+      isAccepted: false,
+      status: '',
+      gracePeriod: 0,
+      end: 0,
+      memberStatus: ''
     };
 
     this.fetchData(props);
@@ -121,7 +152,7 @@ class ProposalDetail extends Component {
 
   loadData(responseJson) {
     let proposal = responseJson.items.member ? responseJson.items.member : responseJson.items;
-    this.setState({ proposal_detail: proposal, isAccepted: proposal.status === "accepted" || proposal.status === "active" ? true : false });
+    this.setState({ proposal_detail: proposal, isAccepted: proposal.status === "accepted" || proposal.status === "active" || proposal.status === 'passed' ? true : false, gracePeriod: (proposal.gracePeriod ? proposal.gracePeriod : 0), end: (proposal.end ? proposal.end : 0) });
     let voters = this.state.proposal_detail.voters ? this.state.proposal_detail.voters : [];
     let userHasVoted = voters.find(voter => voter.member === this.state.loggedUser) ? true : false;
     this.setState({ userHasVoted });
@@ -134,6 +165,17 @@ class ProposalDetail extends Component {
     this.setState({
       userHasVoted: true
     })
+
+    
+    // Add the voter to the voters of the proposal.
+    // let voters = {
+    //   member: JSON.parse(localStorage.getItem("loggedUser")).address,
+    //   vote: 'no',
+    //   shares: this.state.userShare
+    // };
+    // this.setState({ userHasVoted: true });
+    // let name = (this.state.type === 'member') ? 'Membership proposal voted' : 'Project proposal voted';
+    // this.sendProposalUpdate(name, voters);
   }
 
   handleYes = () => {
@@ -142,6 +184,47 @@ class ProposalDetail extends Component {
     this.setState({
       userHasVoted: true
     })
+
+    
+    // Add the voter to the voters of the proposal.
+    // let voters = {
+    //   member: JSON.parse(localStorage.getItem("loggedUser")).address,
+    //   vote: 'yes',
+    //   shares: this.state.userShare
+    // };
+    // this.setState({ userHasVoted: true });
+    // let name = (this.state.type === 'member') ? 'Membership proposal voted' : 'Project proposal voted';
+    // this.sendProposalUpdate(name, voters);
+  }
+  
+  calculateVote(voters) {
+    // calculate votes
+    let totalNumberVotedYes = 0;
+    let totalNumberVotedNo = 0;
+    if (voters) {
+      // eslint-disable-next-line array-callback-return
+      voters.map((voter, idx) => {
+        if (voter.shares) {
+          switch (voter.vote) {
+            case 'yes':
+              totalNumberVotedYes += voter.shares;
+              break;
+            case 'no':
+              totalNumberVotedNo += voter.shares;
+              break;
+            default:
+              break;
+          }
+        }
+      });
+      let percentYes = Math.ceil((totalNumberVotedYes / this.state.totalShares) * 100)
+      let percentNo = Math.ceil((totalNumberVotedNo / this.state.totalShares) * 100);
+      
+      this.setState({
+        votedYes: percentYes,
+        votedNo: percentNo
+      });
+    }
   }
 
   handleProcess = () => {
@@ -162,9 +245,9 @@ class ProposalDetail extends Component {
             <Grid centered columns={14}>
               <Grid.Column mobile={16} tablet={16} computer={4}>
                 <div className="subtext description">{this.state.proposal.description ? this.state.proposal.description : "N/A"}</div>
-                <Grid columns="equal" className="tokens">
+                <Grid columns="equal" className="tokens" textAlign="center">
                   <Grid.Row>
-                    <Grid.Column className="tributes">
+                    <Grid.Column className="tributes"mobile={16} tablet={16} computer={8} style={{ marginBottom: 10 }}>
                       <Segment className="pill" textAlign="center">
                         <Icon name="ethereum" />
                         {this.state.proposal.tokenTribute} ETH

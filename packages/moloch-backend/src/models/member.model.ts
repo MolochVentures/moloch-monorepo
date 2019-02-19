@@ -1,6 +1,45 @@
 import { Entity, model, property } from '@loopback/repository';
 
 @model()
+class Asset {
+  @property({
+    type: 'string',
+    id: true,
+    required: true,
+  })
+  address: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  symbol: string;
+
+  @property({
+    type: 'number',
+    required: true,
+  })
+  amount: number;
+
+  @property({
+    type: 'number',
+    required: true,
+  })
+  price: number;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  logo: string;
+
+  @property({
+    type: 'string',
+  })
+  txs: string;
+}
+
+@model()
 class Voter {
   @property({
     type: 'string',
@@ -64,6 +103,12 @@ class Proposal {
     required: true,
   })
   status: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  type: string;
 }
 
 @model()
@@ -90,6 +135,11 @@ export class Member extends Entity {
     type: 'string',
   })
   title?: string;
+
+  @property({
+    type: 'string',
+  })
+  applicantAddress?: string;
 
   @property({
     type: 'string',
@@ -130,7 +180,7 @@ export class Member extends Entity {
     type: 'array',
     itemType: 'object',
   })
-  assets?: object[];
+  assets?: Asset[];
 
   @property({
     type: 'array',

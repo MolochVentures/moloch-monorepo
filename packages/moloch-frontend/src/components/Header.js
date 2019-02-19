@@ -2,17 +2,20 @@ import React, { Component } from 'react';
 import { Link } from "react-router-dom";
 import { Grid, Icon, Dropdown, Form, Button } from "semantic-ui-react";
 
-const user = {
-  "name": localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')).address : '',
-  "status": localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')).status : '',
-};
+import { connect } from 'react-redux';
+import { postEvents } from '../action/actions';
+
+let user;
 
 class MainMenu extends Component {
-
   render() {
+    user = {
+      "name": localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')).address : '',
+      "status": localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')).status : '',
+    };
     return (
       <div className="dropdownItems">
-        {user.status === 'active' || user.status === 'founder' ?
+        {user.status === 'passed' || user.status === 'founder' ?
           <Dropdown.Item className="item" onClick={() => this.props._handleCloseDropdown()}>
             <Link to={`/members/${user.name}`} className="link">
               <p><Icon name="user" ></Icon>View Profile</p>
@@ -59,23 +62,28 @@ class WithdrawLootTokenMenu extends Component {
         <Dropdown.Divider />
         <Dropdown.Item className="item submenu">
           <p><Icon name="dollar"></Icon>Rage Quit</p>
-          <Form.Input placeholder="Enter withdrawal address"></Form.Input>
-          <Form.Input placeholder="0"></Form.Input>
-          <Button>Withdraw</Button>
+          {/* <Form.Input placeholder="Enter withdrawal address"></Form.Input> */}
+          <Form.Input name="redeemShare" placeholder={this.props.userShare} onChange={this.props.handleInput}></Form.Input>
+          <Button onClick={() => { this.props._handleWidthraw() }}>Withdraw</Button>
         </Dropdown.Item>
       </div>
     );
   }
 }
 
-export default class Header extends Component {
+class Header extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       visibleMenu: 'main',
-      visibleRightMenu: false
+      visibleRightMenu: false,
+      userShare: localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')).shares : 0,
+      redeemShare: 0
     }
+
+    this.handleInput = this.handleInput.bind(this);
+    this._handleWidthraw = this._handleWidthraw.bind(this);
   }
 
   _handleOpenDropdown() {
@@ -84,6 +92,33 @@ export default class Header extends Component {
 
   _handleCloseDropdown() {
     this.setState({ visibleRightMenu: false });
+  }
+
+  handleInput(event) {
+    let name = event.target.name;
+    let value = event.target.value;
+    this.setState({ [event.target.name]: event.target.value });
+
+  }
+
+  _handleWidthraw() {
+    if (this.state.redeemShare > 0 && this.state.redeemShare <= this.state.userShare) {
+      let payload = {
+        redeemingUser: localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')).address : '',
+        amount: this.state.redeemShare
+      }
+      this.props.postEvents(JSON.stringify({ id: '', name: 'Redeem loot token', payload: payload }))
+        .then((responseJson) => {
+          if (responseJson.type === "POST_EVENTS_SUCCESS") {
+            alert('Widthraw Success.');
+          } else {
+            alert('Widthraw Failed.');
+          }
+        })
+
+    } else {
+      alert('Invalid Amount')
+    }
   }
 
   render() {
@@ -97,7 +132,7 @@ export default class Header extends Component {
         topRightMenuContent = <ChangeDelegateKeyMenu onLoadMain={() => { this._handleOpenDropdown(); this.setState({ visibleMenu: 'main' }) }}></ChangeDelegateKeyMenu>
         break;
       case 'withdrawLootToken':
-        topRightMenuContent = <WithdrawLootTokenMenu onLoadMain={() => { this._handleOpenDropdown(); this.setState({ visibleMenu: 'main' }) }}></WithdrawLootTokenMenu>
+        topRightMenuContent = <WithdrawLootTokenMenu onLoadMain={() => { this._handleOpenDropdown(); this.setState({ visibleMenu: 'main' }) }} userShare={this.state.userShare} _handleWidthraw={this._handleWidthraw} handleInput={this.handleInput}></WithdrawLootTokenMenu>
         break;
       default:
         break;
@@ -146,3 +181,20 @@ export default class Header extends Component {
     );
   }
 }
+
+
+// This function is used to convert redux global state to desired props.
+function mapStateToProps(state) {
+  return {};
+}
+
+// This function is used to provide callbacks to container component.
+function mapDispatchToProps(dispatch) {
+  return {
+    postEvents: function (data) {
+      return dispatch(postEvents(data))
+    }
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header);

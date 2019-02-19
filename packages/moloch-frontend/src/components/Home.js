@@ -2,9 +2,16 @@ import React from "react";
 import { Grid, Button, Segment, Modal, Form } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import Graph from "./Graph";
+import moment from 'moment';
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
 import { getToken } from "../web3";
+
+const formatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2
+});
 
 const GET_MEMBERS = gql`
   {
@@ -71,7 +78,8 @@ class HomePage extends React.Component {
   state = {
     approval: "",
     token: null,
-    userAddress: null
+    userAddress: null,
+    guildBankValue: 0
   };
 
   async componentDidMount() {
@@ -124,7 +132,7 @@ class HomePage extends React.Component {
           <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
             <Link to="/guildbank" className="text_link">
               <p className="subtext">Guild Bank Value</p>
-              <p className="amount">0</p>
+              <p className="amount">{formatter.format(typeof(this.state.guildBankValue) === 'number' && this.state.guildBankValue >= 0 ? this.state.guildBankValue : 0) }</p>
             </Link>
           </Grid.Column>
           <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons">
@@ -139,15 +147,15 @@ class HomePage extends React.Component {
               <Grid columns="equal" className="graph_values">
                 <Grid.Column textAlign="left">
                   <p className="subtext">Total Shares</p>
-                  <p className="amount">378</p>
+                  <p className="amount">{this.state.totalShares}</p>
                 </Grid.Column>
                 <Grid.Column textAlign="center">
                   <p className="subtext">Total ETH</p>
-                  <p className="amount">541</p>
+                  <p className="amount">{this.state.ethAmount}</p>
                 </Grid.Column>
                 <Grid.Column textAlign="right">
                   <p className="subtext">Share Value</p>
-                  <p className="amount">128 USD</p>
+                  <p className="amount">{formatter.format(typeof(this.state.shareValue) === 'number' && this.state.shareValue >= 0 ? this.state.shareValue : 0) }</p>
                 </Grid.Column>
               </Grid>
               <div className="graph">

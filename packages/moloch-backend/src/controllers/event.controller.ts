@@ -71,6 +71,7 @@ export class EventController {
     },
   })
   async create(@requestBody() event: Event): Promise<any> {
+    let self = this;
     var S4 = function () {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
     };
@@ -78,52 +79,114 @@ export class EventController {
     switch (event.name) {
       case 'Cron job':
         let today = new Date();
-        let filterCurrent = {
-          where:
-          {
-            start: { lte: today },
-            end: { gte: today }
-          }
-        }
-        return await this.periodRepository.find(filterCurrent).then(async periods => {
-          let memberFilter: Array<any> = [];
-          let projectFilter: Array<any> = [];
-          periods.forEach(period => {
-            period.proposals.forEach(periodProposal => {
-              let endDays = Math.round((period.end.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
-              let graceDays = Math.round((period.gracePeriod.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
-              if (periodProposal.type === 'member') {
-                memberFilter.push({ id: period.id, end: endDays, gracePeriod: graceDays });
-              } else {
-                projectFilter.push({ id: period.id, end: endDays, gracePeriod: graceDays });
-              }
-            });
-          });
-          return await this.memberRepository.find().then(async members => {
-            members.forEach(member => {
-              if (memberFilter.findIndex(k => k.id === member.period) >= 0 && member.status === 'pending') {
-                member.status = 'inprogress';
-                member.end = memberFilter.find(k => k.id === member.period).end;
-                member.gracePeriod = memberFilter.find(k => k.id === member.period).gracePeriod;
-              } else if (member.status === 'inprogress') {
-                member.status = 'pending';
-                member.end = member.gracePeriod = 0;
-              }
-              this.memberRepository.updateById(member.address, member);
-            });
-            return await this.projectRepository.find().then(async projects => {
-              projects.forEach(project => {
-                if (projectFilter.findIndex(k => k.id === project.period) >= 0 && project.status === 'pending') {
-                  project.status = 'inprogress';
-                  project.end = projectFilter.find(k => k.id === project.period).end;
-                  project.gracePeriod = projectFilter.find(k => k.id === project.period).gracePeriod;
-                } else if (project.status === 'inprogress') {
-                  project.status = 'pending';
-                  project.end = project.gracePeriod = 0;
-                }
-                this.projectRepository.updateById(project.id, project);
+        let filterVotingPeriods = {where:{start: { lte: today },end: { gte: today }}}
+        let filterGracePeriods = {where:{end: { lte: today },gracePeriod: { gte: today }}}
+        let filterPastGracePeriods = {where:{gracePeriod: { lte: today }}}
+
+        // Get all the voting periods
+        return await this.periodRepository.find(filterVotingPeriods).then(async votingPeriods => {
+          // Get all the grace periods
+          return await this.periodRepository.find(filterGracePeriods).then(async gracePeriods => {
+            // Get all the periods past their grace period
+            return await this.periodRepository.find(filterPastGracePeriods).then(async pastGracePeriods => {
+              let periods: Array<any> = [];
+              // Create an array to contain all the periods identifying the status in which they are to filter later the proposals and decide what status to assign
+              votingPeriods.forEach(period => {
+                periods.push({id: period.id, start: period.start, end: period.end, grace: period.gracePeriod, status: 'votingperiod'});
               });
-              return await this.eventRepository.create(event);
+              gracePeriods.forEach(period => {
+                periods.push({id: period.id, start: period.start, end: period.end, grace: period.gracePeriod, status: 'graceperiod'});
+              });
+              pastGracePeriods.forEach(period => {
+                periods.push({id: period.id, start: period.start, end: period.end, grace: period.gracePeriod, status: 'pastgraceperiod'});
+              });
+              // Get the membership proposals
+              return await this.memberRepository.find().then(async members => {
+                // Get the total shares of the system to decide if a proposal past the grace period has >50% of yes votes
+                let totalShares = 0;
+                members.forEach(member => { totalShares = totalShares + (member.shares ? member.shares : 0) });
+                // Get the project proposals
+                return await this.projectRepository.find().then(async projects => {
+                  // Check all the membership proposals to decide in which status should they be
+                  members.forEach(member => {
+                    // Only non-founders are affected by the cron job
+                    if (member.status !== 'founder') {
+                      let matchingPeriodIndex = periods.findIndex(k => k.id === member.period);
+                      // If the proposal belogs to a period that can be on voting, grace or past the grace period
+                      if (matchingPeriodIndex >= 0 && (member.status !== 'passed' && member.status !== 'failed' && member.status !== 'aborted')) {
+                        let matchingPeriod = periods[matchingPeriodIndex];
+                        // We decide which status should it get
+                        switch(matchingPeriod.status) {
+                          case 'votingperiod': // This sets it as in votingperiod
+                            member.status = 'votingperiod';
+                            member.end = Math.round((matchingPeriod.end.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
+                            member.gracePeriod = Math.round((matchingPeriod.grace.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
+                            break;
+                          case 'graceperiod': // This sets it as in graceperiod
+                            member.status = 'graceperiod';
+                            member.end = 0;
+                            member.gracePeriod = Math.round((matchingPeriod.grace.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
+                            break;
+                          case 'pastgraceperiod': // This sets it either as in queue (yes votes >50%, waiting until someone processes it) or failed (yes votes < 50%)
+                            let voters = member.voters ? member.voters : [];
+                            let yesPercentage = 0;
+                            // Check the percentage of yes votes
+                            voters.forEach(voter => {
+                              if (voter.vote === 'yes') {
+                                yesPercentage = yesPercentage + (voter.shares * 100 / totalShares);
+                              }
+                            })
+                            yesPercentage >= 50 ? member.status = 'inqueue' : member.status = 'failed';
+                            member.end = 0;
+                            member.gracePeriod = 0;
+                            break;
+                        }
+                      } else if (member.status !== 'passed' && member.status !== 'failed' && member.status !== 'aborted') { // The proposal is below the voting period or doesn't have a period. Assign the status accordingly
+                        member.period ? member.status = 'inqueue' : member.status = '';
+                      }
+                      this.memberRepository.updateById(member.address, member);
+                    }
+                  });
+                  // Check all the project proposals to decide in which status should they be
+                  projects.forEach(project => {
+                    let matchingPeriodIndex = periods.findIndex(k => k.id === project.period);
+                    // If the proposal belogs to a period that can be on voting, grace or past the grace period
+                    if (matchingPeriodIndex >= 0 && (project.status !== 'passed' && project.status !== 'failed' && project.status !== 'aborted')) {
+                      let matchingPeriod = periods[matchingPeriodIndex];
+                      // We decide which status should it get
+                      switch(matchingPeriod.status) {
+                        case 'votingperiod': // This sets it as in votingperiod
+                          project.status = 'votingperiod';
+                          project.end = Math.round((matchingPeriod.end.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
+                          project.gracePeriod = Math.round((matchingPeriod.grace.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
+                          break;
+                        case 'graceperiod': // This sets it as in graceperiod
+                          project.status = 'graceperiod';
+                          project.end = 0;
+                          project.gracePeriod = Math.round((matchingPeriod.grace.getTime() - today.getTime()) / 1000 / 60 / 60 / 24);
+                          break;
+                        case 'pastgraceperiod': // This sets it either as in queue (yes votes >50%, waiting until someone processes it) or failed (yes votes < 50%)
+                          let voters = project.voters ? project.voters : [];
+                          let yesPercentage = 0;
+                          // Check the percentage of yes votes
+                          voters.forEach(voter => {
+                            if (voter.vote === 'yes') {
+                              yesPercentage = yesPercentage + (voter.shares * 100 / totalShares);
+                            }
+                          })
+                          yesPercentage >= 50 ? project.status = 'inqueue' : project.status = 'failed';
+                          project.end = 0;
+                          project.gracePeriod = 0;
+                          break;
+                      }
+                    } else { // If the proposal is below the start date of its period, then it's inqueue
+                      project.status = 'inqueue';
+                    }
+                    this.projectRepository.updateById(project.id, project);
+                  });
+                  return await this.eventRepository.create(event);
+                });
+              });
             });
           });
         });
@@ -139,19 +202,85 @@ export class EventController {
         // Current date at midnight
         let currentDate = new Date();
         currentDate.setHours(1, 0, 0, 0);
-        // Add the new proposal to the list of proposals of the member that submitted it
-        if (!memberPatch.proposals) {
-          memberPatch.proposals = [];
+       // This function is called after the period is created correctly to create the member and add the assets to the system
+        var createMember = async function(newPeriod: Period, status: string) {
+          let addedTribute: number = memberPatch.tribute ? memberPatch.tribute : 0;
+          let addedShares: number = memberPatch.shares ? memberPatch.shares : 0;
+          let addedETH: number = memberPatch.assets ? memberPatch.assets[0].amount : 0; // TODO: change this when assets other than ETH come into the system
+          let addressToRecover = memberPatch.applicantAddress ? memberPatch.applicantAddress.toLowerCase() : '';
+          let today = new Date();
+          // Check if the member to which the proposal is for exists
+          try {
+            return await self.memberRepository.findById(addressToRecover).then(async recoveredMember => {
+              if (recoveredMember) { // If there is a matching member, we modify it
+                recoveredMember.name = recoveredMember.address;
+                recoveredMember.title = memberPatch.title;
+                recoveredMember.description = memberPatch.description;
+                recoveredMember.period = newPeriod.id;
+                recoveredMember.end = status === 'votingperiod' ? Math.round((newPeriod.end.getTime() - today.getTime()) / 1000 / 60 / 60 / 24) : 0;
+                recoveredMember.gracePeriod = status === 'votingperiod' ? Math.round((newPeriod.gracePeriod.getTime() - today.getTime()) / 1000 / 60 / 60 / 24) : 0;
+                recoveredMember.status = status;
+                // Make the tribute, shares and assets cumulative
+                recoveredMember.tribute = recoveredMember.tribute ? parseFloat(recoveredMember.tribute.toString()) + addedTribute : addedTribute;
+                recoveredMember.shares = recoveredMember.shares ? parseFloat(recoveredMember.shares.toString()) + addedShares : addedShares;
+                recoveredMember.assets ? recoveredMember.assets[0].amount = parseFloat(recoveredMember.assets[0].amount.toString()) + parseFloat(addedETH.toString()) : 
+                  recoveredMember.assets = [{address: 'ETH', symbol: 'ETH', amount: addedETH, logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png', price: 100} as Asset]; // TODO: change this when assets other than ETH come into the system
+                // And update the matching membership proposal
+                return await self.memberRepository.updateById(recoveredMember.address, recoveredMember).then(async result => {
+                  // After the member is modified, we add the assets amount to the system
+                  try { // TODO: change this when assets other than ETH come into the system
+                    return await self.assetRepository.findById('ETH').then(async assetETH => {
+                      assetETH.amount = assetETH.amount + parseFloat(addedETH.toString());
+                      return await self.assetRepository.updateById('ETH', assetETH).then(async result => {
+                        return await self.eventRepository.create(event);
+                      });
+                    });
+                  } catch {
+                    if (recoveredMember.assets) {
+                      return await self.assetRepository.create(recoveredMember.assets[0]).then(async result => {
+                        return await self.eventRepository.create(event);
+                      });
+                    }
+                  }
+                });
+              }
+            })
+          } catch {
+            // Prepare the data for a new membership proposal
+            let newMembershipProposal = {
+              address: addressToRecover,
+              nonce: Math.floor(Math.random() * 1000000),
+              name: addressToRecover,
+              title: memberPatch.title,
+              description: memberPatch.description,
+              shares: memberPatch.shares,
+              tribute: memberPatch.tribute,
+              status: status,
+              period: newPeriod.id,
+              assets: memberPatch.assets,
+              end: status === 'votingperiod' ? Math.round((newPeriod.end.getTime() - today.getTime()) / 1000 / 60 / 60 / 24) : 0,
+              gracePeriod: status === 'votingperiod' ? Math.round((newPeriod.gracePeriod.getTime() - today.getTime()) / 1000 / 60 / 60 / 24) : 0,
+            } as Member;
+            // And create it
+            return await self.memberRepository.create(newMembershipProposal).then(async result => {
+              // After the member is modified, we add the assets amount to the system
+              try { // TODO: change this when assets other than ETH come into the system
+                return await self.assetRepository.findById('ETH').then(async assetETH => {
+                  assetETH.amount = assetETH.amount + parseFloat(addedETH.toString());
+                  return await self.assetRepository.updateById('ETH', assetETH).then(async result => {
+                    return await self.eventRepository.create(event);
+                  });
+                });
+              } catch {
+                if (newMembershipProposal.assets) {
+                  return await self.assetRepository.create(newMembershipProposal.assets[0]).then(async result => {
+                    return await self.eventRepository.create(event);
+                  });
+                }
+              }
+            });
+          }
         }
-        memberPatch.proposals.push({
-          id: memberPatch.address, 
-          title: memberPatch.title ? memberPatch.title : '', 
-          date: currentDate, 
-          shares: memberPatch.shares ? memberPatch.shares : 0, 
-          tribute: memberPatch.tribute ? memberPatch.tribute : 0, 
-          vote: 'owner',
-          status: 'pending'
-        });
         // Recover the config data to define a new period
         return await this.configRepository.find().then(async config => {
           // Config data
@@ -177,12 +306,7 @@ export class EventController {
                 periodCreate.gracePeriod = new Date(periodCreate.end.getTime() + (1000 * 60 * 60 * 24 * gracePeriodLength));
                 // And create a period for it
                 return await this.periodRepository.create(periodCreate).then(async newPeriod => {
-                  memberPatch.period = newPeriod.id; // Assign it to the member
-                  memberPatch.status = 'pending';
-                  // And update the member
-                  return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async result => {
-                    return await this.eventRepository.create(event);
-                  });
+                  return await createMember(newPeriod, 'inqueue');
                 });
               });
             } else { // If there isn't a period on that date
@@ -191,12 +315,7 @@ export class EventController {
               periodCreate.gracePeriod = new Date(periodCreate.end.getTime() + (1000 * 60 * 60 * 24 * gracePeriodLength));
               // Create the period
               return await this.periodRepository.create(periodCreate).then(async newPeriod => {
-                memberPatch.period = newPeriod.id; // Assign it to the member
-                memberPatch.status = 'inprogress';
-                // And create the member
-                return await this.memberRepository.updateById(memberPatch.address, memberPatch).then(async result => {
-                  return await this.eventRepository.create(event);
-                });
+                return await createMember(newPeriod, 'votingperiod');
               });
             }
           });
@@ -236,28 +355,10 @@ export class EventController {
                 // And create a period for it
                 return await this.periodRepository.create(periodCreate).then(async newPeriod => {
                   projectCreate.period = newPeriod.id; // Assign it to the project
-                  projectCreate.status = 'pending';
+                  projectCreate.status = 'inqueue';
                   // And create the project
                   return await this.projectRepository.create(projectCreate).then(async project => {
-                    // Get the member that submitted the project
-                    return await this.memberRepository.findById(ownerAddress).then(async matchingMember => {
-                      // And add the new proposal that they have submitted to their list of proposals
-                      if (!matchingMember.proposals) {
-                        matchingMember.proposals = [];
-                      }
-                      matchingMember.proposals.push({
-                        id: projectCreate.id, 
-                        title: projectCreate.title, 
-                        date: currentDate, 
-                        shares: 0, 
-                        tribute: projectCreate.tribute, 
-                        vote: 'owner',
-                        status: 'pending'
-                      });
-                      return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
-                        return await this.eventRepository.create(event);
-                      });
-                    });                    
+                    return await this.eventRepository.create(event);                 
                   });
                 });
               });
@@ -270,25 +371,7 @@ export class EventController {
                 projectCreate.period = newPeriod.id; // Assign it to the project
                 // And create the project
                 return await this.projectRepository.create(projectCreate).then(async result => {
-                  // Get the member that submitted the project
-                  return await this.memberRepository.findById(ownerAddress).then(async matchingMember => {
-                    // And add the new proposal that they have submitted to their list of proposals
-                    if (!matchingMember.proposals) {
-                      matchingMember.proposals = [];
-                    }
-                    matchingMember.proposals.push({
-                      id: projectCreate.id, 
-                      title: projectCreate.title, 
-                      date: currentDate, 
-                      shares: 0, 
-                      tribute: projectCreate.tribute, 
-                      vote: 'owner',
-                      status: 'pending'
-                    });
-                    return await this.memberRepository.updateById(matchingMember.address, matchingMember).then(async result => {
-                      return await this.eventRepository.create(event);
-                    });
-                  });
+                  return await this.eventRepository.create(event);
                 });
               });
             }
@@ -312,7 +395,8 @@ export class EventController {
               shares: 0, 
               tribute: projectVoted.tribute, 
               vote: lastProjectVoter.vote,
-              status: 'inprogress'
+              status: 'votingperiod',
+              type: 'project'
             });
             return await this.memberRepository.updateById(member.address, member).then(async updatedMember => {
               return await this.eventRepository.create(event);
@@ -321,7 +405,7 @@ export class EventController {
         });
       case 'Project proposal processed':
         let projectProcessed = event.payload as Project;
-        projectProcessed.status = 'accepted';
+        projectProcessed.status = 'passed';
         return await this.projectRepository.updateById(projectProcessed.id, projectProcessed).then(async result => {
           return await this.eventRepository.create(event);
         });
@@ -342,7 +426,8 @@ export class EventController {
               shares: memberVoted.shares ? memberVoted.shares : 0, 
               tribute: memberVoted.tribute ? memberVoted.tribute : 0, 
               vote: lastMemberVoter.vote,
-              status: 'inprogress'
+              status: 'votingperiod',
+              type: 'member'
             });
             return await this.memberRepository.updateById(member.address, member).then(async updatedMember => {
               return await this.eventRepository.create(event);
@@ -351,7 +436,7 @@ export class EventController {
         });
       case 'Membership proposal processed':
         let memberProcessed = event.payload as Member;
-        memberProcessed.status = 'active';
+        memberProcessed.status = 'passed';
         return await this.memberRepository.updateById(memberProcessed.address, memberProcessed).then(async result => {
           return await this.eventRepository.create(event);
         });
@@ -391,23 +476,23 @@ export class EventController {
             allMembers.forEach(member => { totalShares = totalShares + (member.shares ? member.shares : 0) });
             var redeem = async function () {
               // We deduct the assets proportionately to the shares of the member
-              return await this.assetRepository.find().then(async (assets: Array<Asset>) => {
+              return await self.assetRepository.find().then(async assets => {
                 let redeemingMemberShares = member.shares ? member.shares : 0;
                 assets.forEach(asset => {
                   asset.amount = asset.amount - (asset.amount * redeemingMemberShares / totalShares);
                   this.assetRepository.updateById(asset.address, asset);
                 });
-                member.status = 'inactive';
+                member.status = 'failed';
                 member.shares = 0;
                 // And deactivate the member
-                return await this.memberRepository.updateById(member.address, member).then(async (result: Member) => {
-                  return await this.eventRepository.create(event);
+                return await self.memberRepository.updateById(member.address, member).then(async result => {
+                  return await self.eventRepository.create(event);
                 });
               });
             };
             var noRedeem = async function () {
               event.name = "Error on Redeem loot token";
-              return await this.eventRepository.create(event).then(async (result: Event) => {
+              return await self.eventRepository.create(event).then(async result => {
                 let error: HttpError = new HttpError;
                 error.status = 400;
                 error.message = "The member is still within the grace period of a voted proposal."
@@ -483,40 +568,6 @@ export class EventController {
             }
           });
         });
-      // case 'Graph update':
-      //   let apiData = event.payload as any;
-      //   let currentPointDate = new Date(1, 0, 0, 0);
-      //   let newGraphPoint;
-      //   let ethAsset: Asset;
-      //   return await this.assetRepository.find().then(async assets => {
-      //     if (assets && assets.length > 0) {
-      //       assets.forEach(asset => {
-      //         if (asset.address === "ETH") {
-      //           ethAsset = asset;
-      //         }
-      //       });
-      //       ethAsset.price = apiData.price_usd;
-      //       newGraphPoint = { date: currentPointDate, value: ethAsset.price * ethAsset.amount}
-      //       return await this.assetRepository.updateById(ethAsset.address, ethAsset).then(async updatedAsset => {
-      //         // Add new point to the graph
-      //         return await this.eventRepository.create(event);
-      //       });
-      //     } else {
-      //       ethAsset = {
-      //         address: 'ETH',
-      //         symbol: 'ETH',
-      //         logo: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
-      //         amount: 0,
-      //         price: apiData.price_usd
-      //       } as Asset;
-      //       newGraphPoint = { date: currentPointDate, value: 0}
-      //       return await this.assetRepository.create(ethAsset).then(async createdAsset => {
-      //         // Add new point to the graph
-      //         return await this.eventRepository.create(event);
-      //       });
-      //     }
-      //   });
-      //   break;
     }
     event.name = "Error: Unidentified event";
     return await this.eventRepository.create(event).then(result => { return event });

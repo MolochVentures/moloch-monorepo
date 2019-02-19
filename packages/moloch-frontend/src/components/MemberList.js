@@ -9,15 +9,18 @@ import hood from "assets/hood.png";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
 
-const MemberAvatar = ({ address, shares }) => (
-  <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={address}>
-    <Link to={`/members/${address}`} className="uncolored">
-      <Image src={hood} centered size="tiny" />
-      <p className="name">{!address ? "" : address.length > 10 ? address.substring(0, 10) + "..." : address}</p>
-      <p className="subtext">{shares} shares</p>
-    </Link>
-  </Grid.Column>
-);
+const MemberAvatar = ({ address, shares, name }) => {
+  let displayedName = name ? name : address;
+  return (
+    <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={displayedName}>
+      <Link to={`/members/${address}`} className="uncolored">
+        <Image src={hood} centered size="tiny" />
+        <p className="name">{!displayedName ? "" : displayedName.length > 10 ? displayedName.substring(0, 10) + "..." : displayedName}</p>
+        <p className="subtext">{shares} shares</p>
+      </Link>
+    </Grid.Column>
+  )
+};
 
 const GET_LOGGED_IN_USER = gql`
   query User($address: String!) {
@@ -42,21 +45,41 @@ const LoggedInUser = () => {
             <p className="subtext">{data.member.shares ? data.member.shares : 0} shares</p>
           </Link>
         ) : (
-          <div />
-        );
+            <div />
+          );
       }}
     </Query>
   );
 };
 
+class MemberListView extends React.Component {
+  constructor(props) {
+    let loggedUser = JSON.parse(localStorage.getItem('loggedUser'));
+    super(props);
+    this.state = {
+      totalMembers: 0,
+      user: {
+        address: loggedUser.address,
+        shares: 0,
+        status: ''
+      }
+    }
+  }
+
+  render() {
+    return (<Switch>
+      <Route exact path="/members" render={() => <MemberList />} />
+      <Route path="/members/:name" component={MemberDetail} />
+    </Switch>)
+  }
+}
 const GET_ELDERS = gql`
   {
     members(where: { shares_gte: 100, isActive: true }) {
       id
       shares
-    }
-  }
-`;
+    } }`;
+
 const Elders = () => (
   <Query query={GET_ELDERS}>
     {({ loading, error, data }) => {
@@ -65,8 +88,8 @@ const Elders = () => (
       return data.members.length > 0 ? (
         data.members.map((elder, idx) => <MemberAvatar address={elder.id} shares={elder.shares} key={idx} />)
       ) : (
-        <>No elders to show.</>
-      );
+          <>No elders to show.</>
+        );
     }}
   </Query>
 );
@@ -87,8 +110,8 @@ const Contributors = () => (
       return data.members.length > 0 ? (
         data.members.map((contributor, idx) => <MemberAvatar address={contributor.id} shares={contributor.shares} key={idx} />)
       ) : (
-        <>No contributors to show.</>
-      );
+          <>No contributors to show.</>
+        );
     }}
   </Query>
 );
@@ -156,11 +179,11 @@ const MemberList = () => (
   </Query>
 );
 
-const MemberListView = () => (
-  <Switch>
-    <Route exact path="/members" render={() => <MemberList />} />
-    <Route path="/members/:name" component={MemberDetail} />
-  </Switch>
-);
+// const MemberListView = () => (
+//   <Switch>
+//     <Route exact path="/members" render={() => <MemberList />} />
+//     <Route path="/members/:name" component={MemberDetail} />
+//   </Switch>
+// );
 
 export default MemberListView;

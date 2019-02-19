@@ -1,10 +1,19 @@
 import React from "react";
-import { Divider, Grid, Segment, Image, Icon, Label, Header } from "semantic-ui-react";
+import { Link, Route } from "react-router-dom";
+import { Divider, Grid, Segment, Image, Icon, Label, Header } from 'semantic-ui-react';
+import moment from 'moment';
+// import ProposalDetail from "./ProposalDetail";
 
 import bull from "assets/bull.png";
 
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
+
+const formatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2
+});
 
 const GET_MEMBER_DETAIL = gql`
   query Member($id: String!) {
@@ -34,7 +43,7 @@ const MemberDetail = ({ name }) => (
             </Grid.Column>
             <Grid.Column textAlign="right">
               <p className="subtext">Total USD Value</p>
-              <p className="amount">{0}</p>
+              <p className="amount">{formatter.format(0)}</p>
             </Grid.Column>
           </Grid>
           <Grid>
@@ -43,7 +52,7 @@ const MemberDetail = ({ name }) => (
             </Grid.Column>
           </Grid>
           <p className="subtext">Tribute</p>
-          <Grid columns="equal">
+          <Grid columns="equal" textAlign="center">
             <Grid.Row>
               <Grid.Column>
                 <Segment className="pill" textAlign="center">
@@ -93,7 +102,7 @@ const ProposalDetail = ({ name }) => (
               History
             </Grid.Row>
           </Grid>
-          <Grid columns="equal">
+          <Grid columns="equal" className="history_detail">
             <Grid.Row className="header">
               <Grid.Column textAlign="center">
                 <p className="subtext">Proposal Title</p>
@@ -123,10 +132,14 @@ const ProposalDetail = ({ name }) => (
                         {p.votes.uintVote === 2 && <Label className="dot" circular color="green" empty />}
                         {/* TODO: is this right? */}
                         {p.votes.uintVote < 2 && <Label className="dot" circular color="red" empty />}
-                        TODO: Where is the title?
+                        {/* TODO: Where is the title? */}
+                        {p.type ?
+                          <Link to={{ pathname: `/proposals/${p.id}`, state: { type: p.type, status: p.status, gracePeriod: 0, end: 0 } }} className="uncolored">
+                            {p.title}
+                          </Link> : <>{p.title}</>}
                       </Grid.Column>
                       <Grid.Column textAlign="center">
-                        <p className="subtext date">{new Date(p.timestamp * 1000).toIsoString()}</p>
+                        <p className="subtext date">{moment(new Date(p.timestamp * 1000).toIsoString()).format('MM/MDD/YYYY')}</p>
                       </Grid.Column>
                       <Grid.Column textAlign="center">
                         <p className="subtext date">{p.sharesRequested}</p>
@@ -148,8 +161,8 @@ const ProposalDetail = ({ name }) => (
                 );
               })
             ) : (
-              <>This member hasn't voted on any proposals yet.</>
-            )}
+              <div className="no-results">This member hasn't voted on any proposals yet.</div>
+              )}
           </Grid>
         </Segment>
       );

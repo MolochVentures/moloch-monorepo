@@ -52,6 +52,10 @@ body {
   padding: 30px;
 }
 
+.highcharts-credits, .highcharts-tick {
+  display: none !important;
+}
+
 #background {
   .blurred_image {
     position: fixed;
@@ -160,6 +164,7 @@ body {
   .graph {
     width: 100%;
     height: 60vh;
+    padding-top: 50px;
   }
   .graph_values {
     padding-left: 20px;
@@ -327,10 +332,18 @@ body {
     }
   }
 
+  .no-results{
+    text-align: center;
+    width: 100%;
+  }
+
   @media screen and (min-width: 320px) and (max-width: 375px) { 
 
     .blurred.box { padding: 30px 7px !important; }
     .user { height: auto !important; }
+    .history_detail{ width: 800px !important; }
+    .delegate_key {font-size: 13px !important; }
+    .no-results { text-align: left !important; }
   }
   
   @media screen and (min-width: 376px) and (max-width: 768px) { 
@@ -338,6 +351,9 @@ body {
     .blurred.box { padding: 30px 20px !important; }
     .user { height: auto !important; }
     .proposals {margin-top: 20px !important}
+    .history_detail{ width: 800px !important; }
+    .delegate_key {font-size: 13px !important; }
+    .no-results { text-align: left !important; }
   }
   
   @media screen and (min-width: 769px) and (max-width: 1024px) { 

@@ -1,6 +1,53 @@
 import React, { Component } from "react";
 import { Grid, Button } from "semantic-ui-react";
 
+import { connect } from "react-redux";
+import { fetchMemberDetail, postEvents } from "../action/actions";
+
+// import Web3 from "web3";
+import SafeProvider from "safe-web3-provider";
+
+// let web3
+// let coinbase
+
+// class Login extends Component {
+//   constructor(props) {
+//     super(props);
+
+//     this.loginWithMetamask = this.loginWithMetamask.bind(this);
+//     this.loginWithGnosisSafe = this.loginWithGnosisSafe.bind(this);
+//     this.doLogin = this.doLogin.bind(this)
+//     this.signWithAccessRequest = this.signWithAccessRequest.bind(this);
+//   }
+
+//   async loginWithMetamask() {
+//     if (!window.ethereum && !window.web3) {
+//       // Non-DApp browsers won't work.
+//       alert("Metamask needs to be installed and configured.");
+//     }
+//     if (window.ethereum) {
+//       // Modern DApp browsers need to enable Metamask access.
+//       try {
+//         await window.ethereum.enable()
+//       } catch (error) {
+//         alert("Metamask needs to be enabled.")
+//       }
+//     }
+//     web3 = new Web3(Web3.givenProvider)
+//     await this.doLogin()
+//   }
+
+//   async loginWithGnosisSafe() {
+//     console.log("Logging in with Gnosis Safe.");
+
+//     /**
+//      *  Create Safe Provider
+//      */
+//     const provider = new SafeProvider({
+//       // TODO: CHANGE THIS TO INFURA/ALCHEMY
+//       rpcUrl: "http://localhost:8545"
+//     });
+
 import { initMetmask, initGnosisSafe } from "../web3";
 import gql from "graphql-tag";
 import { ApolloConsumer } from "react-apollo";
@@ -48,7 +95,7 @@ export default class Login extends Component {
         query: GET_CURRENT_USER,
         variables: { id: coinbase }
       });
-
+      console.log('data:', data);
       if (!data.member) {
         // If the user didn't exist.
         await this.signWithAccessRequest(web3, 99, 0);
@@ -89,6 +136,7 @@ export default class Login extends Component {
 
   async signWithAccessRequest(web3, nonce, shares, isActive) {
     let message = "Please, sign the following one-time message to authenticate: " + nonce;
+    let self = this;
     // Request account access if needed.
     if (!localStorage.getItem("loggedUser")) {
       try {
@@ -98,16 +146,15 @@ export default class Login extends Component {
         if (nonce) {
           this.props.history.push("/");
         } else {
-          this.doLogin();
+          let loggedUser = JSON.parse(localStorage.getItem('loggedUser'))
+          loggedUser.nonce = nonce;
+          localStorage.setItem("loggedUser", JSON.stringify(loggedUser));
+          self.props.history.push('/');
+
         }
-      } catch (e) {
-        alert("Error while retrieving your public key.");
+      } catch(e) {
+        console.log('error:', e);
       }
-    } else {
-      let loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
-      loggedUser.nonce = nonce;
-      localStorage.setItem("loggedUser", JSON.stringify(loggedUser));
-      this.props.history.push("/");
     }
   }
 

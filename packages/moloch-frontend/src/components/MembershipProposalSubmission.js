@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Divider, Form, Grid, Input, Segment, GridColumn } from "semantic-ui-react";
 import { connect } from 'react-redux';
-import { postEvents, getAssetData } from '../action/actions';
+import { postEvents, getAssetData, getAssetAmount, fetchMemberDetail } from '../action/actions';
 
 const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -66,12 +66,15 @@ class MembershipProposalSubmission extends Component {
             shares: 0,
             tribute: 0, // TODO: this will be calculated with the blockchain
             assets: [],
-            formErrors: { title: '', description: '', assets: '', shares: '' },
+            applicantAddress: '',
+            formErrors: { title: '', description: '', assets: '', shares: '', applicantAddress: '' },
             titleValid: false,
             descriptionValid: false,
             assetsValid: false,
             sharesValid: false,
-            formValid: false
+            applicantAddressValid: false,
+            formValid: false,
+            shareValue: 0
         }
 
         this.addAsset = this.addAsset.bind(this);
@@ -91,6 +94,15 @@ class MembershipProposalSubmission extends Component {
             }]
         });
         this.props.getAssetData();
+        this.props.getAssetAmount();
+        this.props.fetchMemberDetail(JSON.parse(localStorage.getItem("loggedUser")).address)
+            .then((responseJson) => {
+                if(responseJson.items.member.status === 'founder'){
+                    this.setState({applicantAddressValid: false});
+                } else {
+                    this.setState({applicantAddressValid: true, applicantAddress: JSON.parse(localStorage.getItem("loggedUser")).address });
+                }
+            });
     }
 
     validateField(fieldName, value) {
@@ -99,7 +111,8 @@ class MembershipProposalSubmission extends Component {
         let descriptionValid = this.state.descriptionValid;
         let assetsValid = this.state.assetsValid;
         let sharesValid = this.state.sharesValid;
-
+        let applicantAddressValid = this.state.applicantAddressValid;
+        
         switch (fieldName) {
             case 'title':
                 titleValid = value !== '';
@@ -131,6 +144,17 @@ class MembershipProposalSubmission extends Component {
                 sharesValid = value > 0;
                 fieldValidationErrors.shares = sharesValid ? '' : 'Shares field is invalid';
                 break;
+            case 'applicantAddress':
+                if(this.props.memberDetail.status === 'founder'){
+                    fieldValidationErrors.applicantAddress = value ? '' : 'Applicant Address is required';
+                    applicantAddressValid = !fieldValidationErrors.applicantAddress;
+                } else {
+                    if(!value){
+                        this.setState({applicantAddress:  JSON.parse(localStorage.getItem("loggedUser")).address});
+                    }
+                    applicantAddressValid = true;
+                }
+                break;
             default:
                 break;
         }
@@ -139,12 +163,13 @@ class MembershipProposalSubmission extends Component {
             titleValid: titleValid,
             descriptionValid: descriptionValid,
             assetsValid: assetsValid,
-            sharesValid: sharesValid
+            sharesValid: sharesValid,
+            applicantAddressValid: applicantAddressValid
         }, this.validateForm);
     }
 
     validateForm() {
-        this.setState({ formValid: this.state.titleValid && this.state.descriptionValid && this.state.assetsValid && this.state.sharesValid });
+        this.setState({ formValid: this.state.titleValid && this.state.descriptionValid && this.state.assetsValid && this.state.sharesValid && this.state.applicantAddressValid });
     }
 
     addAsset() {
@@ -156,9 +181,18 @@ class MembershipProposalSubmission extends Component {
 
     handleInput(event) {
         let name = event.target.name;
-        let value = event.target.value
+        let value = event.target.value;
         if (name === 'shares') {
-            this.setState({ [name]: parseInt(value) },
+            // Calculate Share Value
+            let shareValue = 0;
+            if(value) {
+                value = parseInt(value);
+                let totalShares = parseInt(localStorage.getItem('totalShares'));
+                let requestedShare = parseInt(value);
+                let totalValueWithRequestedShare = totalShares+requestedShare;
+                shareValue = ((this.props.assetDetails.price_usd * this.props.assetAmount * requestedShare)/totalValueWithRequestedShare);
+            } 
+            this.setState({ [name]: value, shareValue: shareValue },
                 () => {
                     this.validateField(name, value);
                 });
@@ -168,6 +202,7 @@ class MembershipProposalSubmission extends Component {
                     this.validateField(name, value);
                 });
         }
+
     }
 
     handleAsset(event) {
@@ -198,16 +233,16 @@ class MembershipProposalSubmission extends Component {
             description: this.state.description,
             shares: this.state.shares,
             tribute: this.state.tribute,
-            assets: this.state.assets
+            assets: this.state.assets,
+            applicantAddress: this.state.applicantAddress
         }
-
         if (this.state.formValid) {
             this.props.postEvents(JSON.stringify({ id: '', name: 'Membership proposal', payload: membership }))
                 .then((responseJson) => {
                     switch (responseJson.type) {
                         case 'POST_EVENTS_SUCCESS':
                             if (responseJson.items.id) {
-                                self.props.history.push('/members');
+                                self.props.history.push('/proposals');
                             } else {
                                 alert('Error processing proposal');
                             }
@@ -220,7 +255,7 @@ class MembershipProposalSubmission extends Component {
                     }
                 });
         } else {
-            alert('Please, fill any missing field');
+            alert('Please, fill any missing fields.');
         }
     };
 
@@ -238,7 +273,14 @@ class MembershipProposalSubmission extends Component {
                         <Grid.Row stretched>
                             <Grid.Column mobile={16} tablet={16} computer={12} >
                                 <Segment className="blurred box">
-                                    <Form.Input name="shares" label="Request voting shares" placeholder="Shares" fluid type="number" onChange={this.handleInput} value={this.state.shares} />
+                                    <div className="subtext" style={{textAlign: 'center'}}>
+                                        Share Value
+                                    </div>
+                                    <div className="subtext" style={{textAlign: 'center'}}>
+                                        {formatter.format(this.state.shareValue)}
+                                    </div>
+                                    <Form.Input name="shares" label="Shares Requested" placeholder="Shares" fluid type="number" onChange={this.handleInput} value={this.state.shares} />
+                                    <Form.Input name="applicantAddress" label="Applicant Address" placeholder="Applicant Address" fluid type="text" onChange={this.handleInput} value={this.state.applicantAddres} />
                                 </Segment>
                             </Grid.Column>
                         </Grid.Row>
@@ -298,8 +340,11 @@ class MembershipProposalSubmission extends Component {
 
 // This function is used to convert redux global state to desired props.
 function mapStateToProps(state) {
+    // console.log(state)
     return {
-        assetDetails: state.assetData.items ? state.assetData.items[0] : { price_usd: 1 }
+        assetDetails: state.assetData.items ? state.assetData.items[0] : { price_usd: 1 },
+        assetAmount: state.assetAmount.items ? state.assetAmount.items : 0,
+        memberDetail: state.members.items
     };
 }
 
@@ -311,7 +356,13 @@ function mapDispatchToProps(dispatch) {
         },
         getAssetData: function () {
             dispatch(getAssetData());
-        }
+        },
+        getAssetAmount: function(){
+            dispatch(getAssetAmount())
+        },
+        fetchMemberDetail: function (id) {
+          return dispatch(fetchMemberDetail(id));
+        },
     };
 }
 

@@ -104,7 +104,7 @@ class ProjectProposalSubmission extends Component {
             .then((responseJson) => {
                 switch (responseJson.type) {
                     case 'FETCH_MEMBER_DETAIL_SUCCESS':
-                        if (responseJson.items.member.shares && responseJson.items.member.shares > 0 && (responseJson.items.member.status === 'active' || responseJson.items.member.status === 'founder')) {
+                        if (responseJson.items.member.shares && responseJson.items.member.shares > 0 && (responseJson.items.member.status === 'passed' || responseJson.items.member.status === 'founder')) {
                             this.setState({ isMember: true })
                         }
                         break;
@@ -236,7 +236,7 @@ class ProjectProposalSubmission extends Component {
                     }
                 });
         } else {
-            alert('Please, fill any missing field');
+            alert('Please, fill any missing fields.');
         }
     };
 
