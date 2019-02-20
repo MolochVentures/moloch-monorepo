@@ -68,7 +68,7 @@ const ProposalCard = ({ proposal }) => {
               </Grid.Column>
             </Grid.Row>
           </Grid>
-          <ProgressBar yes={parseInt(proposal.yesVotes)} no={parseInt(proposal.noVotes)} />
+          <ProgressBar yes={parseInt(proposal.yesVotes)} no={parseInt(proposal.noVotes)} barSize="small" />
         </Segment>
       </Link>
     </Grid.Column>
@@ -110,6 +110,7 @@ class ProposalList extends React.Component {
     const result = await client.query({
       query: GET_PROPOSAL_LIST
     });
+    console.log('result', result)
     try {
       await this.determineProposalStatuses(result.data.proposals);
     } catch(e) {
@@ -135,6 +136,7 @@ class ProposalList extends React.Component {
     this.setState({
       proposals: fullProps
     });
+    console.log('PROPOSALS:', this.state.proposals)
     return;
   };
 
@@ -239,13 +241,11 @@ const GET_LOGGED_IN_USER = gql`
 `;
 const ProposalListView = () => {
   let loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
-  console.log('loggedUser: ', loggedUser);
   return (
     <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedUser.address }}>
       {({ loading, error, data }) => {
         if (loading) return "Loading...";
         if (error) throw new Error(`Error!: ${error}`);
-        console.log(data);
         return (
           <Switch>
             <Route exact path="/proposals" render={() => <ProposalListHOC isActive={data.member ? data.member.isActive : false} />} />

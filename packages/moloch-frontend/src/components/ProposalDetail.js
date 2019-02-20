@@ -21,26 +21,31 @@ const Vote = {
   Yes: 1,
   No: 2
 }
-// const ProgressBar = ({ yes, no }) => (
+// const ProgressBar = ({ yes, no }) =>  {
+  
+//   const total = yes + no
+//   const percentYes = yes === 0 ? 0 : Math.round((yes / total) * 100)
+//   const percentNo = no === 0 ? 0 : Math.round((no / total) * 100)
+//   return(
 //   <>
 //   <div style={{ "position": "relative" }}>
-//     <Progress percent={yes + no} color="red" size="big" style={{
+//     <Progress percent={percentYes + percentNo} color="red" size="big" style={{
 //       "position": "absolute",
 //       "top": "0",
 //       "width": "100%"
 //     }} />
-//     <Progress percent={yes} color="green" size="big" />
+//     <Progress percent={percentYes} color="green" size="big" />
 //   </div>
 //   <Grid columns="equal">
 //     <Grid.Column floated="left">
-//       {(typeof (yes) === 'number' && yes >= 0) ? yes : 0}% Yes
+//       {percentYes}% Yes
 //       </Grid.Column>
 //     <Grid.Column floated="right" textAlign="right">
-//       {(typeof (no) === 'number' && no >= 0) ? no : 0}% No
+//       {percentNo}% No
 //       </Grid.Column>
 //   </Grid>
 //   </>
-// );
+// )};
 
 const MemberAvatar = ({ member, shares }) => {
   return (
@@ -320,7 +325,7 @@ class ProposalDetail extends Component {
                 </Grid>
                 <Grid>
                   <Grid.Column>
-                    <ProgressBar yes={parseInt(this.state.proposal.yesVotes)} no={parseInt(this.state.proposal.noVotes)} />
+                    <ProgressBar yes={parseInt(this.state.proposal.yesVotes)} no={parseInt(this.state.proposal.noVotes)} barSize="big" />
                   </Grid.Column>
                 </Grid>
                 <Grid columns="equal" centered>
