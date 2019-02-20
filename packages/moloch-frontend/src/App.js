@@ -7,8 +7,7 @@ import Wrapper from './components/Wrapper';
 import Home from './components/Home';
 import ProposalList from './components/ProposalList';
 import MemberList from './components/MemberList';
-import ProjectProposalSubmission from './components/ProjectProposalSubmission';
-import MembershipProposalSubmission from './components/MembershipProposalSubmission';
+import ProposalSubmission from './components/ProposalSubmission';
 import GuildBank from './components/GuildBank';
 import Login from './components/Login';
 import NotFound from './components/NotFound';
@@ -36,8 +35,7 @@ const App = () => (
             <Route exact path="/" render={props => localStorage.getItem("loggedUser") ? <Home {...props}/> : <Redirect to={{pathname: '/login'}} />} />
             <Route path="/proposals" render={props => localStorage.getItem("loggedUser") ? <ProposalList {...props}/> : <Redirect to={{pathname: '/login'}} />} />
             <Route path="/members" render={props => localStorage.getItem("loggedUser") ? <MemberList {...props}/> : <Redirect to={{pathname: '/login'}} />} />
-            <Route path="/projectproposalsubmission" render={props => localStorage.getItem("loggedUser") ? <ProjectProposalSubmission {...props}/> : <Redirect to={{pathname: '/login'}} />} />
-            <Route path="/membershipproposalsubmission" render={props => localStorage.getItem("loggedUser") ? <MembershipProposalSubmission {...props}/> : <Redirect to={{pathname: '/login'}} />} />
+            <Route path="/proposalsubmission" render={props => localStorage.getItem("loggedUser") ? <ProposalSubmission {...props}/> : <Redirect to={{pathname: '/login'}} />} />
             <Route path="/guildbank" render={props => localStorage.getItem("loggedUser") ? <GuildBank {...props}/> : <Redirect to={{pathname: '/login'}} />} />
             <Route path="/login" component={Login} />
             <Route component={NotFound} />

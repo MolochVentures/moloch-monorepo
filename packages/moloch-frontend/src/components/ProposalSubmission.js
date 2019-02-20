@@ -54,7 +54,7 @@ class AssetsFields extends Component {
   }
 }
 
-class MembershipProposalSubmission extends Component {
+class ProposalSubmission extends Component {
   constructor(props) {
     super(props);
 
@@ -346,4 +346,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(MembershipProposalSubmission);
+)(ProposalSubmission);
