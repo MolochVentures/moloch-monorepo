@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Button, Divider, Form, Grid, Input, Segment, GridColumn } from "semantic-ui-react";
-import { connect } from "react-redux";
-import { postEvents, getAssetData } from "../action/actions";
+import { getMoloch } from "../web3";
 
 const formatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -54,7 +53,7 @@ class AssetsFields extends Component {
   }
 }
 
-class ProposalSubmission extends Component {
+export default class ProposalSubmission extends Component {
   constructor(props) {
     super(props);
 
@@ -65,7 +64,14 @@ class ProposalSubmission extends Component {
       description: "",
       shares: 0,
       tribute: 0, // TODO: this will be calculated with the blockchain
-      assets: [],
+      assets: [
+        {
+          asset: "ETH",
+          symbol: "ETH",
+          amount: 0,
+          logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
+        }
+      ],
       formErrors: { title: "", description: "", assets: "", shares: "" },
       titleValid: false,
       descriptionValid: false,
@@ -81,18 +87,11 @@ class ProposalSubmission extends Component {
     this.handleDeleteAsset = this.handleDeleteAsset.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    const moloch = await getMoloch();
     this.setState({
-      assets: [
-        {
-          asset: "ETH",
-          symbol: "ETH",
-          amount: 0,
-          logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"
-        }
-      ]
+      moloch
     });
-    this.props.getAssetData();
   }
 
   validateField(fieldName, value) {
@@ -179,7 +178,7 @@ class ProposalSubmission extends Component {
     this.setState({ assets }, () => {
       this.validateField("assets", assets);
     });
-    this.setState({ tribute: this.props.assetDetails.price_usd * event.value });
+    this.setState({ tribute: 0 * event.value });
   }
 
   handleDeleteAsset(event) {
@@ -190,37 +189,18 @@ class ProposalSubmission extends Component {
     });
   }
 
-  handleSubmit() {
-    let self = this;
-    var membership = {
-      address: this.state.address,
-      nonce: this.state.nonce,
-      title: this.state.title,
-      description: this.state.description,
-      shares: this.state.shares,
-      tribute: this.state.tribute,
-      assets: this.state.assets
-    };
+  async handleSubmit() {
+    const { moloch, formValid, address, title, description, shares, tribute } = this.state
 
-    if (this.state.formValid) {
-      this.props.postEvents(JSON.stringify({ id: "", name: "Membership proposal", payload: membership })).then(responseJson => {
-        switch (responseJson.type) {
-          case "POST_EVENTS_SUCCESS":
-            if (responseJson.items.id) {
-              self.props.history.push("/members");
-            } else {
-              alert("Error processing proposal");
-            }
-            break;
-          case "POST_EVENTS_FAILURE":
-            alert("Error processing proposal");
-            break;
-          default:
-            break;
-        }
-      });
+    if (formValid) {
+      try {
+        await moloch.methods.submitProposal(address, tribute, shares, JSON.stringify({ title, description })).send({ from: address })
+      } catch (e) {
+        console.error(e);
+        alert("Error processing proposal");
+      }
     } else {
-      alert("Please, fill any missing field");
+      alert("Please fill any missing fields.");
     }
   }
 
@@ -323,27 +303,3 @@ class ProposalSubmission extends Component {
     );
   }
 }
-
-// This function is used to convert redux global state to desired props.
-function mapStateToProps(state) {
-  return {
-    assetDetails: state.assetData.items ? state.assetData.items[0] : { price_usd: 1 }
-  };
-}
-
-// This function is used to provide callbacks to container component.
-function mapDispatchToProps(dispatch) {
-  return {
-    postEvents: function(data) {
-      return dispatch(postEvents(data));
-    },
-    getAssetData: function() {
-      dispatch(getAssetData());
-    }
-  };
-}
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ProposalSubmission);

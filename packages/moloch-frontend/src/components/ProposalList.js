@@ -152,7 +152,7 @@ class ProposalList extends React.Component {
         <React.Fragment>
           <Grid columns={16} verticalAlign="middle">
             <Grid.Column mobile={16} tablet={8} computer={4} textAlign="right" floated="right" className="submit_button">
-              <Link to={isActive ? "/membershipproposalsubmission" : "/proposals"} className="link">
+              <Link to={isActive ? "/proposalsubmission" : "/proposals"} className="link">
                 <Button size="large" color="red" disabled={!isActive}>
                   New Proposal
                 </Button>
