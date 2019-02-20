@@ -86,7 +86,7 @@ const Elders = () => (
       if (loading) return "...";
       if (error) throw new Error(`Error!: ${error}`);
       return data.members.length > 0 ? (
-        data.members.map((elder, idx) => <MemberAvatar address={elder.id} shares={elder.shares} key={idx} />)
+        data.members.map((elder, idx) => <MemberAvatar name={elder.name} address={elder.id} shares={elder.shares} key={idx} />)
       ) : (
           <>No elders to show.</>
         );
@@ -108,7 +108,7 @@ const Contributors = () => (
       if (loading) return "...";
       if (error) throw new Error(`Error!: ${error}`);
       return data.members.length > 0 ? (
-        data.members.map((contributor, idx) => <MemberAvatar address={contributor.id} shares={contributor.shares} key={idx} />)
+        data.members.map((contributor, idx) => <MemberAvatar name={contributor.name} address={contributor.id} shares={contributor.shares} key={idx} />)
       ) : (
           <>No contributors to show.</>
         );

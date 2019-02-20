@@ -152,7 +152,7 @@ export default class Login extends Component {
           self.props.history.push('/');
 
         }
-      } catch(e) {
+      } catch (e) {
         console.log('error:', e);
       }
     }
@@ -166,14 +166,18 @@ export default class Login extends Component {
             <Grid columns={16} centered>
               <Grid.Column width={16}>
                 <Grid.Row>
-                  <Button size="large" color="grey" onClick={() => this.loginWithMetamask(client)}>
-                    Login With Metamask
+                  <Grid.Column width={16} >
+                    <Button size="large" className="login-btn" color="grey" onClick={() => this.loginWithMetamask(client)}>
+                      Login With Metamask
                   </Button>
+                  </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
-                  <Button size="large" color="grey" onClick={() => this.loginWithGnosisSafe(client)}>
-                    Login With Gnosis Safe
+                  <Grid.Column width={16}>
+                    <Button size="large" className="login-btn" color="grey"  onClick={() => this.loginWithGnosisSafe(client)}>
+                      Login With Gnosis Safe
                   </Button>
+                  </Grid.Column>
                 </Grid.Row>
               </Grid.Column>
             </Grid>

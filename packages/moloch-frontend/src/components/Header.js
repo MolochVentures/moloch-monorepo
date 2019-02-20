@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { Link } from "react-router-dom";
 import { Grid, Icon, Dropdown, Form, Button } from "semantic-ui-react";
 
-import { connect } from 'react-redux';
-import { postEvents } from '../action/actions';
+// import { connect } from 'react-redux';
+// import { postEvents } from '../action/actions';
 
 let user;
 
@@ -107,14 +107,14 @@ class Header extends Component {
         redeemingUser: localStorage.getItem('loggedUser') ? JSON.parse(localStorage.getItem('loggedUser')).address : '',
         amount: this.state.redeemShare
       }
-      this.props.postEvents(JSON.stringify({ id: '', name: 'Redeem loot token', payload: payload }))
-        .then((responseJson) => {
-          if (responseJson.type === "POST_EVENTS_SUCCESS") {
-            alert('Widthraw Success.');
-          } else {
-            alert('Widthraw Failed.');
-          }
-        })
+      // this.props.postEvents(JSON.stringify({ id: '', name: 'Redeem loot token', payload: payload }))
+      //   .then((responseJson) => {
+      //     if (responseJson.type === "POST_EVENTS_SUCCESS") {
+      //       alert('Widthraw Success.');
+      //     } else {
+      //       alert('Widthraw Failed.');
+      //     }
+      //   })
 
     } else {
       alert('Invalid Amount')
@@ -123,7 +123,6 @@ class Header extends Component {
 
   render() {
     let topRightMenuContent;
-
     switch (this.state.visibleMenu) {
       case 'main':
         topRightMenuContent = <MainMenu _handleOpenDropdown={() => this._handleOpenDropdown()} _handleCloseDropdown={() => this._handleCloseDropdown()} onLoadChangeDelegateKey={() => this.setState({ visibleMenu: 'changeDelegateKey' })} onLoadWithdrawLootToken={() => this.setState({ visibleMenu: 'withdrawLootToken' })}></MainMenu>
@@ -184,17 +183,17 @@ class Header extends Component {
 
 
 // This function is used to convert redux global state to desired props.
-function mapStateToProps(state) {
-  return {};
-}
+// function mapStateToProps(state) {
+//   return {};
+// }
 
-// This function is used to provide callbacks to container component.
-function mapDispatchToProps(dispatch) {
-  return {
-    postEvents: function (data) {
-      return dispatch(postEvents(data))
-    }
-  };
-}
+// // This function is used to provide callbacks to container component.
+// function mapDispatchToProps(dispatch) {
+//   return {
+//     postEvents: function (data) {
+//       return dispatch(postEvents(data))
+//     }
+//   };
+// }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Header);
+export default (Header);

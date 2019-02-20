@@ -79,7 +79,9 @@ class HomePage extends React.Component {
     approval: "",
     token: null,
     userAddress: null,
-    guildBankValue: 0
+    guildBankValue: 0,
+    ethAmount: 0,
+    totalShares: 0
   };
 
   async componentDidMount() {
