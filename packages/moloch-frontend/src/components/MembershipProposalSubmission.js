@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Divider, Form, Grid, Input, Segment, GridColumn } from "semantic-ui-react";
 import { connect } from 'react-redux';
-import { postEvents, getAssetData, getAssetAmount, fetchMemberDetail } from '../action/actions';
+import { getAssetData } from '../action/actions';
 
 const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -94,15 +94,15 @@ class MembershipProposalSubmission extends Component {
             }]
         });
         this.props.getAssetData();
-        this.props.getAssetAmount();
-        this.props.fetchMemberDetail(JSON.parse(localStorage.getItem("loggedUser")).address)
-            .then((responseJson) => {
-                if(responseJson.items.member.status === 'founder'){
-                    this.setState({applicantAddressValid: false});
-                } else {
-                    this.setState({applicantAddressValid: true, applicantAddress: JSON.parse(localStorage.getItem("loggedUser")).address });
-                }
-            });
+        // this.props.getAssetAmount();
+        // this.props.fetchMemberDetail(JSON.parse(localStorage.getItem("loggedUser")).address)
+        //     .then((responseJson) => {
+        //         if(responseJson.items.member.status === 'founder'){
+        //             this.setState({applicantAddressValid: false});
+        //         } else {
+        //             this.setState({applicantAddressValid: true, applicantAddress: JSON.parse(localStorage.getItem("loggedUser")).address });
+        //         }
+        //     });
     }
 
     validateField(fieldName, value) {
@@ -237,23 +237,7 @@ class MembershipProposalSubmission extends Component {
             applicantAddress: this.state.applicantAddress
         }
         if (this.state.formValid) {
-            this.props.postEvents(JSON.stringify({ id: '', name: 'Membership proposal', payload: membership }))
-                .then((responseJson) => {
-                    switch (responseJson.type) {
-                        case 'POST_EVENTS_SUCCESS':
-                            if (responseJson.items.id) {
-                                self.props.history.push('/proposals');
-                            } else {
-                                alert('Error processing proposal');
-                            }
-                            break;
-                        case 'POST_EVENTS_FAILURE':
-                            alert('Error processing proposal');
-                            break;
-                        default:
-                            break;
-                    }
-                });
+            console.log('valid')
         } else {
             alert('Please, fill any missing fields.');
         }
@@ -351,17 +335,8 @@ function mapStateToProps(state) {
 // This function is used to provide callbacks to container component.
 function mapDispatchToProps(dispatch) {
     return {
-        postEvents: function (data) {
-            return dispatch(postEvents(data));
-        },
         getAssetData: function () {
             dispatch(getAssetData());
-        },
-        getAssetAmount: function(){
-            dispatch(getAssetAmount())
-        },
-        fetchMemberDetail: function (id) {
-          return dispatch(fetchMemberDetail(id));
         },
     };
 }

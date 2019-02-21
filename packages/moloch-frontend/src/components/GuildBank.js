@@ -1,20 +1,9 @@
 import React from 'react';
 import { Grid, Image, Divider } from 'semantic-ui-react';
-
-// import xIcon from 'assets/0xIcon.png';
-// import aragonIcon from 'assets/aragonIcon.png';
-// import bitcoinIcon from 'assets/bitcoinIcon.png';
-// import district0xIcon from 'assets/district0xIcon.png';
-// import ethereumIcon from 'assets/ethereumIcon.png';
-// import funfairIcon from 'assets/funfairIcon.png';
-// import makerIcon from 'assets/makerIcon.png';
-// import spankchainIcon from 'assets/spankchainIcon.png';
-// import stellarIcon from 'assets/stellarIcon.png';
-// import stormIcon from 'assets/stormIcon.png';
 import ETHLogo from 'assets/ETHLogo.png';
 
 import { connect } from 'react-redux';
-import { fetchMemberDetail, postEvents, getAssetInfo, getAssetAmount, getAssetData } from '../action/actions';
+import { getAssetData } from '../action/actions';
 
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -51,31 +40,31 @@ class GuildBank extends React.Component {
   componentDidMount() {
     let user = JSON.parse(localStorage.getItem('loggedUser'));
     this.setState({ loggedUser: user.address });
-    this.props.fetchMemberDetail(user.address)
-      .then((responseJson) => {
-        if (responseJson.type === 'FETCH_MEMBER_DETAIL_SUCCESS') {
-          if (responseJson.items.member.status && responseJson.items.member.shares && responseJson.items.member.shares > 0) {
-            switch (responseJson.items.member.status) {
-              case 'passed':
-                this.setState({ isActive: true });
-                break;
-              default:
-                break;
-            }
-          }
-        }
-      });
-    this.props.getAssetInfo();
+    // this.props.fetchMemberDetail(user.address)
+    //   .then((responseJson) => {
+    //     if (responseJson.type === 'FETCH_MEMBER_DETAIL_SUCCESS') {
+    //       if (responseJson.items.member.status && responseJson.items.member.shares && responseJson.items.member.shares > 0) {
+    //         switch (responseJson.items.member.status) {
+    //           case 'passed':
+    //             this.setState({ isActive: true });
+    //             break;
+    //           default:
+    //             break;
+    //         }
+    //       }
+    //     }
+    //   });
+    // this.props.getAssetInfo();
     let ethAmount = 0;
-    this.props.getAssetAmount()
-      .then((responseJson) => {
-        ethAmount = (responseJson.items) ? responseJson.items : 0;
-        this.props.getAssetData()
-          .then((responseJson) => {
-            let guildBankValue = ethAmount * responseJson.items[0].price_usd;
-            this.setState({guildBankValue: guildBankValue});
-          })
-      });
+    // this.props.getAssetAmount()
+    //   .then((responseJson) => {
+    //     ethAmount = (responseJson.items) ? responseJson.items : 0;
+    //     this.props.getAssetData()
+    //       .then((responseJson) => {
+    //         let guildBankValue = ethAmount * responseJson.items[0].price_usd;
+    //         this.setState({guildBankValue: guildBankValue});
+    //       })
+    //   });
   }
 
   redeemToken() {
@@ -86,23 +75,23 @@ class GuildBank extends React.Component {
         address: this.state.loggedUser
       }
     });
-    this.props.postEvents(postData)
-      .then((responseJson) => {
-        let message = '';
-        switch (responseJson.type) {
-          case 'POST_EVENTS_SUCCESS':
-            message = 'You have successfully redeem the token.';
-            this.setState({ isActive: false });
-            break;
-          case 'POST_EVENTS_FAILURE':
-            message = responseJson.error.message;
-            break;
-          default:
-            message = 'Please try again later.'
-            break;
-        }
-        alert(message);
-      });
+    // this.props.postEvents(postData)
+    //   .then((responseJson) => {
+    //     let message = '';
+    //     switch (responseJson.type) {
+    //       case 'POST_EVENTS_SUCCESS':
+    //         message = 'You have successfully redeem the token.';
+    //         this.setState({ isActive: false });
+    //         break;
+    //       case 'POST_EVENTS_FAILURE':
+    //         message = responseJson.error.message;
+    //         break;
+    //       default:
+    //         message = 'Please try again later.'
+    //         break;
+    //     }
+    //     alert(message);
+    //   });
   }
 
   //<Button size='large' color='grey' disabled={this.state.isActive ? false : true} onClick={this.redeemToken}>Redeem Loot Token</Button>
@@ -140,18 +129,6 @@ function mapStateToProps(state) {
 // This function is used to provide callbacks to container component.
 function mapDispatchToProps(dispatch) {
   return {
-    fetchMemberDetail: function (id) {
-      return dispatch(fetchMemberDetail(id));
-    },
-    postEvents: function (data) {
-      return dispatch(postEvents(data));
-    },
-    getAssetInfo: function () {
-      return dispatch(getAssetInfo());
-    },
-    getAssetAmount: function () {
-      return dispatch(getAssetAmount());
-    },
     getAssetData: function () {
       return dispatch(getAssetData());
     }

@@ -100,18 +100,6 @@ class ProjectProposalSubmission extends Component {
 
     componentDidMount() {
         let user = JSON.parse(localStorage.getItem('loggedUser'));
-        this.props.fetchMemberDetail(user.address)
-            .then((responseJson) => {
-                switch (responseJson.type) {
-                    case 'FETCH_MEMBER_DETAIL_SUCCESS':
-                        if (responseJson.items.member.shares && responseJson.items.member.shares > 0 && (responseJson.items.member.status === 'passed' || responseJson.items.member.status === 'founder')) {
-                            this.setState({ isMember: true })
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            });
         // this.addAsset();
         this.setState({
             assets: [{
@@ -218,23 +206,6 @@ class ProjectProposalSubmission extends Component {
 
         if (this.state.formValid) {
             let user = JSON.parse(localStorage.getItem('loggedUser'));
-            this.props.postEvents(JSON.stringify({ id: '', name: 'Project proposal', payload: { project: project, owner: user.address } }))
-                .then((responseJson) => {
-                    switch (responseJson.type) {
-                        case 'POST_EVENTS_SUCCESS':
-                            if (responseJson.items.id) {
-                                self.props.history.push('/proposals');
-                            } else {
-                                alert('Error processing proposal');
-                            }
-                            break;
-                        case 'POST_EVENTS_FAILURE':
-                            alert('Error processing proposal');
-                            break;
-                        default:
-                            break;
-                    }
-                });
         } else {
             alert('Please, fill any missing fields.');
         }
@@ -318,9 +289,6 @@ function mapDispatchToProps(dispatch) {
     return {
         fetchMemberDetail: function (id) {
             return dispatch(fetchMemberDetail(id));
-        },
-        postEvents: function (data) {
-            return dispatch(postEvents(data));
         },
         getAssetData: function () {
             dispatch(getAssetData());

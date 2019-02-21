@@ -16,38 +16,498 @@ const formatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2
 });
 
+const memberData = {
+  id: 1,
+  delegateKey: '01x123',
+  shares: 100,
+  isActive: true,
+  highestIndexYesVote: 50,
+  tokenTribute: 1000,
+  didRagequit: false,
+  votes: [],
+  submissions: []
+}
+
+const proposalData = {
+  id: 1,
+  timestamp: '2019-02-21',
+  proposalIndex: 0,
+  delegateKey: 123456789,
+  member: {
+    id: 1,
+    delegateKey: 987654321,
+    shares: 100,
+    isActive: true,
+    highestIndexYesVote: 25,
+    tokenTribute: 1000,
+    didRagequit: false,
+    votes: [{
+      id: 1,
+      timestamp: '2019-02-20',
+      proposalIndex: 0,
+      delegateKey: 23456789,
+      memberAddress: 0x001,
+      uintVote: 1,
+      proposal: {
+        id: 1,
+        timestamp: '2019-02-21',
+        proposalIndex: 0,
+        delegateKey: 123456789,
+        member: {
+          id: 1,
+          delegateKey: 987654321,
+          shares: 100,
+          isActive: true,
+          highestIndexYesVote: 25,
+          tokenTribute: 1000,
+          didRagequit: false,
+          votes: [{
+            id: 1,
+            timestamp: '2019-02-20',
+            proposalIndex: 0,
+            delegateKey: 23456789,
+            memberAddress: 0x001,
+            uintVote: 1,
+            proposal: {},
+            member: {
+              id: 2,
+              delegateKey: 1234,
+              shares: 100,
+              isActive: true,
+              highestIndexYesVote: 25,
+              tokenTribute: 1000,
+              didRagequit: false,
+              votes: [{
+                id: 1,
+                timestamp: '2019-02-20',
+                proposalIndex: 0,
+                delegateKey: 23456789,
+                memberAddress: 0x001,
+                uintVote: 1,
+                proposal: {},
+                member: {}
+              }],
+              submissions: [{}]
+            }
+          }],
+          submissions: [{}]
+        },
+        memberAddress: 0x002,
+        applicant: {
+          id: 1,
+          timestamp: '2019-02-01',
+          proposalIndex: 1,
+          delegateKey: 1111111,
+          member: {
+            id: 2,
+            delegateKey: 2344,
+            shares: 100,
+            isActive: true,
+            highestIndexYesVote: 25,
+            tokenTribute: 1000,
+            didRagequit: false,
+            votes: [{
+              id: 1,
+              timestamp: '2019-02-20',
+              proposalIndex: 0,
+              delegateKey: 23456789,
+              memberAddress: 0x001,
+              uintVote: 1,
+              proposal: {},
+              member: {}
+            }],
+            submissions: [{}]
+          },
+          memberAddress: 0x003,
+          applicantAddress: 1,
+          tokenTribute: 2000,
+          sharesRequested: 90,
+          didPass: true,
+          aborted: false,
+          votes: [{
+            id: 1,
+            timestamp: '2019-02-10',
+            proposalIndex: 1,
+            delegateKey: 99999,
+            memberAddress: 0x001,
+            uintVote: 1,
+            proposal: {},
+            member: {}
+          }],
+          proposal: {}
+        },
+        applicantAddress: 2,
+        tokenTribute: 1000,
+        sharesRequested: 200,
+        yesVotes: 10,
+        noVotes: 20,
+        processed: false,
+        didPass: false,
+        aborted: false,
+        votes: [{
+          id: 1,
+          timestamp: '2019-02-10',
+          proposalIndex: 1,
+          delegateKey: 99999,
+          memberAddress: 0x001,
+          uintVote: 1,
+          proposal: {},
+          member: {}
+        }],
+        details: 'test only',
+        maxTotalSharesAtYesVote: 2000,
+      },
+      member: {
+        id: 2,
+        delegateKey: 4544,
+        shares: 100,
+        isActive: true,
+        highestIndexYesVote: 25,
+        tokenTribute: 1000,
+        didRagequit: false,
+        votes: [{
+          id: 1,
+          timestamp: '2019-02-20',
+          proposalIndex: 0,
+          delegateKey: 23456789,
+          memberAddress: 0x001,
+          uintVote: 1,
+          proposal: {},
+          member: {}
+        }],
+        submissions: [{}]
+      }
+    }],
+    submissions: [{}]
+  },
+  memberAddress: 0x002,
+  applicant: {
+    id: 1,
+    timestamp: '2019-02-01',
+    proposalIndex: 1,
+    delegateKey: 1111111,
+    member: {
+      id: 2,
+      delegateKey: 12323,
+      shares: 100,
+      isActive: true,
+      highestIndexYesVote: 25,
+      tokenTribute: 1000,
+      didRagequit: false,
+      votes: [{
+        id: 1,
+        timestamp: '2019-02-20',
+        proposalIndex: 0,
+        delegateKey: 23456789,
+        memberAddress: 0x001,
+        uintVote: 1,
+        proposal: {},
+        member: {}
+      }],
+      submissions: [{}]
+    },
+    memberAddress: 0x003,
+    applicantAddress: 1,
+    tokenTribute: 2000,
+    sharesRequested: 90,
+    didPass: true,
+    aborted: false,
+    votes: [{
+      id: 1,
+      timestamp: '2019-02-10',
+      proposalIndex: 1,
+      delegateKey: 99999,
+      memberAddress: 0x001,
+      uintVote: 1,
+      proposal: {},
+      member: {}
+    }],
+    proposal: {}
+  },
+  applicantAddress: 2,
+  tokenTribute: 1000,
+  sharesRequested: 200,
+  yesVotes: 10,
+  noVotes: 20,
+  processed: false,
+  didPass: false,
+  aborted: false,
+  votes: [{
+    id: 1,
+    timestamp: '2019-02-10',
+    proposalIndex: 1,
+    delegateKey: 99999,
+    memberAddress: 0x001,
+    uintVote: 1,
+    proposal: {
+      id: 1,
+      timestamp: '2019-02-21',
+      proposalIndex: 0,
+      delegateKey: 123456789,
+      member: {
+        id: 1,
+        delegateKey: 987654321,
+        shares: 100,
+        isActive: true,
+        highestIndexYesVote: 25,
+        tokenTribute: 1000,
+        didRagequit: false,
+        votes: [{
+          id: 1,
+          timestamp: '2019-02-20',
+          proposalIndex: 0,
+          delegateKey: 23456789,
+          memberAddress: 0x001,
+          uintVote: 1,
+          proposal: {},
+          member: {
+            id: 2,
+            delegateKey: 12334,
+            shares: 100,
+            isActive: true,
+            highestIndexYesVote: 25,
+            tokenTribute: 1000,
+            didRagequit: false,
+            votes: [{
+              id: 1,
+              timestamp: '2019-02-20',
+              proposalIndex: 0,
+              delegateKey: 23456789,
+              memberAddress: 0x001,
+              uintVote: 1,
+              proposal: {},
+              member: {}
+            }],
+            submissions: [{}]
+          }
+        }],
+        submissions: [{}]
+      },
+      memberAddress: 0x002,
+      applicant: {
+        id: 1,
+        timestamp: '2019-02-01',
+        proposalIndex: 1,
+        delegateKey: 1111111,
+        member: {
+          id: 2,
+          delegateKey: 3434,
+          shares: 100,
+          isActive: true,
+          highestIndexYesVote: 25,
+          tokenTribute: 1000,
+          didRagequit: false,
+          votes: [{
+            id: 1,
+            timestamp: '2019-02-20',
+            proposalIndex: 0,
+            delegateKey: 23456789,
+            memberAddress: 0x001,
+            uintVote: 1,
+            proposal: {},
+            member: {}
+          }],
+          submissions: [{}]
+        },
+        memberAddress: 0x003,
+        applicantAddress: 1,
+        tokenTribute: 2000,
+        sharesRequested: 90,
+        didPass: true,
+        aborted: false,
+        votes: [{
+          id: 1,
+          timestamp: '2019-02-10',
+          proposalIndex: 1,
+          delegateKey: 99999,
+          memberAddress: 0x001,
+          uintVote: 1,
+          proposal: {},
+          member: {}
+        }],
+        proposal: {}
+      },
+      applicantAddress: 2,
+      tokenTribute: 1000,
+      sharesRequested: 200,
+      yesVotes: 10,
+      noVotes: 20,
+      processed: false,
+      didPass: false,
+      aborted: false,
+      votes: [{
+        id: 1,
+        timestamp: '2019-02-10',
+        proposalIndex: 1,
+        delegateKey: 99999,
+        memberAddress: 0x001,
+        uintVote: 1,
+        proposal: {},
+        member: {}
+      }],
+      details: 'test only',
+      maxTotalSharesAtYesVote: 2000,
+    },
+    member: {
+      id: 1,
+      delegateKey: 987654321,
+      shares: 100,
+      isActive: true,
+      highestIndexYesVote: 25,
+      tokenTribute: 1000,
+      didRagequit: false,
+      votes: [{
+        id: 1,
+        timestamp: '2019-02-20',
+        proposalIndex: 0,
+        delegateKey: 23456789,
+        memberAddress: 0x001,
+        uintVote: 1,
+        proposal: {
+          id: 1,
+          timestamp: '2019-02-21',
+          proposalIndex: 0,
+          delegateKey: 123456789,
+          member: {
+            id: 1,
+            delegateKey: 987654321,
+            shares: 100,
+            isActive: true,
+            highestIndexYesVote: 25,
+            tokenTribute: 1000,
+            didRagequit: false,
+            votes: [{
+              id: 1,
+              timestamp: '2019-02-20',
+              proposalIndex: 0,
+              delegateKey: 23456789,
+              memberAddress: 0x001,
+              uintVote: 1,
+              proposal: {},
+              member: {
+                id: 2,
+                delegateKey: 1234,
+                shares: 100,
+                isActive: true,
+                highestIndexYesVote: 25,
+                tokenTribute: 1000,
+                didRagequit: false,
+                votes: [{
+                  id: 1,
+                  timestamp: '2019-02-20',
+                  proposalIndex: 0,
+                  delegateKey: 23456789,
+                  memberAddress: 0x001,
+                  uintVote: 1,
+                  proposal: {},
+                  member: {}
+                }],
+                submissions: [{}]
+              }
+            }],
+            submissions: [{}]
+          },
+          memberAddress: 0x002,
+          applicant: {
+            id: 1,
+            timestamp: '2019-02-01',
+            proposalIndex: 1,
+            delegateKey: 1111111,
+            member: {
+              id: 2,
+              delegateKey: 2344,
+              shares: 100,
+              isActive: true,
+              highestIndexYesVote: 25,
+              tokenTribute: 1000,
+              didRagequit: false,
+              votes: [{
+                id: 1,
+                timestamp: '2019-02-20',
+                proposalIndex: 0,
+                delegateKey: 23456789,
+                memberAddress: 0x001,
+                uintVote: 1,
+                proposal: {},
+                member: {}
+              }],
+              submissions: [{}]
+            },
+            memberAddress: 0x003,
+            applicantAddress: 1,
+            tokenTribute: 2000,
+            sharesRequested: 90,
+            didPass: true,
+            aborted: false,
+            votes: [{
+              id: 1,
+              timestamp: '2019-02-10',
+              proposalIndex: 1,
+              delegateKey: 99999,
+              memberAddress: 0x001,
+              uintVote: 1,
+              proposal: {},
+              member: {}
+            }],
+            proposal: {}
+          },
+          applicantAddress: 2,
+          tokenTribute: 1000,
+          sharesRequested: 200,
+          yesVotes: 10,
+          noVotes: 20,
+          processed: false,
+          didPass: false,
+          aborted: false,
+          votes: [{
+            id: 1,
+            timestamp: '2019-02-10',
+            proposalIndex: 1,
+            delegateKey: 99999,
+            memberAddress: 0x001,
+            uintVote: 1,
+            proposal: {},
+            member: {}
+          }],
+          details: 'test only',
+          maxTotalSharesAtYesVote: 2000,
+        },
+        member: {
+          id: 2,
+          delegateKey: 4544,
+          shares: 100,
+          isActive: true,
+          highestIndexYesVote: 25,
+          tokenTribute: 1000,
+          didRagequit: false,
+          votes: [{
+            id: 1,
+            timestamp: '2019-02-20',
+            proposalIndex: 0,
+            delegateKey: 23456789,
+            memberAddress: 0x001,
+            uintVote: 1,
+            proposal: {},
+            member: {}
+          }],
+          submissions: [{}]
+        }
+      }],
+      submissions: [{}]
+    }
+  }],
+  details: 'test only',
+  maxTotalSharesAtYesVote: 2000,
+}
+
 const Vote = {
   Null: 0, // default value, counted as abstention
   Yes: 1,
   No: 2
 }
-// const ProgressBar = ({ yes, no }) =>  {
-  
-//   const total = yes + no
-//   const percentYes = yes === 0 ? 0 : Math.round((yes / total) * 100)
-//   const percentNo = no === 0 ? 0 : Math.round((no / total) * 100)
-//   return(
-//   <>
-//   <div style={{ "position": "relative" }}>
-//     <Progress percent={percentYes + percentNo} color="red" size="big" style={{
-//       "position": "absolute",
-//       "top": "0",
-//       "width": "100%"
-//     }} />
-//     <Progress percent={percentYes} color="green" size="big" />
-//   </div>
-//   <Grid columns="equal">
-//     <Grid.Column floated="left">
-//       {percentYes}% Yes
-//       </Grid.Column>
-//     <Grid.Column floated="right" textAlign="right">
-//       {percentNo}% No
-//       </Grid.Column>
-//   </Grid>
-//   </>
-// )};
 
 const MemberAvatar = ({ member, shares }) => {
+  console.log(member);
   return (
     <Grid.Column mobile={4} tablet={3} computer={3} textAlign="center" className="member_avatar" title={member}>
       <Link to={`/members/${member}`} className="uncolored">
@@ -145,11 +605,14 @@ class ProposalDetail extends Component {
       query: GET_LOGGED_IN_USER,
       variables: { address: loggedUser.address }
     });
+    userResult.data.member = memberData;
     this.setState({
       user: userResult.data.member
     });
+    console.log(memberData);
 
-    const proposal = await getProposalDetailsFromOnChain(proposalResult.data.proposal);
+    // const proposal = await getProposalDetailsFromOnChain(proposalResult.data.proposal);
+    const proposal = proposalData;
     this.setState({
       proposal
     });
@@ -166,12 +629,13 @@ class ProposalDetail extends Component {
 
   handleNo = () => {
     const { proposal, moloch, user } = this.state
-    moloch.methods.submitVote(proposal.proposalIndex, Vote.No).send({ from: user.id })
+    console.log('user', this.state)
+    // moloch.methods.submitVote(proposal.proposalIndex, Vote.No).send({ from: user.id })
     this.setState({
       userHasVoted: true
     })
 
-    
+
     // Add the voter to the voters of the proposal.
     // let voters = {
     //   member: JSON.parse(localStorage.getItem("loggedUser")).address,
@@ -190,7 +654,7 @@ class ProposalDetail extends Component {
       userHasVoted: true
     })
 
-    
+
     // Add the voter to the voters of the proposal.
     // let voters = {
     //   member: JSON.parse(localStorage.getItem("loggedUser")).address,
@@ -201,7 +665,7 @@ class ProposalDetail extends Component {
     // let name = (this.state.type === 'member') ? 'Membership proposal voted' : 'Project proposal voted';
     // this.sendProposalUpdate(name, voters);
   }
-  
+
   calculateVote(voters) {
     // calculate votes
     let totalNumberVotedYes = 0;
@@ -224,7 +688,7 @@ class ProposalDetail extends Component {
       });
       let percentYes = Math.ceil((totalNumberVotedYes / this.state.totalShares) * 100)
       let percentNo = Math.ceil((totalNumberVotedNo / this.state.totalShares) * 100);
-      
+
       this.setState({
         votedYes: percentYes,
         votedNo: percentNo
@@ -244,15 +708,15 @@ class ProposalDetail extends Component {
           <Segment className="transparent box segment" textAlign="center">
             <Grid centered columns={14}>
               <Grid.Column mobile={16} tablet={16} computer={12}>
-                <span className="title">{this.state.proposal.title ? this.state.proposal.title : "N/A"}</span>
+                <span className="title">{this.state.proposal.id ? this.state.proposal.id : "N/A"}</span>
               </Grid.Column>
             </Grid>
             <Grid centered columns={14}>
               <Grid.Column mobile={16} tablet={16} computer={4}>
-                <div className="subtext description">{this.state.proposal.description ? this.state.proposal.description : "N/A"}</div>
+                <div className="subtext description">{this.state.proposal.details ? this.state.proposal.details : "N/A"}</div>
                 <Grid columns="equal" className="tokens" textAlign="center">
                   <Grid.Row>
-                    <Grid.Column className="tributes"mobile={16} tablet={16} computer={8} style={{ marginBottom: 10 }}>
+                    <Grid.Column className="tributes" mobile={16} tablet={16} computer={8} style={{ marginBottom: 10 }}>
                       <Segment className="pill" textAlign="center">
                         <Icon name="ethereum" />
                         {this.state.proposal.tokenTribute} ETH
@@ -267,7 +731,7 @@ class ProposalDetail extends Component {
                   </Grid.Column>
                   <Grid.Column textAlign="right">
                     <p className="subtext">Total USD Value</p>
-                    <p className="amount">{formatter.format(0)}</p>
+                    <p className="amount">{formatter.format(this.state.proposal.tokenTribute)}</p>
                   </Grid.Column>
                 </Grid>
               </Grid.Column>
@@ -283,14 +747,15 @@ class ProposalDetail extends Component {
                       {this.state.proposal.votingEnded ? (
                         <span className="subtext">Voting Ended</span>
                       ) : (
-                        <>
+                          <>
                           <span className="subtext">Voting Ends: </span>
                           <span>
-                            {this.state.proposal.votingEnds ? this.state.proposal.votingEnds : "-"} period
+                            {/* {this.state.proposal.votingEnds ? this.state.proposal.votingEnds : "-"} period */}
+                            {this.state.proposal.votingEnds} day
                             {this.state.proposal.votingEnds === 1 ? null : "s"}
                           </span>
-                        </>
-                      )}
+                          </>
+                        )}
                     </span>
                   </Grid.Column>
                   <Grid.Column textAlign="right" className="pill_column grace" mobile={16} tablet={8} computer={8}>
@@ -298,14 +763,15 @@ class ProposalDetail extends Component {
                       {this.state.proposal.graceEnded ? (
                         <span className="subtext">Grace Ended</span>
                       ) : (
-                        <>
+                          <>
                           <span className="subtext">Grace Period Ends: </span>
                           <span>
-                            {this.state.proposal.gracePeriod ? this.state.proposal.gracePeriod : "-"} period
+                            {/* {this.state.proposal.gracePeriod ? this.state.proposal.gracePeriod : "-"} period */}
+                            {this.state.proposal.gracePeriod} day
                             {this.state.proposal.gracePeriod === 1 ? null : "s"}
                           </span>
-                        </>
-                      )}
+                          </>
+                        )}
                     </span>
                   </Grid.Column>
                 </Grid>
