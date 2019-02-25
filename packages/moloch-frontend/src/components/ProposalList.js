@@ -88,6 +88,7 @@ const GET_PROPOSAL_LIST = gql`
       yesVotes
       noVotes
       proposalIndex
+      status @client
     }
   }
 `;
