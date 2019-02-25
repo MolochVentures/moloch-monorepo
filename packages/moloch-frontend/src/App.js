@@ -13,26 +13,49 @@ import Login from "./components/Login";
 import NotFound from "./components/NotFound";
 import { store } from "./store";
 import { ApolloProvider, Query } from "react-apollo";
-import { ApolloClient } from "apollo-client";
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { HttpLink } from "apollo-link-http";
 import gql from "graphql-tag";
+import {ApolloClient} from 'apollo-client';
+import {InMemoryCache} from 'apollo-cache-inmemory';
+import {HttpLink} from 'apollo-link-http';
+import { defaults, resolvers } from "./resolvers";
+import { typeDefs } from "./schema";
+import { ApolloLink } from "apollo-link";
+import { onError } from 'apollo-link-error';
+import { withClientState } from 'apollo-link-state';
 
 console.log(process.env);
 
 const cache = new InMemoryCache();
-const link = new HttpLink({
-  uri: process.env.REACT_APP_GRAPH_NODE_URI
-});
+const stateLink = withClientState({
+  cache,
+  resolvers,
+  typeDefs,
+  defaults
+})
 const client = new ApolloClient({
   cache,
-  link
+  link: ApolloLink.from([
+    onError(({ graphQLErrors, networkError }) => {
+      if (graphQLErrors)
+        graphQLErrors.map(({ message, locations, path }) =>
+          console.log(
+            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+          ),
+        );
+      if (networkError) console.log(`[Network error]: ${networkError}`);
+    }),
+    stateLink,
+    new HttpLink({
+      uri: process.env.REACT_APP_GRAPH_NODE_URI,
+    })
+  ]),
+  connectToDevTools: true
 });
 
 cache.writeData({
   data: {
-    loggedInUser: localStorage.getItem("loggedUser") ? localStorage.getItem("loggedUser") : ""
-  }
+    loggedInUser: localStorage.getItem('loggedInUser')
+  },
 });
 
 const Provider = require("react-redux").Provider;
