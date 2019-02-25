@@ -116,19 +116,17 @@ export default class Login extends Component {
       <ApolloConsumer>
         {client => (
           <div id="login">
-            <Grid columns={16} centered>
-              <Grid.Column width={16}>
-                <Grid.Row>
-                  <Button size="large" color="grey" onClick={() => this.loginWithMetamask(client)}>
-                    Login With Metamask
-                  </Button>
-                </Grid.Row>
-                <Grid.Row>
-                  <Button size="large" color="grey" onClick={() => this.loginWithGnosisSafe(client)}>
-                    Login With Gnosis Safe
-                  </Button>
-                </Grid.Row>
-              </Grid.Column>
+            <Grid columns={1} centered>
+              <Grid.Row>
+                <Button size="large" color="grey" onClick={() => this.loginWithMetamask(client)}>
+                  Login With Metamask
+                </Button>
+              </Grid.Row>
+              <Grid.Row>
+                <Button size="large" color="grey" onClick={() => this.loginWithGnosisSafe(client)}>
+                  Login With Gnosis Safe
+                </Button>
+              </Grid.Row>
             </Grid>
           </div>
         )}
