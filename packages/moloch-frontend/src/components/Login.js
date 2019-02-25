@@ -7,13 +7,9 @@ import { ApolloConsumer } from "react-apollo";
 
 let coinbase;
 
-const GET_CURRENT_USER = gql`
-  query Member($id: String!) {
-    member(id: $id) {
-      id
-      shares
-      isActive
-    }
+const IS_LOGGED_IN = gql`
+  query IsUserLoggedIn {
+    loggedInUser @client
   }
 `;
 export default class Login extends Component {
@@ -26,6 +22,7 @@ export default class Login extends Component {
     this.signWithAccessRequest = this.signWithAccessRequest.bind(this);
   }
 
+  // bypass auth for now
   async loginWithMetamask(client) {
     const web3 = await initMetmask();
     await this.doLoginBypassAuth(client, web3);
@@ -41,22 +38,10 @@ export default class Login extends Component {
 
     if (!coinbase) {
       // First time logging in on metamask
-      await this.signWithAccessRequest(null);
+      alert('Web3 client not configured properly')
+      return
     } else {
-      // Try getting a user by their public address.
-      const { data } = await client.query({
-        query: GET_CURRENT_USER,
-        variables: { id: coinbase }
-      });
-
-      if (!data.member) {
-        // If the user didn't exist.
-        await this.signWithAccessRequest(web3, 99, 0);
-      } else {
-        // If the user exists, ask for a signature.
-        localStorage.setItem("totalShares", data.member.totalShares);
-        await this.signWithAccessRequest(web3, 99, data.member.totalShares, data.member.isActive);
-      }
+      await this.signWithAccessRequest(client, web3, 99);
     }
   }
 
@@ -67,34 +52,32 @@ export default class Login extends Component {
       alert("Could not retrieve address from Gnosis Safe/MetaMask, is it configured and this domain whitelisted?");
     } else {
       // Try getting a user by their public address.
-      const { data } = await client.query({
-        query: GET_CURRENT_USER,
-        variables: { id: coinbase }
+      client.writeData({
+        data: {
+          loggedInUser: coinbase.toLowerCase()
+        }
       });
-      console.log(data.member);
-
-      localStorage.setItem("totalShares", data.member ? data.member.totalShares : 0);
-      localStorage.setItem(
-        "loggedUser",
-        JSON.stringify({
-          isActive: data.member ? data.member.isActive : false,
-          shares: data.member ? data.member.totalShares : 0,
-          address: coinbase.toLowerCase(),
-          nonce: 99
-        })
-      );
+      localStorage.setItem('loggedInUser', coinbase.toLowerCase())
       this.props.history.push("/");
     }
   }
 
-  async signWithAccessRequest(web3, nonce, shares, isActive) {
+  async signWithAccessRequest(client, web3, nonce) {
     let message = "Please, sign the following one-time message to authenticate: " + nonce;
+    const { data } = await client.query({
+      query: IS_LOGGED_IN,
+      variables: { id: coinbase }
+    });
     // Request account access if needed.
-    if (!localStorage.getItem("loggedUser")) {
+    if (!data.loggedInUser) {
       try {
         const signature = await web3.eth.personal.sign(web3.utils.utf8ToHex(message), coinbase, "");
         const result = await web3.eth.personal.ecRecover(web3.utils.utf8ToHex(message), signature);
-        localStorage.setItem("loggedUser", JSON.stringify({ isActive, shares: shares ? shares : 0, address: result, nonce }));
+        client.writeData({
+          data: {
+            loggedInUser: result.toLowerCase()
+          }
+        });
         if (nonce) {
           this.props.history.push("/");
         } else {
@@ -104,9 +87,11 @@ export default class Login extends Component {
         alert("Error while retrieving your public key.");
       }
     } else {
-      let loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
-      loggedUser.nonce = nonce;
-      localStorage.setItem("loggedUser", JSON.stringify(loggedUser));
+      client.writeData({
+        data: {
+          loggedInUser: data.loggedInUser
+        }
+      });
       this.props.history.push("/");
     }
   }
