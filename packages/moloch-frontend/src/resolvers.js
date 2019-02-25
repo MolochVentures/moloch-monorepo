@@ -1,15 +1,9 @@
-import gql from 'graphql-tag';
+export const defaults = {
+  loggedInUser: ""
+};
 
-export const typeDefs = gql`
-  extend type Query {
-    loggedInUser: String!
+export const resolvers = {
+  Proposal: {
+    status: () => false
   }
-
-  extend type Launch {
-    loggedInUser: String!
-  }
-
-  extend type Mutation {
-    logIn(user: String!): [Launch]
-  }
-`;
+}
