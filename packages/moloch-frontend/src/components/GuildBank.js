@@ -100,9 +100,8 @@ class GuildBank extends React.Component {
   }
 
   componentDidMount() {
-    let user = JSON.parse(localStorage.getItem('loggedUser'));
-    this.setState({ loggedUser: user.address });
-    this.props.fetchMemberDetail(user.address)
+    this.setState({ loggedUser: this.props.loggedInUser });
+    this.props.fetchMemberDetail(this.props.loggedInUser)
       .then((responseJson) => {
         if (responseJson.type === 'FETCH_MEMBER_DETAIL_SUCCESS') {
           if (responseJson.items.member.status && responseJson.items.member.shares && responseJson.items.member.shares > 0) {

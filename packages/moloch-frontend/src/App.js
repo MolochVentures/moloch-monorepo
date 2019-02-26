@@ -92,7 +92,7 @@ class App extends React.Component {
                 return (
                   <>
                     <Background />
-                    <Header />
+                    <Header loggedInUser={data.loggedInUser} />
                     <Wrapper>
                       <Switch>
                         <Route
@@ -130,7 +130,7 @@ class App extends React.Component {
                         />
                         <Route
                           path="/guildbank"
-                          render={props => (data.loggedInUser ? <GuildBank {...props} /> : <Redirect to={{ pathname: "/login" }} />)}
+                          render={props => (data.loggedInUser ? <GuildBank {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />)}
                         />
                         <Route path="/login" component={Login} />
                         <Route component={NotFound} />

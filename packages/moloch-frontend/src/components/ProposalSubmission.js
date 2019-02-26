@@ -58,8 +58,7 @@ export default class ProposalSubmission extends Component {
     super(props);
 
     this.state = {
-      address: JSON.parse(localStorage.getItem("loggedUser")).address,
-      nonce: JSON.parse(localStorage.getItem("loggedUser")).nonce,
+      address: props.loggedInUser,
       title: "",
       description: "",
       shares: 0,

@@ -262,7 +262,6 @@ const ProposalListView = props => {
       {({ loading, error, data }) => {
         if (loading) return "Loading...";
         if (error) throw new Error(`Error!: ${error}`);
-        console.log(data);
         return (
           <Switch>
             <Route exact path="/proposals" render={() => <ProposalListHOC isActive={data.member ? data.member.isActive : false} />} />

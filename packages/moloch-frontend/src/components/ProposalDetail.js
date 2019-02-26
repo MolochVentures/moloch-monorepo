@@ -98,16 +98,15 @@ class ProposalDetail extends Component {
   }
 
   async fetchData(props) {
-    const { client } = props;
+    const { client, loggedInUser } = props;
     const proposalResult = await client.query({
       query: GET_PROPOSAL_DETAIL,
       variables: { id: this.props.match.params.id }
     });
 
-    const loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
     const userResult = await client.query({
       query: GET_LOGGED_IN_USER,
-      variables: { address: loggedUser.address }
+      variables: { address: loggedInUser }
     });
     this.setState({
       user: userResult.data.member
