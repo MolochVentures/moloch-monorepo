@@ -57,7 +57,6 @@ export default class Login extends Component {
           loggedInUser: coinbase.toLowerCase()
         }
       });
-      localStorage.setItem('loggedInUser', coinbase.toLowerCase())
       this.props.history.push("/");
     }
   }
