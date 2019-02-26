@@ -8,6 +8,7 @@ import hood from "assets/hood.png";
 
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
+import { GET_LOGGED_IN_USER } from "../helpers/graphQlQueries";
 
 const MemberAvatar = ({ address, shares }) => (
   <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={address}>
@@ -19,15 +20,6 @@ const MemberAvatar = ({ address, shares }) => (
   </Grid.Column>
 );
 
-const GET_LOGGED_IN_USER = gql`
-  query User($address: String!) {
-    member(id: $address) {
-      id
-      shares
-      isActive
-    }
-  }
-`;
 const LoggedInUser = props => {
   return (
     <Query query={GET_LOGGED_IN_USER} variables={{ address: props.loggedInUser }}>

@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { Grid, Icon, Dropdown, Form, Button } from "semantic-ui-react";
-import gql from "graphql-tag";
 import { Query, withApollo } from "react-apollo";
+import { GET_LOGGED_IN_USER } from "../helpers/graphQlQueries";
 
 const MainMenu = props => (
   <div className="dropdownItems">
@@ -87,15 +87,6 @@ const WithdrawLootTokenMenu = () => (
   </div>
 );
 
-const GET_LOGGED_IN_USER = gql`
-  query User($address: String!) {
-    member(id: $address) {
-      id
-      shares
-      isActive
-    }
-  }
-`;
 export default class Header extends Component {
   constructor(props) {
     super(props);
@@ -160,7 +151,6 @@ export default class Header extends Component {
         {({ loading, error, data }) => {
           if (loading) return "Loading...";
           if (error) throw new Error(`Error!: ${error}`);
-          console.log("data: ", data);
           return (
             <div id="header">
               <Grid columns="equal" verticalAlign="middle">
@@ -196,7 +186,7 @@ export default class Header extends Component {
                       text="A"
                     >
                       <Dropdown.Menu className="menu blurred" direction="left">
-                        {this.getTopRightMenuContent()}
+                        {this.getTopRightMenuContent(data.member)}
                       </Dropdown.Menu>
                     </Dropdown>
                   </Grid.Column>

@@ -7,6 +7,7 @@ import ProgressBar from "./ProgressBar";
 import { Query, withApollo } from "react-apollo";
 import gql from "graphql-tag";
 import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
+import { GET_LOGGED_IN_USER } from "../helpers/graphQlQueries";
 
 const formatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -247,15 +248,6 @@ class ProposalList extends React.Component {
 }
 const ProposalListHOC = withApollo(ProposalList);
 
-const GET_LOGGED_IN_USER = gql`
-  query User($address: String!) {
-    member(id: $address) {
-      id
-      shares
-      isActive
-    }
-  }
-`;
 const ProposalListView = props => {
   return (
     <Query query={GET_LOGGED_IN_USER} variables={{ address: props.loggedInUser }}>

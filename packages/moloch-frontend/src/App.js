@@ -11,7 +11,6 @@ import ProposalSubmission from "./components/ProposalSubmission";
 import GuildBank from "./components/GuildBank";
 import Login from "./components/Login";
 import NotFound from "./components/NotFound";
-import { store } from "./store";
 import { ApolloProvider, Query } from "react-apollo";
 import gql from "graphql-tag";
 import { defaults, resolvers } from "./resolvers";
@@ -61,8 +60,6 @@ const client = new ApolloClient({
   ])
 });
 
-const Provider = require("react-redux").Provider;
-
 const IS_LOGGED_IN = gql`
   query IsUserLoggedIn {
     loggedInUser @client
@@ -83,66 +80,62 @@ class App extends React.Component {
 
   render() {
     return this.state.restored ? (
-      <Provider store={store}>
-        <ApolloProvider client={client}>
-          <Router>
-            <Query query={IS_LOGGED_IN}>
-              {({ data }) => {
-                console.log("data: ", data.loggedInUser);
-                return (
-                  <>
-                    <Background />
-                    <Header loggedInUser={data.loggedInUser} />
-                    <Wrapper>
-                      <Switch>
-                        <Route
-                          exact
-                          path="/"
-                          render={props =>
-                            data.loggedInUser ? <Home {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
-                          }
-                        />
-                        <Route
-                          path="/proposals"
-                          render={props =>
-                            data.loggedInUser ? (
-                              <ProposalList {...props} loggedInUser={data.loggedInUser} />
-                            ) : (
-                              <Redirect to={{ pathname: "/login" }} />
-                            )
-                          }
-                        />
-                        <Route
-                          path="/members"
-                          render={props =>
-                            data.loggedInUser ? <MemberList {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
-                          }
-                        />
-                        <Route
-                          path="/proposalsubmission"
-                          render={props =>
-                            data.loggedInUser ? (
-                              <ProposalSubmission {...props} loggedInUser={data.loggedInUser} />
-                            ) : (
-                              <Redirect to={{ pathname: "/login" }} />
-                            )
-                          }
-                        />
-                        <Route
-                          path="/guildbank"
-                          render={props => (data.loggedInUser ? <GuildBank {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />)}
-                        />
-                        <Route path="/login" component={Login} />
-                        <Route component={NotFound} />
-                      </Switch>
-                    </Wrapper>
-                  </>
-                );
-              }}
-            </Query>
-          </Router>
-        </ApolloProvider>
-      </Provider>
+      <ApolloProvider client={client}>
+        <Router>
+          <Query query={IS_LOGGED_IN}>
+            {({ data }) => {
+              console.log("data: ", data.loggedInUser);
+              return (
+                <>
+                  <Background />
+                  <Header loggedInUser={data.loggedInUser} />
+                  <Wrapper>
+                    <Switch>
+                      <Route
+                        exact
+                        path="/"
+                        render={props =>
+                          data.loggedInUser ? <Home {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                        }
+                      />
+                      <Route
+                        path="/proposals"
+                        render={props =>
+                          data.loggedInUser ? <ProposalList {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                        }
+                      />
+                      <Route
+                        path="/members"
+                        render={props =>
+                          data.loggedInUser ? <MemberList {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                        }
+                      />
+                      <Route
+                        path="/proposalsubmission"
+                        render={props =>
+                          data.loggedInUser ? (
+                            <ProposalSubmission {...props} loggedInUser={data.loggedInUser} />
+                          ) : (
+                            <Redirect to={{ pathname: "/login" }} />
+                          )
+                        }
+                      />
+                      <Route
+                        path="/guildbank"
+                        render={props =>
+                          data.loggedInUser ? <GuildBank {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                        }
+                      />
+                      <Route path="/login" component={Login} />
+                      <Route component={NotFound} />
+                    </Switch>
+                  </Wrapper>
+                </>
+              );
+            }}
+          </Query>
+        </Router>
+      </ApolloProvider>
     ) : (
       <div>Loading!!!</div>
     );

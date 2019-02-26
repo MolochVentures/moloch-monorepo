@@ -9,6 +9,7 @@ import gql from "graphql-tag";
 import { withApollo } from "react-apollo";
 import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
 import { getMoloch } from "../web3";
+import { GET_LOGGED_IN_USER } from "../helpers/graphQlQueries";
 
 const formatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -33,15 +34,6 @@ const MemberAvatar = ({ member, shares }) => {
   );
 };
 
-const GET_LOGGED_IN_USER = gql`
-  query User($address: String!) {
-    member(id: $address) {
-      id
-      shares
-      isActive
-    }
-  }
-`;
 const GET_PROPOSAL_DETAIL = gql`
   query Proposal($id: String!) {
     proposal(id: $id) {
