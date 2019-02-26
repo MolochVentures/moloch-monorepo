@@ -256,11 +256,9 @@ const GET_LOGGED_IN_USER = gql`
     }
   }
 `;
-const ProposalListView = () => {
-  let loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
-  console.log('loggedUser: ', loggedUser);
+const ProposalListView = props => {
   return (
-    <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedUser.address }}>
+    <Query query={GET_LOGGED_IN_USER} variables={{ address: props.loggedInUser }}>
       {({ loading, error, data }) => {
         if (loading) return "Loading...";
         if (error) throw new Error(`Error!: ${error}`);
