@@ -20,25 +20,23 @@ const MemberAvatar = ({ address, shares }) => (
   </Grid.Column>
 );
 
-const LoggedInUser = props => {
-  return (
-    <Query query={GET_LOGGED_IN_USER} variables={{ address: props.loggedInUser }}>
-      {({ loading, error, data }) => {
-        if (loading) return "...";
-        if (error) throw new Error(`Error!: ${error}`);
-        return data.member && data.member.isActive ? (
-          <Link to={`/members/${data.member.id}`} className="uncolored">
-            <Image centered src={bull} size="tiny" />
-            <p className="name">{!data.member.id ? "" : data.member.id.length > 10 ? data.member.id.substring(0, 10) + "..." : data.member.id}</p>
-            <p className="subtext">{data.member.shares ? data.member.shares : 0} shares</p>
-          </Link>
-        ) : (
-          <div />
-        );
-      }}
-    </Query>
-  );
-};
+const LoggedInUser = props => (
+  <Query query={GET_LOGGED_IN_USER} variables={{ address: props.loggedInUser }}>
+    {({ loading, error, data }) => {
+      if (loading) return "...";
+      if (error) throw new Error(`Error!: ${error}`);
+      return data.member && data.member.isActive ? (
+        <Link to={`/members/${data.member.id}`} className="uncolored">
+          <Image centered src={bull} size="tiny" />
+          <p className="name">{!data.member.id ? "" : data.member.id.length > 10 ? data.member.id.substring(0, 10) + "..." : data.member.id}</p>
+          <p className="subtext">{data.member.shares ? data.member.shares : 0} shares</p>
+        </Link>
+      ) : (
+        <div />
+      );
+    }}
+  </Query>
+);
 
 const GET_ELDERS = gql`
   {
@@ -91,7 +89,7 @@ const GET_MEMBERS = gql`
     }
   }
 `;
-const MemberList = () => (
+const MemberList = props => (
   <Query query={GET_MEMBERS}>
     {({ loading, error, data }) => {
       let members;
@@ -120,7 +118,7 @@ const MemberList = () => (
 
           <Grid>
             <Grid.Column textAlign="center">
-              <LoggedInUser />
+              <LoggedInUser {...props} />
             </Grid.Column>
           </Grid>
           <Grid className="member_item">
@@ -147,10 +145,10 @@ const MemberList = () => (
   </Query>
 );
 
-const MemberListView = () => (
+const MemberListView = higherProps => (
   <Switch>
-    <Route exact path="/members" render={() => <MemberList />} />
-    <Route path="/members/:name" component={MemberDetail} />
+    <Route exact path="/members" render={props => <MemberList {...props} {...higherProps} />} />
+    <Route path="/members/:name" render={props => <MemberDetail {...props} {...higherProps} />} />
   </Switch>
 );
 
