@@ -147,8 +147,8 @@ const MemberList = props => (
 
 const MemberListView = higherProps => (
   <Switch>
-    <Route exact path="/members" render={props => <MemberList {...props} {...higherProps} />} />
-    <Route path="/members/:name" render={props => <MemberDetail {...props} {...higherProps} />} />
+    <Route exact path="/members" render={props => <MemberList {...props} loggedInUser={higherProps.loggedInUser} />} />
+    <Route path="/members/:name" render={props => <MemberDetail {...props} loggedInUser={higherProps.loggedInUser} />} />
   </Switch>
 );
 
