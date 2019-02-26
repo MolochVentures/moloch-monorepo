@@ -14,45 +14,22 @@ import NotFound from "./components/NotFound";
 import { store } from "./store";
 import { ApolloProvider, Query } from "react-apollo";
 import gql from "graphql-tag";
-import {ApolloClient} from 'apollo-client';
-import {InMemoryCache} from 'apollo-cache-inmemory';
-import {HttpLink} from 'apollo-link-http';
 import { defaults, resolvers } from "./resolvers";
 import { typeDefs } from "./schema";
-import { ApolloLink } from "apollo-link";
-import { onError } from 'apollo-link-error';
-import { withClientState } from 'apollo-link-state';
+import ApolloClient from "apollo-boost";
 
 console.log(process.env);
 
-const cache = new InMemoryCache();
-const stateLink = withClientState({
-  cache,
-  resolvers,
-  typeDefs,
-  defaults
-})
 const client = new ApolloClient({
-  cache,
-  link: ApolloLink.from([
-    onError(({ graphQLErrors, networkError }) => {
-      if (graphQLErrors)
-        graphQLErrors.map(({ message, locations, path }) =>
-          console.log(
-            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
-          ),
-        );
-      if (networkError) console.log(`[Network error]: ${networkError}`);
-    }),
-    stateLink,
-    new HttpLink({
-      uri: process.env.REACT_APP_GRAPH_NODE_URI,
-    })
-  ]),
-  connectToDevTools: true
+  uri: process.env.REACT_APP_GRAPH_NODE_URI,
+  clientState: {
+    defaults,
+    resolvers,
+    typeDefs
+  }
 });
 
-cache.writeData({
+client.writeData({
   data: {
     loggedInUser: localStorage.getItem('loggedInUser')
   },
