@@ -92,6 +92,13 @@ const GET_PROPOSAL_LIST = gql`
     }
   }
 `;
+const SET_PROPOSAL_STATUS = gql`
+  mutation SetStatus($status: String!) {
+    setStatus(status: $status) @client {
+      status
+    }
+  }
+`;
 class ProposalList extends React.Component {
   constructor(props) {
     super(props);
@@ -112,7 +119,7 @@ class ProposalList extends React.Component {
       query: GET_PROPOSAL_LIST
     });
     try {
-      await this.determineProposalStatuses(result.data.proposals);
+      await this.determineProposalStatuses(client, result.data.proposals);
     } catch(e) {
       console.error(e)
     } finally {
@@ -122,15 +129,26 @@ class ProposalList extends React.Component {
     }
   }
 
-  determineProposalStatuses = async proposals => {
-    if (proposals.length === 0) {
+  determineProposalStatuses = async (client, proposals) => {
+    if (!proposals || proposals.length === 0) {
       return;
     }
 
     const fullProps = [];
     for (const proposal of proposals) {
-      const fullProp = await getProposalDetailsFromOnChain(proposal);
-      fullProps.push(fullProp);
+      if (proposal.status === ProposalStatus.Unknown) {
+        const fullProp = await getProposalDetailsFromOnChain(proposal);
+        const result = await client.mutate({
+          mutation: SET_PROPOSAL_STATUS,
+          variables: {
+            id: proposal.id,
+            status: fullProp.status
+          }
+        })
+        fullProps.push({...proposal, status: result.data.setStatus.status});
+      } else {
+        fullProps.push(proposal)
+      }
     }
 
     this.setState({
