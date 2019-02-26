@@ -28,10 +28,9 @@ const GET_LOGGED_IN_USER = gql`
     }
   }
 `;
-const LoggedInUser = () => {
-  let loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
+const LoggedInUser = props => {
   return (
-    <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedUser.address }}>
+    <Query query={GET_LOGGED_IN_USER} variables={{ address: props.loggedInUser }}>
       {({ loading, error, data }) => {
         if (loading) return "...";
         if (error) throw new Error(`Error!: ${error}`);
