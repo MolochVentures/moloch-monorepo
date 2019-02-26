@@ -6,6 +6,7 @@
     "@nivo/line": "^0.52.0",
     "apollo-boost": "^0.1.28",
     "apollo-cache-inmemory": "^1.4.3",
+    "apollo-cache-persist": "^0.1.1",
     "apollo-client": "^2.4.13",
     "apollo-link": "^1.2.8",
     "apollo-link-error": "^1.1.7",
