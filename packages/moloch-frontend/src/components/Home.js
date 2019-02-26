@@ -76,18 +76,17 @@ class HomePage extends React.Component {
 
   async componentDidMount() {
     const token = await getToken();
-    let loggedUser = JSON.parse(localStorage.getItem("loggedUser"));
     this.setState({
-      token,
-      userAddress: loggedUser.address
+      token
     });
   }
 
   handleChange = (e) => this.setState({ approval: e.target.value });
 
   handleSubmit = () => {
-    const { approval, token, userAddress } = this.state;
-    token.methods.approve(process.env.REACT_APP_MOLOCH_ADDRESS, approval).send({ from: userAddress });
+    const { loggedInUser } = this.props
+    const { approval, token } = this.state;
+    token.methods.approve(process.env.REACT_APP_MOLOCH_ADDRESS, approval).send({ from: loggedInUser });
   };
 
   render() {
