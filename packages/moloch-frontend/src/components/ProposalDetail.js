@@ -9,7 +9,7 @@ import gql from "graphql-tag";
 import { withApollo } from "react-apollo";
 import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
 import { getMoloch } from "../web3";
-import { GET_LOGGED_IN_USER } from "../helpers/graphQlQueries";
+import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES } from "../helpers/graphQlQueries";
 
 const formatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -17,7 +17,7 @@ const formatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2
 });
 
-const Vote = {
+export const Vote = {
   Null: 0, // default value, counted as abstention
   Yes: 1,
   No: 2
@@ -54,6 +54,9 @@ const GET_PROPOSAL_DETAIL = gql`
         }
         uintVote
       }
+      status @client
+      title @client
+      description @client
     }
   }
 `;
@@ -104,7 +107,25 @@ class ProposalDetail extends Component {
       user: userResult.data.member
     });
 
-    const proposal = await getProposalDetailsFromOnChain(proposalResult.data.proposal);
+    let proposal = proposalResult.data.proposal
+    if (proposalResult.data.proposal.status === ProposalStatus.Unknown) {
+      const onChain = await getProposalDetailsFromOnChain(proposalResult.data.proposal);
+      const result = await client.mutate({
+        mutation: SET_PROPOSAL_ATTRIBUTES,
+        variables: {
+          id: proposalResult.data.proposal.id,
+          status: onChain.status,
+          title: onChain.title,
+          description: onChain.description || ""
+        }
+      });
+      proposal = {
+        ...proposalResult.data.proposal,
+        status: result.data.setAttributes.status,
+        title: result.data.setAttributes.title,
+        description: result.data.setAttributes.description
+      }
+    }
     this.setState({
       proposal
     });

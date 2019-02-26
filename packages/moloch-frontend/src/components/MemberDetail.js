@@ -5,6 +5,7 @@ import bull from "assets/bull.png";
 
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
+import { Vote } from "./ProposalDetail";
 
 const GET_MEMBER_DETAIL = gql`
   query Member($id: String!) {
@@ -18,11 +19,7 @@ const GET_MEMBER_DETAIL = gql`
 const MemberDetail = ({ name }) => (
   <Query query={GET_MEMBER_DETAIL} variables={{ id: name }}>
     {({ loading, error, data }) => {
-      if (loading) return (
-        <Segment className="blurred box">
-          Loading...
-        </Segment>
-      );
+      if (loading) return <Segment className="blurred box">Loading...</Segment>;
       if (error) throw new Error(`Error!: ${error}`);
 
       return (
@@ -61,7 +58,7 @@ const MemberDetail = ({ name }) => (
 
 const GET_PROPOSAL_HISTORY = gql`
   query Proposals($id: String!) {
-    proposals(where: { memberAddress: $id }) {
+    proposals {
       id
       timestamp
       tokenTribute
@@ -69,23 +66,22 @@ const GET_PROPOSAL_HISTORY = gql`
       processed
       didPass
       aborted
-      votes {
+      votes(where: { memberAddress: $id }) {
         id
         uintVote
       }
+      status @client
+      title @client
+      description @client
     }
   }
 `;
 const ProposalDetail = ({ name }) => (
   <Query query={GET_PROPOSAL_HISTORY} variables={{ id: name }}>
     {({ loading, error, data }) => {
-      if (loading) return (
-        <Segment className="blurred box">
-          Loading...
-        </Segment>
-      );
+      if (loading) return <Segment className="blurred box">Loading...</Segment>;
       if (error) throw new Error(`Error!: ${error}`);
-      console.log('data: ', data);
+      console.log("data: ", data);
       return (
         <Segment className="blurred box">
           <Grid columns="equal" textAlign="center">
@@ -120,13 +116,13 @@ const ProposalDetail = ({ name }) => (
                   <React.Fragment key={idx}>
                     <Grid.Row verticalAlign="middle">
                       <Grid.Column textAlign="center">
-                        {p.votes.uintVote === 2 && <Label className="dot" circular color="green" empty />}
+                        {p.votes.uintVote === Vote.Yes && <Label className="dot" circular color="green" empty />}
                         {/* TODO: is this right? */}
-                        {p.votes.uintVote < 2 && <Label className="dot" circular color="red" empty />}
-                        TODO: Where is the title?
+                        {(p.votes.uintVote === Vote.No || p.votes.uintVote === Vote.Null) && <Label className="dot" circular color="red" empty />}
+                        {p.title}
                       </Grid.Column>
                       <Grid.Column textAlign="center">
-                        <p className="subtext date">{new Date(p.timestamp * 1000).toIsoString()}</p>
+                        <p className="subtext date">{new Date(p.timestamp * 1000).toISOString().slice(0, 10)}</p>
                       </Grid.Column>
                       <Grid.Column textAlign="center">
                         <p className="subtext date">{p.sharesRequested}</p>
@@ -140,7 +136,7 @@ const ProposalDetail = ({ name }) => (
                         </Header>
                       </Grid.Column>
                       <Grid.Column textAlign="center">
-                        <p className="subtext date">{p.aborted ? "Aborted" : (p.processed ? (p.didPass ? "Passed" : "Failed") : "Pending")}</p>
+                        <p className="subtext date">{p.aborted ? "Aborted" : p.processed ? (p.didPass ? "Passed" : "Failed") : "Pending"}</p>
                       </Grid.Column>
                     </Grid.Row>
                     <Divider />
@@ -174,4 +170,4 @@ const MemberDetailView = props => (
   </div>
 );
 
-export default MemberDetailView
+export default MemberDetailView;

@@ -7,7 +7,7 @@ import ProgressBar from "./ProgressBar";
 import { Query, withApollo } from "react-apollo";
 import gql from "graphql-tag";
 import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
-import { GET_LOGGED_IN_USER } from "../helpers/graphQlQueries";
+import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES } from "../helpers/graphQlQueries";
 
 const formatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -90,13 +90,8 @@ const GET_PROPOSAL_LIST = gql`
       noVotes
       proposalIndex
       status @client
-    }
-  }
-`;
-const SET_PROPOSAL_STATUS = gql`
-  mutation SetStatus($status: String!) {
-    setStatus(status: $status) @client {
-      status
+      title @client
+      description @client
     }
   }
 `;
@@ -121,8 +116,8 @@ class ProposalList extends React.Component {
     });
     try {
       await this.determineProposalStatuses(client, result.data.proposals);
-    } catch(e) {
-      console.error(e)
+    } catch (e) {
+      console.error(e);
     } finally {
       this.setState({
         loading: false
@@ -140,15 +135,22 @@ class ProposalList extends React.Component {
       if (proposal.status === ProposalStatus.Unknown) {
         const fullProp = await getProposalDetailsFromOnChain(proposal);
         const result = await client.mutate({
-          mutation: SET_PROPOSAL_STATUS,
+          mutation: SET_PROPOSAL_ATTRIBUTES,
           variables: {
             id: proposal.id,
-            status: fullProp.status
+            status: fullProp.status,
+            title: fullProp.title,
+            description: fullProp.description || ""
           }
-        })
-        fullProps.push({...proposal, status: result.data.setStatus.status});
+        });
+        fullProps.push({
+          ...proposal,
+          status: result.data.setAttributes.status,
+          title: result.data.setAttributes.title,
+          description: result.data.setAttributes.description
+        });
       } else {
-        fullProps.push(proposal)
+        fullProps.push(proposal);
       }
     }
 

@@ -7,20 +7,22 @@ export const defaults = {
 
 export const resolvers = {
   Proposal: {
-    status: () => ProposalStatus.Unknown
+    status: () => ProposalStatus.Unknown,
+    title: () => "",
+    description: () => ""
   },
   Mutation: {
-    setStatus: (_, variables, { cache, getCacheKey }) => {
-      const id = getCacheKey({ __typename: 'Proposal', id: variables.id })
+    setAttributes: (_, variables, { cache, getCacheKey }) => {
+      const id = getCacheKey({ __typename: "Proposal", id: variables.id });
       const fragment = gql`
         fragment getStatus on Proposal {
           status
         }
       `;
       const proposal = cache.readFragment({ fragment, id });
-      const data = { ...proposal, status: variables.status };
+      const data = { ...proposal, status: variables.status, title: variables.title, description: variables.description };
       cache.writeData({ id, data });
       return data;
-    },
+    }
   }
-}
+};
