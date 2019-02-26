@@ -4,6 +4,7 @@ const VOTING_PERIOD_LENGTH = 7;
 const GRACE_PERIOD_LENGTH = 7;
 
 export const ProposalStatus = {
+  Unknown: "Unknown",
   InQueue: "InQueue",
   VotingPeriod: "VotingPeriod",
   GracePeriod: "GracePeriod",
