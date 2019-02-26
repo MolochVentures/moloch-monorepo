@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 
 export const typeDefs = gql`
   extend type Proposal {
-    status: Boolean
+    status: String
   }
 
   extend type Query {
