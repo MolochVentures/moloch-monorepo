@@ -103,12 +103,12 @@ export default class Login extends Component {
             <Grid columns={1} centered>
               <Grid.Row>
                 <Button size="large" color="grey" onClick={() => this.loginWithMetamask(client)}>
-                  Login With Metamask
+                  Connect With Web3
                 </Button>
               </Grid.Row>
               <Grid.Row>
                 <Button size="large" color="grey" onClick={() => this.loginWithGnosisSafe(client)}>
-                  Login With Gnosis Safe
+                  Connect With Web3 (Gnosis Safe)
                 </Button>
               </Grid.Row>
             </Grid>
