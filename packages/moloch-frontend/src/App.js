@@ -126,7 +126,7 @@ class App extends React.Component {
                           data.loggedInUser ? <GuildBank {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
                         }
                       />
-                      <Route path="/login" component={Login} />
+                      <Route path="/login" render={props => <Login {...props} />} />
                       <Route component={NotFound} />
                     </Switch>
                   </Wrapper>
