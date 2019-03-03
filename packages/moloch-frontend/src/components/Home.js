@@ -1,10 +1,11 @@
 import React from "react";
 import { Grid, Button, Segment, Modal, Form } from "semantic-ui-react";
 import { Link } from "react-router-dom";
-import Graph from "./Graph";
 import gql from "graphql-tag";
-import { Query } from "react-apollo";
-import { getToken } from "../web3";
+import { Query, withApollo } from "react-apollo";
+import { getToken, getMedianizer, getWeb3, getMoloch } from "../web3";
+import { GET_EXCHANGE_RATE, GET_TOTAL_SHARES, GET_GUILD_BANK_VALUE } from "../helpers/graphQlQueries";
+import { utils } from "ethers";
 
 const GET_MEMBERS = gql`
   {
@@ -71,87 +72,132 @@ class HomePage extends React.Component {
   state = {
     approval: "",
     token: null,
-    userAddress: null
+    userAddress: null,
+    exchangeRate: 0,
+    totalShares: "0",
+    guildBankValue: "0"
   };
 
   async componentDidMount() {
+    const { client } = this.props;
     const token = await getToken();
+
+    let { data: exchangeRateData } = await client.query({
+      query: GET_EXCHANGE_RATE
+    });
+    let rate = exchangeRateData.exchangeRate;
+    if (!rate) {
+      const medianizer = await getMedianizer();
+      rate = (await medianizer.compute())[0];
+      client.writeData({
+        data: {
+          exchangeRate: rate
+        }
+      });
+    }
+
+    let { data: sharesData } = await client.query({
+      query: GET_TOTAL_SHARES
+    });
+    let shares = sharesData.totalShares;
+    if (!shares) {
+      const moloch = await getMoloch();
+      shares = await moloch.totalShares();
+      console.log("shares: ", shares.toString());
+      client.writeData({
+        data: {
+          totalShares: shares.toString()
+        }
+      });
+    }
+
+    const eth = getWeb3();
+    let { data: guildBankData } = await client.query({
+      query: GET_GUILD_BANK_VALUE
+    });
+    let guildBankValue = guildBankData.guildBankValue;
+    if (!guildBankValue) {
+      guildBankValue = await eth.getBalance(process.env.REACT_APP_GUILD_BANK_ADDRESS);
+      client.writeData({
+        data: {
+          guildBankValue: guildBankValue.toString()
+        }
+      });
+    }
+
     this.setState({
-      token
+      eth,
+      token,
+      exchangeRate: rate,
+      totalShares: shares.toString(),
+      guildBankValue: guildBankValue.toString()
     });
   }
 
-  handleChange = (e) => this.setState({ approval: e.target.value });
+  handleChange = e => this.setState({ approval: e.target.value });
 
   handleSubmit = () => {
-    const { loggedInUser } = this.props
+    const { loggedInUser } = this.props;
     const { approval, token } = this.state;
     token.methods.approve(process.env.REACT_APP_MOLOCH_ADDRESS, approval).send({ from: loggedInUser });
   };
 
   render() {
-    const { approval } = this.state;
+    const { approval, exchangeRate, totalShares, guildBankValue, eth } = this.state;
     return (
       <div id="homepage">
         <Grid columns={16} verticalAlign="middle">
-          <Grid.Row>
-            <Grid.Column>
-              <Modal
-                basic
-                size="small"
-                trigger={
-                  <Button size="large" color="grey" className="btn_link">
-                    Approve wETH
-                  </Button>
-                }
-              >
-                <Modal.Header>Approve wETH</Modal.Header>
-                <Modal.Content>
-                  <Form onSubmit={this.handleSubmit}>
-                    <Form.Field>
-                      <label>Amount to Approve</label>
-                      <input placeholder="Amount in Wei" name="amount" value={approval} onChange={this.handleChange} className="asset_amount" />
-                    </Form.Field>
-                    <Button type="submit" color="grey" className="btn_link">
-                      Submit
-                    </Button>
-                  </Form>
-                </Modal.Content>
-              </Modal>
-            </Grid.Column>
-          </Grid.Row>
           <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
             <Link to="/guildbank" className="text_link">
               <p className="subtext">Guild Bank Value</p>
-              <p className="amount">0</p>
+              <p className="amount">${parseFloat(utils.formatEther(utils.bigNumberify(guildBankValue).mul(exchangeRate))).toFixed(2)}</p>
             </Link>
           </Grid.Column>
           <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons">
             <NumMembers />
             <NumProposals />
           </Grid.Column>
-
-          <Grid.Column computer={4} />
+          <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
+            <Modal
+              basic
+              size="small"
+              trigger={
+                <Button size="large" color="grey" className="browse_buttons">
+                  Approve wETH
+                </Button>
+              }
+            >
+              <Modal.Header>Approve wETH</Modal.Header>
+              <Modal.Content>
+                <Form onSubmit={this.handleSubmit}>
+                  <Form.Field>
+                    <label>Amount to Approve</label>
+                    <input placeholder="Amount in Wei" name="amount" value={approval} onChange={this.handleChange} className="asset_amount" />
+                  </Form.Field>
+                  <Button type="submit" color="grey" className="btn_link">
+                    Submit
+                  </Button>
+                </Form>
+              </Modal.Content>
+            </Modal>
+          </Grid.Column>
 
           <Grid.Column width={16}>
             <Segment className="blurred box">
               <Grid columns="equal" className="graph_values">
                 <Grid.Column textAlign="left">
                   <p className="subtext">Total Shares</p>
-                  <p className="amount">378</p>
+                  <p className="amount">{totalShares}</p>
                 </Grid.Column>
                 <Grid.Column textAlign="center">
                   <p className="subtext">Total ETH</p>
-                  <p className="amount">541</p>
+                  <p className="amount">{utils.formatEther(guildBankValue)}</p>
                 </Grid.Column>
                 <Grid.Column textAlign="right">
                   <p className="subtext">Share Value</p>
-                  <p className="amount">128 USD</p>
+                  <p className="amount">{utils.bigNumberify(guildBankValue).gt(0) ? utils.bigNumberify(totalShares).div(guildBankValue) : 0}</p>
                 </Grid.Column>
               </Grid>
-              <div className="graph">
-                <Graph />
-              </div>
             </Segment>
           </Grid.Column>
         </Grid>
@@ -160,4 +206,4 @@ class HomePage extends React.Component {
   }
 }
 
-export default HomePage;
+export default withApollo(HomePage);
