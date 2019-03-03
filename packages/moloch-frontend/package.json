@@ -12,6 +12,7 @@
     "apollo-link-error": "^1.1.7",
     "apollo-link-http": "^1.5.11",
     "apollo-link-state": "^0.4.2",
+    "ethers": "^4.0.26",
     "graphql": "^14.1.1",
     "moment": "^2.24.0",
     "node-sass": "^4.11.0",
