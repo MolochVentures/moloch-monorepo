@@ -1,5 +1,23 @@
 import gql from "graphql-tag";
 
+export const GET_EXCHANGE_RATE = gql`
+  query ExchangeRate {
+    exchangeRate @client
+  }
+`
+
+export const GET_TOTAL_SHARES = gql`
+  query TotalShares {
+    totalShares @client
+  }
+`
+
+export const GET_GUILD_BANK_VALUE = gql`
+  query GuildBankValue {
+    guildBankValue @client
+  }
+`
+
 export const GET_LOGGED_IN_USER = gql`
   query User($address: String!) {
     member(id: $address) {
