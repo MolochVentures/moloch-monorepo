@@ -1,18 +1,23 @@
-
 import SafeProvider from "safe-web3-provider"
+import { ethers } from 'ethers';
+
 const Web3 = require("web3")
 
 const molochAbi = require('./abi/Moloch.abi.json')
 const erc20Abi = require('./abi/ERC20.abi.json')
+const medianizerAbi = require('./abi/Medianizer.abi.json')
 
 let web3
 let moloch
 let token
+let medianizer
+let provider
+let eth
 
 export async function initMetmask() {
   if (!window.ethereum && !window.web3) {
     // Non-DApp browsers won't work.
-    alert("Metamask needs to be installed and configured.");
+    alert("This page must be viewed on a Web3 enabled browser.");
   }
   if (window.ethereum) {
     // Modern DApp browsers need to enable Metamask access.
@@ -22,9 +27,10 @@ export async function initMetmask() {
       alert("Metamask needs to be enabled.")
     }
   }
-  web3 = new Web3(Web3.givenProvider)
+  let web3Provider = window['ethereum'] || window.web3.currentProvider
+  eth = new ethers.providers.Web3Provider(web3Provider);
   localStorage.setItem("loginType", "metamask");
-  return web3
+  return eth
 }
 
 export function initGnosisSafe() {
@@ -39,44 +45,53 @@ export function initGnosisSafe() {
   /**
    *  Create Web3
    */
-  web3 = new Web3(provider);
+  eth = new ethers.providers.Web3Provider(provider);
   localStorage.setItem("loginType", "gnosis");
-  return web3
+  return eth
 }
 
 export async function initMoloch() {
-  if (!web3) {
+  if (!eth) {
     if (localStorage.getItem("loginType") === "metamask") {
-      web3 = await initMetmask()
+      eth = await initMetmask()
     } else if (localStorage.getItem("loginType") === "gnosis") {
-      web3 = await initGnosisSafe()
+      eth = await initGnosisSafe()
     } else {
       throw new Error("Not logged in with web3.")
     }
   }
-  moloch = new web3.eth.Contract(molochAbi, process.env.REACT_APP_MOLOCH_ADDRESS)
+  moloch = new ethers.Contract(process.env.REACT_APP_MOLOCH_ADDRESS, molochAbi, eth)
+  // moloch = new web3.eth.Contract(molochAbi, process.env.REACT_APP_MOLOCH_ADDRESS)
   return moloch
 }
 
 export async function initToken() {
-  if (!web3) {
+  if (!eth) {
     if (localStorage.getItem("loginType") === "metamask") {
-      web3 = await initMetmask()
+      eth = await initMetmask()
     } else if (localStorage.getItem("loginType") === "gnosis") {
-      web3 = await initGnosisSafe()
+      eth = await initGnosisSafe()
     } else {
       throw new Error("Not logged in with web3.")
     }
   }
-  token = new web3.eth.Contract(erc20Abi, process.env.REACT_APP_TOKEN_ADDRESS)
+  // token = new web3.eth.Contract(erc20Abi, process.env.REACT_APP_TOKEN_ADDRESS)
+  token = new ethers.Contract(process.env.REACT_APP_TOKEN_ADDRESS, erc20Abi, eth)
   return token
 }
 
+export async function initMedianizer() {
+  // pull from mainnet
+  let provider = ethers.getDefaultProvider();
+  medianizer = new ethers.Contract(process.env.REACT_APP_MEDIANIZER_ADDRESS, medianizerAbi, provider)
+  return medianizer
+}
+
 export function getWeb3() {
-  if (!web3) {
+  if (!eth) {
     throw new Error("Web3 is not initialized.")
   }
-  return web3
+  return eth
 }
 
 export async function getMoloch() {
@@ -91,4 +106,11 @@ export async function getToken() {
     await initToken()
   }
   return token
+}
+
+export async function getMedianizer() {
+  if (!medianizer) {
+    await initMedianizer()
+  }
+  return medianizer
 }
