@@ -93,6 +93,8 @@ contract("Moloch", accounts => {
   before("deploy contracts", async () => {
     moloch = await Moloch.deployed();
     console.log("moloch.address", moloch.address);
+    const guildBank = await moloch.guildBank.call()
+    console.log("guildBank.address", guildBank)
     simpleToken = await SimpleToken.deployed();
 
     summoner = accounts[0];
