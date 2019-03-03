@@ -2,7 +2,10 @@ import { ProposalStatus } from "./helpers/proposals";
 import gql from "graphql-tag";
 
 export const defaults = {
-  loggedInUser: ""
+  loggedInUser: "",
+  exchangeRate: "",
+  totalShares: "",
+  guildBankValue: ""
 };
 
 export const resolvers = {
