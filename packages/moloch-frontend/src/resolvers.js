@@ -5,7 +5,8 @@ export const defaults = {
   loggedInUser: "",
   exchangeRate: "",
   totalShares: "",
-  guildBankValue: ""
+  guildBankValue: "",
+  shareValue: ""
 };
 
 export const resolvers = {
