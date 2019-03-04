@@ -1,17 +1,13 @@
 import SafeProvider from "safe-web3-provider"
 import { ethers } from 'ethers';
 
-const Web3 = require("web3")
-
 const molochAbi = require('./abi/Moloch.abi.json')
 const erc20Abi = require('./abi/ERC20.abi.json')
 const medianizerAbi = require('./abi/Medianizer.abi.json')
 
-let web3
 let moloch
 let token
 let medianizer
-let provider
 let eth
 
 export async function initMetmask() {
@@ -87,9 +83,15 @@ export async function initMedianizer() {
   return medianizer
 }
 
-export function getWeb3() {
+export async function getWeb3() {
   if (!eth) {
-    throw new Error("Web3 is not initialized.")
+    if (localStorage.getItem("loginType") === "metamask") {
+      eth = await initMetmask()
+    } else if (localStorage.getItem("loginType") === "gnosis") {
+      eth = await initGnosisSafe()
+    } else {
+      throw new Error("Not logged in with web3.")
+    }
   }
   return eth
 }
