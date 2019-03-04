@@ -8,7 +8,7 @@ import hood from "assets/hood.png";
 
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { GET_LOGGED_IN_USER } from "../helpers/graphQlQueries";
+import { GET_LOGGED_IN_USER, GET_MEMBERS } from "../helpers/graphQlQueries";
 
 const MemberAvatar = ({ address, shares }) => (
   <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={address}>
@@ -62,7 +62,7 @@ const Elders = () => (
 
 const GET_NON_ELDERS = gql`
   {
-    members(where: { shares_lt: 100, isActive: true }) {
+    members(where: { shares_gt: 0, shares_lt: 100, isActive: true }) {
       id
       shares
     }
@@ -82,13 +82,6 @@ const Contributors = () => (
   </Query>
 );
 
-const GET_MEMBERS = gql`
-  {
-    members(where: { shares_gt: 0, isActive: true }) {
-      id
-    }
-  }
-`;
 const MemberList = props => (
   <Query query={GET_MEMBERS}>
     {({ loading, error, data }) => {
@@ -106,7 +99,6 @@ const MemberList = props => (
           <Grid columns={16} verticalAlign="middle">
             <Grid.Column mobile={16} tablet={6} computer={6} textAlign="left" className="member_list_header">
               <p className="subtext">{members} Members</p>
-              <p className="title">Ranking</p>
             </Grid.Column>
 
             {/* <Grid.Column mobile={16} tablet={10} computer={10} textAlign="right" className="submit_button">
