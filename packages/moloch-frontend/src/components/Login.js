@@ -2,16 +2,10 @@ import React, { Component } from "react";
 import { Grid, Button } from "semantic-ui-react";
 
 import { initMetmask, initGnosisSafe } from "../web3";
-import gql from "graphql-tag";
 import { ApolloConsumer } from "react-apollo";
 
 let coinbase;
 
-const IS_LOGGED_IN = gql`
-  query IsUserLoggedIn {
-    loggedInUser @client
-  }
-`;
 export default class Login extends Component {
   constructor(props) {
     super(props);
@@ -33,20 +27,8 @@ export default class Login extends Component {
     await this.doLoginBypassAuth(client, web3);
   }
 
-  async doLogin(client, web3) {
-    coinbase = (await web3.eth.getAccounts())[0];
-
-    if (!coinbase) {
-      // First time logging in on metamask
-      alert('Web3 client not configured properly')
-      return
-    } else {
-      await this.signWithAccessRequest(client, web3, 99);
-    }
-  }
-
   async doLoginBypassAuth(client, web3) {
-    coinbase = (await web3.eth.getAccounts())[0];
+    coinbase = (await web3.listAccounts())[0];
 
     if (!coinbase) {
       alert("Could not retrieve address from Gnosis Safe/MetaMask, is it configured and this domain whitelisted?");
@@ -55,40 +37,6 @@ export default class Login extends Component {
       client.writeData({
         data: {
           loggedInUser: coinbase.toLowerCase()
-        }
-      });
-      this.props.history.push("/");
-    }
-  }
-
-  async signWithAccessRequest(client, web3, nonce) {
-    let message = "Please, sign the following one-time message to authenticate: " + nonce;
-    const { data } = await client.query({
-      query: IS_LOGGED_IN,
-      variables: { id: coinbase }
-    });
-    // Request account access if needed.
-    if (!data.loggedInUser) {
-      try {
-        const signature = await web3.eth.personal.sign(web3.utils.utf8ToHex(message), coinbase, "");
-        const result = await web3.eth.personal.ecRecover(web3.utils.utf8ToHex(message), signature);
-        client.writeData({
-          data: {
-            loggedInUser: result.toLowerCase()
-          }
-        });
-        if (nonce) {
-          this.props.history.push("/");
-        } else {
-          this.doLogin();
-        }
-      } catch (e) {
-        alert("Error while retrieving your public key.");
-      }
-    } else {
-      client.writeData({
-        data: {
-          loggedInUser: data.loggedInUser
         }
       });
       this.props.history.push("/");
