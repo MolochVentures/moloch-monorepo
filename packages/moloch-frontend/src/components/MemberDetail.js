@@ -2,10 +2,12 @@ import React from "react";
 import { Divider, Grid, Segment, Image, Icon, Label, Header } from "semantic-ui-react";
 
 import bull from "assets/bull.png";
+import hood from "assets/hood.png";
 
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
 import { Vote } from "./ProposalDetail";
+import { utils } from "ethers"
 
 const GET_MEMBER_DETAIL = gql`
   query Member($id: String!) {
@@ -14,9 +16,10 @@ const GET_MEMBER_DETAIL = gql`
       shares
       tokenTribute
     }
+    shareValue @client
   }
 `;
-const MemberDetail = ({ name }) => (
+const MemberDetail = ({ name, loggedInUser }) => (
   <Query query={GET_MEMBER_DETAIL} variables={{ id: name }}>
     {({ loading, error, data }) => {
       if (loading) return <Segment className="blurred box">Loading...</Segment>;
@@ -30,13 +33,13 @@ const MemberDetail = ({ name }) => (
               <p className="amount">{data.member.shares}</p>
             </Grid.Column>
             <Grid.Column textAlign="right">
-              <p className="subtext">Total USD Value</p>
-              <p className="amount">{0}</p>
+              <p className="subtext">Total Value</p>
+              <p className="amount">${parseFloat(utils.bigNumberify(data.member.shares).mul(data.shareValue)).toFixed(2)}</p>
             </Grid.Column>
           </Grid>
           <Grid>
             <Grid.Column textAlign="center" className="avatar">
-              <Image centered src={bull} size="tiny" />
+              <Image centered src={loggedInUser === name ? bull : hood} size="tiny" />
             </Grid.Column>
           </Grid>
           <p className="subtext">Tribute</p>
@@ -45,7 +48,7 @@ const MemberDetail = ({ name }) => (
               <Grid.Column>
                 <Segment className="pill" textAlign="center">
                   <Icon name="ethereum" />
-                  {data.member.tokenTribute} ETH
+                  {utils.formatEther(data.member.tokenTribute)} ETH
                 </Segment>
               </Grid.Column>
             </Grid.Row>
@@ -160,7 +163,7 @@ const MemberDetailView = props => (
     <Grid columns={16}>
       <Grid.Row className="details">
         <Grid.Column mobile={16} tablet={16} computer={6} className="user">
-          <MemberDetail name={props.match.params.name} />
+          <MemberDetail name={props.match.params.name} loggedInUser={props.loggedInUser} />
         </Grid.Column>
         <Grid.Column mobile={16} tablet={16} computer={10} className="proposals">
           <ProposalDetail name={props.match.params.name} />
