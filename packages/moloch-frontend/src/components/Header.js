@@ -7,43 +7,45 @@ import { GET_LOGGED_IN_USER } from "../helpers/graphQlQueries";
 const MainMenu = props => (
   <div className="dropdownItems">
     {props.member && props.member.isActive ? (
-      <Dropdown.Item className="item" onClick={() => props._handleCloseDropdown()}>
-        <Link to={`/members/${props.member.id}`} className="link">
-          <p>
-            <Icon name="user" />
-            View Profile
-          </p>
-        </Link>
-      </Dropdown.Item>
+      <>
+        <Dropdown.Item className="item" onClick={() => props._handleCloseDropdown()}>
+          <Link to={`/members/${props.member.id}`} className="link">
+            <p>
+              <Icon name="user" />
+              View Profile
+            </p>
+          </Link>
+        </Dropdown.Item>
+        <Dropdown.Divider />
+        <Dropdown.Item
+          icon="key"
+          className="item"
+          content="Change Delegate Key"
+          onClick={() => {
+            props._handleOpenDropdown();
+            props.onLoadChangeDelegateKey();
+          }}
+        />
+        <Dropdown.Divider />
+        <Dropdown.Item
+          icon="dollar"
+          className="item"
+          content="Rage Quit"
+          onClick={() => {
+            props._handleOpenDropdown();
+            props.onLoadWithdrawLootToken();
+          }}
+        />
+        <Dropdown.Divider />
+      </>
     ) : null}
-    <Dropdown.Divider />
-    <Dropdown.Item
-      icon="key"
-      className="item"
-      content="Change Delegate Key"
-      onClick={() => {
-        props._handleOpenDropdown();
-        props.onLoadChangeDelegateKey();
-      }}
-    />
-    <Dropdown.Divider />
-    <Dropdown.Item
-      icon="dollar"
-      className="item"
-      content="Rage Quit"
-      onClick={() => {
-        props._handleOpenDropdown();
-        props.onLoadWithdrawLootToken();
-      }}
-    />
-    <Dropdown.Divider />
     <Dropdown.Item className="item">
       <Link
         to="/login"
         className="link"
         onClick={async () => {
           props._handleCloseDropdown();
-          await props.client.resetStore()
+          await props.client.resetStore();
         }}
       >
         <p>
@@ -54,7 +56,7 @@ const MainMenu = props => (
     </Dropdown.Item>
   </div>
 );
-const MainMenuWrapped = withApollo(MainMenu)
+const MainMenuWrapped = withApollo(MainMenu);
 
 const ChangeDelegateKeyMenu = () => (
   <div>
