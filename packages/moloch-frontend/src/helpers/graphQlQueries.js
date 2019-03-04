@@ -18,6 +18,21 @@ export const GET_GUILD_BANK_VALUE = gql`
   }
 `
 
+export const GET_SHARE_VALUE = gql`
+  query ShareValue {
+    shareValue @client
+  }
+`
+
+export const GET_METADATA = gql`
+  query GetMetadata {
+    exchangeRate @client
+    totalShares @client
+    guildBankValue @client
+    shareValue @client
+  }
+`
+
 export const GET_LOGGED_IN_USER = gql`
   query User($address: String!) {
     member(id: $address) {
