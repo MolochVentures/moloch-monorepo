@@ -28,6 +28,14 @@ export const GET_LOGGED_IN_USER = gql`
   }
 `;
 
+export const GET_MEMBERS = gql`
+  {
+    members(where: { shares_gt: 0, isActive: true }) {
+      id
+    }
+  }
+`;
+
 export const SET_PROPOSAL_ATTRIBUTES = gql`
   mutation SetAttributes($status: String!, $title: String!, $description: String!) {
     setAttributes(status: $status, title: $title, description: $description) @client {
