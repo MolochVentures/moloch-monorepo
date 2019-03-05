@@ -1,6 +1,6 @@
 specVersion: 0.0.1
 description: Moloch subgraph
-repository: https://github.com/moloch/subgraph
+repository: https://github.com/MolochVentures/moloch-monorepo/
 schema:
   file: ./schema.graphql
 dataSources:

@@ -119,15 +119,14 @@ export function handleProcessProposal(event: ProcessProposal): void {
       newMember.isActive = true
       newMember.tokenTribute = event.params.tokenTribute
       newMember.didRagequit = false
-      member.votes = new Array<string>()
-      member.submissions = new Array<string>()
+      newMember.votes = new Array<string>()
+      newMember.submissions = new Array<string>()
       newMember.save()
     } else {
       member.shares = member.shares.plus(event.params.sharesRequested)
       member.tokenTribute = member.tokenTribute.plus(event.params.tokenTribute)
       member.save()
     }
-    
   }
 }
 
