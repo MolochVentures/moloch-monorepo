@@ -7,27 +7,18 @@ import { ApolloConsumer } from "react-apollo";
 let coinbase;
 
 export default class Login extends Component {
-  constructor(props) {
-    super(props);
-
-    this.loginWithMetamask = this.loginWithMetamask.bind(this);
-    this.loginWithGnosisSafe = this.loginWithGnosisSafe.bind(this);
-    this.doLogin = this.doLogin.bind(this);
-    this.signWithAccessRequest = this.signWithAccessRequest.bind(this);
-  }
-
   // bypass auth for now
-  async loginWithMetamask(client) {
+  loginWithMetamask = async client => {
     const web3 = await initMetmask();
     await this.doLoginBypassAuth(client, web3);
-  }
+  };
 
-  async loginWithGnosisSafe(client) {
+  loginWithGnosisSafe = async client => {
     const web3 = initGnosisSafe();
     await this.doLoginBypassAuth(client, web3);
-  }
+  };
 
-  async doLoginBypassAuth(client, web3) {
+  doLoginBypassAuth = async (client, web3) => {
     coinbase = (await web3.listAccounts())[0];
 
     if (!coinbase) {
@@ -39,9 +30,10 @@ export default class Login extends Component {
           loggedInUser: coinbase.toLowerCase()
         }
       });
+      this.props.loginComplete()
       this.props.history.push("/");
     }
-  }
+  };
 
   render() {
     return (
