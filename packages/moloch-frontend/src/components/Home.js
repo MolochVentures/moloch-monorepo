@@ -6,6 +6,7 @@ import { Query, withApollo } from "react-apollo";
 import { getToken } from "../web3";
 import { utils } from "ethers";
 import { GET_METADATA } from "../helpers/graphQlQueries";
+import { convertWeiToDollars } from "../helpers/currency";
 
 const GET_MEMBERS = gql`
   {
@@ -108,7 +109,7 @@ class HomePage extends React.Component {
                   <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
                     <Link to="/guildbank" className="text_link">
                       <p className="subtext">Guild Bank Value</p>
-                      <p className="amount">${parseFloat(utils.formatEther(utils.bigNumberify(guildBankValue).mul(exchangeRate))).toFixed(2)}</p>
+                      <p className="amount">${convertWeiToDollars(guildBankValue, exchangeRate)}</p>
                     </Link>
                   </Grid.Column>
                   <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons">
