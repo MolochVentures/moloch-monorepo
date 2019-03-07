@@ -19,13 +19,13 @@ export async function initMetmask() {
     // Modern DApp browsers need to enable Metamask access.
     try {
       await window.ethereum.enable()
+      let web3Provider = window['ethereum'] || window.web3.currentProvider
+      eth = new ethers.providers.Web3Provider(web3Provider);
+      localStorage.setItem("loginType", "metamask");
     } catch (error) {
       alert("Metamask needs to be enabled.")
     }
   }
-  let web3Provider = window['ethereum'] || window.web3.currentProvider
-  eth = new ethers.providers.Web3Provider(web3Provider);
-  localStorage.setItem("loginType", "metamask");
   return eth
 }
 
