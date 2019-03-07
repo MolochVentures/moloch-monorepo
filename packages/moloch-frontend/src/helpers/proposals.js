@@ -1,4 +1,4 @@
-import { initMoloch } from "../web3";
+import { initMoloch, getMoloch } from "../web3";
 
 const VOTING_PERIOD_LENGTH = 7;
 const GRACE_PERIOD_LENGTH = 7;
@@ -14,10 +14,9 @@ export const ProposalStatus = {
 };
 
 // fill in missing data from onchain
-export async function getProposalDetailsFromOnChain(proposal) {
-  const moloch = await initMoloch();
-  const currentPeriod = await moloch.methods.getCurrentPeriod().call();
-
+export async function getProposalDetailsFromOnChain(proposal, currentPeriod) {
+  const moloch = await getMoloch()
+  
   const inGracePeriod = proposal =>
     currentPeriod > proposal.startingPeriod + VOTING_PERIOD_LENGTH &&
     currentPeriod < proposal.startingPeriod + VOTING_PERIOD_LENGTH + GRACE_PERIOD_LENGTH;
