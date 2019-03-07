@@ -22,8 +22,8 @@ import { onError } from "apollo-link-error";
 import { ApolloLink } from "apollo-link";
 import { withClientState } from "apollo-link-state";
 import { CachePersistor } from "apollo-cache-persist";
-import { GET_EXCHANGE_RATE, GET_TOTAL_SHARES, GET_GUILD_BANK_VALUE } from "./helpers/graphQlQueries";
-import { getMedianizer, getMoloch, getWeb3, getToken } from "./web3";
+import { GET_METADATA } from "./helpers/graphQlQueries";
+import { getMedianizer, getMoloch, getToken } from "./web3";
 import { utils } from "ethers";
 
 console.log(process.env);
@@ -93,57 +93,38 @@ class App extends React.Component {
     });
     const loggedInUser = loggedInUserData.loggedInUser
 
-    let { data: exchangeRateData } = await client.query({
-      query: GET_EXCHANGE_RATE
+    let { data } = await client.query({
+      query: GET_METADATA
     });
-    let rate = exchangeRateData.exchangeRate;
-    if (!rate || refetch) {
+    console.log('data: ', data);
+    let { exchangeRate, totalShares, currentPeriod, guildBankValue, shareValue } = data;
+
+    if (!exchangeRate || refetch) {
       const medianizer = await getMedianizer();
-      rate = (await medianizer.compute())[0];
-      rate = utils.bigNumberify(rate)
-      client.writeData({
-        data: {
-          exchangeRate: rate.toString()
-        }
-      });
+      exchangeRate = (await medianizer.compute())[0];
+      exchangeRate = utils.bigNumberify(exchangeRate)
     }
 
-    let { data: sharesData } = await client.query({
-      query: GET_TOTAL_SHARES
-    });
-    let shares = sharesData.totalShares;
-    if (!shares || refetch) {
+    if (!totalShares || !currentPeriod || refetch) {
       const moloch = await getMoloch();
-      shares = await moloch.totalShares();
-      console.log("shares: ", shares.toString());
-      client.writeData({
-        data: {
-          totalShares: shares.toString()
-        }
-      });
+      totalShares = await moloch.totalShares();
+      currentPeriod = await moloch.getCurrentPeriod();
     }
 
     const token = await getToken();
-    let { data: guildBankData } = await client.query({
-      query: GET_GUILD_BANK_VALUE
-    });
-    let guildBankValue = guildBankData.guildBankValue;
     if (!guildBankValue || refetch) {
-      console.log('loggedInUser: ', loggedInUser);
       guildBankValue = loggedInUser ? await token.balanceOf(loggedInUser) : 0;
-      console.log('guildBankValue: ', guildBankValue.toString());
-      client.writeData({
-        data: {
-          guildBankValue: guildBankValue.toString()
-        }
-      });
     }
 
-    const shareValue = utils.bigNumberify(guildBankValue).gt(0) ? utils.bigNumberify(shares).div(guildBankValue) : 0
+    shareValue = utils.bigNumberify(guildBankValue).gt(0) ? utils.bigNumberify(totalShares).div(guildBankValue) : 0
 
     client.writeData({
       data: {
-        shareValue: shareValue.toString()
+        guildBankValue: guildBankValue.toString(),
+        shareValue: shareValue.toString(),
+        totalShares: totalShares.toString(),
+        currentPeriod: currentPeriod.toString(),
+        exchangeRate: exchangeRate.toString()
       }
     });
   }

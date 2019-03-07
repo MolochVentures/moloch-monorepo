@@ -6,7 +6,8 @@ export const defaults = {
   exchangeRate: "",
   totalShares: "",
   guildBankValue: "",
-  shareValue: ""
+  shareValue: "",
+  currentPeriod: ""
 };
 
 export const resolvers = {
