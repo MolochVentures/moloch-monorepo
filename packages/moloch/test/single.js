@@ -83,7 +83,9 @@ contract('Moloch', accounts => {
     
     console.log('moloch.address', moloch.address)
     console.log('simpleToken.address', simpleToken.address)
-    
+
+    const guildBank = await moloch.guildBank.call()
+    console.log("guildBank.address", guildBank)
 
     summoner = accounts[0]
     simpleToken.approve(moloch.address, new BigNumber(configJSON.PROPOSAL_DEPOSIT * numAccounts))
