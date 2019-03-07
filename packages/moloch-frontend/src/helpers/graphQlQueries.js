@@ -24,12 +24,19 @@ export const GET_SHARE_VALUE = gql`
   }
 `
 
+export const GET_CURRENT_PERIOD = gql`
+  query CurrentPeriod {
+    currentPeriod @client
+  }
+`
+
 export const GET_METADATA = gql`
   query GetMetadata {
     exchangeRate @client
     totalShares @client
     guildBankValue @client
     shareValue @client
+    currentPeriod @client
   }
 `
 
