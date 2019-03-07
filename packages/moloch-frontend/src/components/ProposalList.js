@@ -8,12 +8,7 @@ import { Query, withApollo } from "react-apollo";
 import gql from "graphql-tag";
 import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
 import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES } from "../helpers/graphQlQueries";
-
-const formatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 2
-});
+import { formatter } from "../helpers/currency";
 
 const ProposalCard = ({ proposal }) => {
   let id = proposal.id;
@@ -93,6 +88,7 @@ const GET_PROPOSAL_LIST = gql`
       title @client
       description @client
     }
+    currentPeriod @client
   }
 `;
 class ProposalList extends React.Component {
@@ -115,7 +111,7 @@ class ProposalList extends React.Component {
       query: GET_PROPOSAL_LIST
     });
     try {
-      await this.determineProposalStatuses(client, result.data.proposals);
+      await this.determineProposalStatuses(client, result.data.proposals, result.data.currentPeriod);
     } catch (e) {
       console.error(e);
     } finally {
@@ -125,7 +121,7 @@ class ProposalList extends React.Component {
     }
   }
 
-  determineProposalStatuses = async (client, proposals) => {
+  determineProposalStatuses = async (client, proposals, currentPeriod) => {
     if (!proposals || proposals.length === 0) {
       return;
     }
@@ -133,7 +129,7 @@ class ProposalList extends React.Component {
     const fullProps = [];
     for (const proposal of proposals) {
       if (proposal.status === ProposalStatus.Unknown) {
-        const fullProp = await getProposalDetailsFromOnChain(proposal);
+        const fullProp = await getProposalDetailsFromOnChain(proposal, currentPeriod);
         const result = await client.mutate({
           mutation: SET_PROPOSAL_ATTRIBUTES,
           variables: {
