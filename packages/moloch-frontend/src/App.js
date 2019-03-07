@@ -92,6 +92,10 @@ class App extends React.Component {
       query: IS_LOGGED_IN
     });
     const loggedInUser = loggedInUserData.loggedInUser
+    if (!loggedInUser) {
+      console.log(`User not logged in, cannot fetch`)
+      return
+    }
 
     let { data } = await client.query({
       query: GET_METADATA
@@ -113,7 +117,7 @@ class App extends React.Component {
 
     const token = await getToken();
     if (!guildBankValue || refetch) {
-      guildBankValue = loggedInUser ? await token.balanceOf(loggedInUser) : 0;
+      guildBankValue = await token.balanceOf(loggedInUser);
     }
 
     shareValue = utils.bigNumberify(guildBankValue).gt(0) ? utils.bigNumberify(totalShares).div(guildBankValue) : 0
