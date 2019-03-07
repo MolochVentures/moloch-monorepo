@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/moloch-monorepo/precache-manifest.e9de8c53091db9528567955f04cc9efa.js"
+  "/moloch-monorepo/precache-manifest.3a4ea57edb9f373269e222647b148fb1.js"
 );
 
 workbox.clientsClaim();
