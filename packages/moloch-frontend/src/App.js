@@ -23,7 +23,7 @@ import { ApolloLink } from "apollo-link";
 import { withClientState } from "apollo-link-state";
 import { CachePersistor } from "apollo-cache-persist";
 import { GET_EXCHANGE_RATE, GET_TOTAL_SHARES, GET_GUILD_BANK_VALUE } from "./helpers/graphQlQueries";
-import { getMedianizer, getMoloch, getWeb3 } from "./web3";
+import { getMedianizer, getMoloch, getWeb3, getToken } from "./web3";
 import { utils } from "ethers";
 
 console.log(process.env);
@@ -80,67 +80,72 @@ class App extends React.Component {
   }
 
   async componentDidMount() {
-    await persistor.restore();
+    // await persistor.restore();
 
+    await this.populateData(true)
+
+    this.setState({ restored: true });
+  }
+
+  async populateData(refetch) {
     let { data: loggedInUserData } = await client.query({
       query: IS_LOGGED_IN
     });
     const loggedInUser = loggedInUserData.loggedInUser
 
-    if (loggedInUser) {
-      let { data: exchangeRateData } = await client.query({
-        query: GET_EXCHANGE_RATE
-      });
-      let rate = exchangeRateData.exchangeRate;
-      if (!rate) {
-        const medianizer = await getMedianizer();
-        rate = (await medianizer.compute())[0];
-        client.writeData({
-          data: {
-            exchangeRate: rate
-          }
-        });
-      }
-
-      let { data: sharesData } = await client.query({
-        query: GET_TOTAL_SHARES
-      });
-      let shares = sharesData.totalShares;
-      if (!shares) {
-        const moloch = await getMoloch();
-        shares = await moloch.totalShares();
-        console.log("shares: ", shares.toString());
-        client.writeData({
-          data: {
-            totalShares: shares.toString()
-          }
-        });
-      }
-
-      const eth = await getWeb3();
-      let { data: guildBankData } = await client.query({
-        query: GET_GUILD_BANK_VALUE
-      });
-      let guildBankValue = guildBankData.guildBankValue;
-      if (!guildBankValue) {
-        guildBankValue = await eth.getBalance(process.env.REACT_APP_GUILD_BANK_ADDRESS);
-        client.writeData({
-          data: {
-            guildBankValue: guildBankValue.toString()
-          }
-        });
-      }
-
-      const shareValue = utils.bigNumberify(guildBankValue).gt(0) ? utils.bigNumberify(shares).div(guildBankValue) : 0
-
+    let { data: exchangeRateData } = await client.query({
+      query: GET_EXCHANGE_RATE
+    });
+    let rate = exchangeRateData.exchangeRate;
+    if (!rate || refetch) {
+      const medianizer = await getMedianizer();
+      rate = (await medianizer.compute())[0];
+      rate = utils.bigNumberify(rate)
       client.writeData({
         data: {
-          shareValue: shareValue.toString()
+          exchangeRate: rate.toString()
         }
       });
     }
 
-    this.setState({ restored: true });
+    let { data: sharesData } = await client.query({
+      query: GET_TOTAL_SHARES
+    });
+    let shares = sharesData.totalShares;
+    if (!shares || refetch) {
+      const moloch = await getMoloch();
+      shares = await moloch.totalShares();
+      console.log("shares: ", shares.toString());
+      client.writeData({
+        data: {
+          totalShares: shares.toString()
+        }
+      });
+    }
+
+    const token = await getToken();
+    let { data: guildBankData } = await client.query({
+      query: GET_GUILD_BANK_VALUE
+    });
+    let guildBankValue = guildBankData.guildBankValue;
+    if (!guildBankValue || refetch) {
+      console.log('loggedInUser: ', loggedInUser);
+      guildBankValue = loggedInUser ? await token.balanceOf(loggedInUser) : 0;
+      console.log('guildBankValue: ', guildBankValue.toString());
+      client.writeData({
+        data: {
+          guildBankValue: guildBankValue.toString()
+        }
+      });
+    }
+
+    const shareValue = utils.bigNumberify(guildBankValue).gt(0) ? utils.bigNumberify(shares).div(guildBankValue) : 0
+
+    client.writeData({
+      data: {
+        shareValue: shareValue.toString()
+      }
+    });
   }
 
   render() {
@@ -191,7 +196,7 @@ class App extends React.Component {
                           data.loggedInUser ? <GuildBank {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
                         }
                       />
-                      <Route path="/login" render={props => <Login {...props} />} />
+                      <Route path="/login" render={props => <Login {...props} loginComplete={() => this.populateData(true)} />} />
                       <Route component={NotFound} />
                     </Switch>
                   </Wrapper>
