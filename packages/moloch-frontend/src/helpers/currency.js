@@ -1,5 +1,11 @@
 import { utils } from "ethers";
 
+export const formatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  minimumFractionDigits: 2
+});
+
 export function convertWeiToDollars(weiAmount, exchangeRate) {
   console.log('weiAmount: ', weiAmount);
   console.log('exchangeRate: ', exchangeRate);
@@ -8,5 +14,5 @@ export function convertWeiToDollars(weiAmount, exchangeRate) {
   const weitoEth = utils.formatEther(weiAmount)
   const exchWeiToEth = utils.formatEther(exchangeRate)
   
-  return new Intl.NumberFormat().format(parseFloat(weitoEth * exchWeiToEth))
+  return formatter.format(parseFloat(weitoEth * exchWeiToEth))
 }
