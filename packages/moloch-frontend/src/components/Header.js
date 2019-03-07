@@ -185,7 +185,7 @@ export default class Header extends Component {
                       open={this.state.visibleRightMenu}
                       onBlur={() => this._handleCloseDropdown()}
                       onFocus={() => this._handleOpenDropdown()}
-                      text="A"
+                      text={`${data.member.id.substring(0,6)}...`}
                     >
                       <Dropdown.Menu className="menu blurred" direction="left">
                         {this.getTopRightMenuContent(data.member)}
