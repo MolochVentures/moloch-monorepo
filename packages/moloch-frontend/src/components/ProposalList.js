@@ -7,10 +7,44 @@ import ProgressBar from "./ProgressBar";
 import { Query, withApollo } from "react-apollo";
 import gql from "graphql-tag";
 import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
-import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES } from "../helpers/graphQlQueries";
+import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES, GET_CURRENT_PERIOD, GET_TOTAL_SHARES } from "../helpers/graphQlQueries";
 import { formatter } from "../helpers/currency";
 
-const ProposalCard = ({ proposal }) => {
+function getProposalCountdownText(proposal) {
+  switch (proposal.status) {
+    case ProposalStatus.InQueue:
+      return (
+        <>
+          <span className="subtext">Voting Begins: </span>
+          <span>
+            {proposal.votingStarts ? proposal.votingStarts : "-"} period{proposal.votingStarts === 1 ? null : "s"}
+          </span>
+        </>
+      )
+    case ProposalStatus.VotingPeriod:
+      return (
+        <>
+          <span className="subtext">Voting Ends: </span>
+          <span>
+            {proposal.votingEnds ? proposal.votingEnds : "-"} period{proposal.votingEnds === 1 ? null : "s"}
+          </span>
+        </>
+      );
+    case ProposalStatus.GracePeriod:
+      return (
+        <>
+          <span className="subtext">Voting Ends: </span>
+          <span>
+            {proposal.gracePeriod ? proposal.gracePeriod : "-"} period{proposal.gracePeriod === 1 ? null : "s"}
+          </span>
+        </>
+      );
+    default:
+      return <></>;
+  }
+}
+
+const ProposalCard = ({ proposal, totalShares }) => {
   let id = proposal.id;
   return (
     <Grid.Column mobile={16} tablet={8} computer={5}>
@@ -21,11 +55,11 @@ const ProposalCard = ({ proposal }) => {
           <Grid columns="equal" className="value_shares">
             <Grid.Row>
               <Grid.Column textAlign="center">
-                <p className="subtext">Shares</p>
+                <p className="subtext">Shares Requested</p>
                 <p className="amount">{proposal.sharesRequested}</p>
               </Grid.Column>
               <Grid.Column textAlign="center">
-                <p className="subtext">Total USD Value</p>
+                <p className="subtext">Total Value</p>
                 <p className="amount">{formatter.format(0)}</p>
               </Grid.Column>
             </Grid.Row>
@@ -34,37 +68,12 @@ const ProposalCard = ({ proposal }) => {
             <Grid.Row>
               <Grid.Column textAlign="center">
                 <Segment className="voting pill" textAlign="center">
-                  {proposal.votingEnded ? (
-                    <span className="subtext">Voting Ended</span>
-                  ) : (
-                    <>
-                      <span className="subtext">Voting Ends: </span>
-                      <span>
-                        {proposal.votingEnds ? proposal.votingEnds : "-"} period$
-                        {proposal.votingEnds === 1 ? null : "s"}
-                      </span>
-                    </>
-                  )}
-                </Segment>
-              </Grid.Column>
-              <Grid.Column textAlign="center">
-                <Segment className="grace pill" textAlign="center">
-                  {proposal.graceEnded ? (
-                    <span className="subtext">Grace Ended</span>
-                  ) : (
-                    <>
-                      <span className="subtext">Grace Period Ends: </span>
-                      <span>
-                        {proposal.gracePeriod ? proposal.gracePeriod : "-"} period$
-                        {proposal.gracePeriod === 1 ? null : "s"}
-                      </span>
-                    </>
-                  )}
+                  {getProposalCountdownText(proposal)}
                 </Segment>
               </Grid.Column>
             </Grid.Row>
           </Grid>
-          <ProgressBar yes={parseInt(proposal.yesVotes)} no={parseInt(proposal.noVotes)} />
+          <ProgressBar totalShares={totalShares} yes={parseInt(proposal.yesVotes)} no={parseInt(proposal.noVotes)} />
         </Segment>
       </Link>
     </Grid.Column>
@@ -88,7 +97,6 @@ const GET_PROPOSAL_LIST = gql`
       title @client
       description @client
     }
-    currentPeriod @client
   }
 `;
 class ProposalList extends React.Component {
@@ -96,7 +104,8 @@ class ProposalList extends React.Component {
     super(props);
     this.state = {
       proposals: [],
-      loading: true
+      loading: true,
+      totalShares: 0
     };
 
     this.fetchData(props);
@@ -107,16 +116,25 @@ class ProposalList extends React.Component {
     this.setState({
       loading: true
     });
-    const result = await client.query({
+    const { data: proposalData } = await client.query({
       query: GET_PROPOSAL_LIST
     });
+
+    const { data: currentPeriodData } = await client.query({
+      query: GET_CURRENT_PERIOD
+    });
+
+    const { data: totalSharesData } = await client.query({
+      query: GET_TOTAL_SHARES
+    });
     try {
-      await this.determineProposalStatuses(client, result.data.proposals, result.data.currentPeriod);
+      await this.determineProposalStatuses(client, proposalData.proposals, currentPeriodData.currentPeriod);
     } catch (e) {
       console.error(e);
     } finally {
       this.setState({
-        loading: false
+        loading: false,
+        totalShares: +totalSharesData.totalShares
       });
     }
   }
@@ -130,6 +148,7 @@ class ProposalList extends React.Component {
     for (const proposal of proposals) {
       if (proposal.status === ProposalStatus.Unknown) {
         const fullProp = await getProposalDetailsFromOnChain(proposal, currentPeriod);
+        console.log("fullProp: ", fullProp);
         const result = await client.mutate({
           mutation: SET_PROPOSAL_ATTRIBUTES,
           variables: {
@@ -158,7 +177,7 @@ class ProposalList extends React.Component {
 
   render() {
     const { isActive } = this.props;
-    const { proposals } = this.state;
+    const { proposals, totalShares } = this.state;
     const gracePeriod = proposals.filter(p => p.status === ProposalStatus.GracePeriod);
     const votingPeriod = proposals.filter(p => p.status === ProposalStatus.VotingPeriod);
     const inQueue = proposals.filter(p => p.status === ProposalStatus.InQueue);
@@ -192,7 +211,7 @@ class ProposalList extends React.Component {
               </Grid>
               <Grid columns={3}>
                 {gracePeriod.map((p, index) => (
-                  <ProposalCard proposal={p} key={index} />
+                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
                 ))}
               </Grid>
               {/* Voting Period */}
@@ -206,7 +225,7 @@ class ProposalList extends React.Component {
               </Grid>
               <Grid columns={3}>
                 {votingPeriod.map((p, index) => (
-                  <ProposalCard proposal={p} key={index} />
+                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
                 ))}
               </Grid>
               {/* In Queue */}
@@ -220,7 +239,7 @@ class ProposalList extends React.Component {
               </Grid>
               <Grid columns={3}>
                 {inQueue.map((p, index) => (
-                  <ProposalCard proposal={p} key={index} />
+                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
                 ))}
               </Grid>
               {/* Completed */}
@@ -234,7 +253,7 @@ class ProposalList extends React.Component {
               </Grid>
               <Grid columns={3}>
                 {completed.map((p, index) => (
-                  <ProposalCard proposal={p} key={index} />
+                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
                 ))}
               </Grid>
             </>
