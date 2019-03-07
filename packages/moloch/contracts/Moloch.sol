@@ -11,16 +11,24 @@ contract Moloch {
     GLOBAL CONSTANTS
     ***************/
     uint256 public periodDuration; // default = 17280 = 4.8 hours in seconds (5 periods per day)
-    uint256 public votingPeriodLength; // default = 35 periods
-    uint256 public gracePeriodLength; // default = 35 periods
-    uint256 public abortWindow; // default = 5 periods
+    uint256 public votingPeriodLength; // default = 35 periods (7 days)
+    uint256 public gracePeriodLength; // default = 35 periods (7 days)
+    uint256 public abortWindow; // default = 5 periods (1 day)
     uint256 public proposalDeposit; // default = 10 ETH (~$1,000 worth of ETH at contract deployment)
     uint256 public dilutionBound; // default = 3 - maximum multiplier a YES voter will be obligated to pay in case of mass ragequit
     uint256 public processingReward; // default = 0.1 - amount of ETH to give to whoever processes a proposal
     uint256 public summoningTime; // needed to determine the current period
 
-    ERC20 public approvedToken; // approved token contract reference; default = wETH
+    IERC20 public approvedToken; // approved token contract reference; default = wETH
     GuildBank public guildBank; // guild bank contract reference
+
+    // HARD-CODED LIMITS
+    // These numbers are quite arbitrary; they are small enough to avoid overflows when doing calculations
+    // with periods or shares, yet big enough to not limit reasonable use cases.
+    uint256 constant MAX_VOTING_PERIOD_LENGTH = 10**18; // maximum length of voting period
+    uint256 constant MAX_GRACE_PERIOD_LENGTH = 10**18; // maximum length of grace period
+    uint256 constant MAX_DILUTION_BOUND = 10**18; // maximum dilution bound
+    uint256 constant MAX_NUMBER_OF_SHARES = 10**18; // maximum number of shares that can be minted
 
     /***************
     EVENTS
@@ -48,7 +56,7 @@ contract Moloch {
     struct Member {
         address delegateKey; // the key responsible for submitting proposals and voting - defaults to member address unless updated
         uint256 shares; // the # of shares assigned to this member
-        bool isActive; // always true once a member has been created
+        bool exists; // always true once a member has been created
         uint256 highestIndexYesVote; // highest proposal index # on which the member voted YES
     }
 
@@ -81,7 +89,7 @@ contract Moloch {
     }
 
     modifier onlyDelegate {
-        require(members[memberAddressByDelegateKey[msg.sender]].shares > 0, "Moloch::onlyDelegate - not a member");
+        require(members[memberAddressByDelegateKey[msg.sender]].shares > 0, "Moloch::onlyDelegate - not a delegate");
         _;
     }
 
@@ -103,11 +111,15 @@ contract Moloch {
         require(_approvedToken != address(0), "Moloch::constructor - _approvedToken cannot be 0");
         require(_periodDuration > 0, "Moloch::constructor - _periodDuration cannot be 0");
         require(_votingPeriodLength > 0, "Moloch::constructor - _votingPeriodLength cannot be 0");
-        require(_abortWindow <= _votingPeriodLength, "Moloch::constructor - _abortWindow must be smaller than _votingPeriodLength");
+        require(_votingPeriodLength <= MAX_VOTING_PERIOD_LENGTH, "Moloch::constructor - _votingPeriodLength exceeds limit");
+        require(_gracePeriodLength <= MAX_GRACE_PERIOD_LENGTH, "Moloch::constructor - _gracePeriodLength exceeds limit");
+        require(_abortWindow > 0, "Moloch::constructor - _abortWindow cannot be 0");
+        require(_abortWindow <= _votingPeriodLength, "Moloch::constructor - _abortWindow must be smaller than or equal to _votingPeriodLength");
         require(_dilutionBound > 0, "Moloch::constructor - _dilutionBound cannot be 0");
+        require(_dilutionBound <= MAX_DILUTION_BOUND, "Moloch::constructor - _dilutionBound exceeds limit");
         require(_proposalDeposit >= _processingReward, "Moloch::constructor - _proposalDeposit cannot be smaller than _processingReward");
 
-        approvedToken = ERC20(_approvedToken);
+        approvedToken = IERC20(_approvedToken);
 
         guildBank = new GuildBank(_approvedToken);
 
@@ -128,10 +140,6 @@ contract Moloch {
         emit SummonComplete(summoner, 1);
     }
 
-    function max(uint256 x, uint256 y) internal pure returns (uint256) {
-        return x >= y ? x : y;
-    }
-
     /*****************
     PROPOSAL FUNCTIONS
     *****************/
@@ -147,12 +155,10 @@ contract Moloch {
     {
         require(applicant != address(0), "Moloch::submitProposal - applicant cannot be 0");
 
-        // Make sure we won't run into overflows when we process this proposal.
+        // Make sure we won't run into overflows when doing calculations with shares.
         // Note that totalShares + totalSharesRequested + sharesRequested is an upper bound
-        // on the number of shares that can exist during and after the processing of this proposal.
-        // Hence, neither the dilution check nor the addition of the sharesRequested to the existing
-        // shares (in case the proposal is accepted) can overflow.
-        require(totalShares.add(totalSharesRequested).add(sharesRequested).mul(dilutionBound) >= 0); // we only care for the SafeMath operations, not for >= 0
+        // on the number of shares that can exist until this proposal has been processed.
+        require(totalShares.add(totalSharesRequested).add(sharesRequested) <= MAX_NUMBER_OF_SHARES, "Moloch::submitProposal - too many shares requested");
 
         totalSharesRequested = totalSharesRequested.add(sharesRequested);
 
@@ -200,6 +206,7 @@ contract Moloch {
         require(proposalIndex < proposalQueue.length, "Moloch::submitVote - proposal does not exist");
         Proposal storage proposal = proposalQueue[proposalIndex];
 
+        require(uintVote < 3, "Moloch::submitVote - uintVote must be less than 3");
         Vote vote = Vote(uintVote);
 
         require(getCurrentPeriod() >= proposal.startingPeriod, "Moloch::submitVote - voting period has not started");
@@ -215,6 +222,7 @@ contract Moloch {
         if (vote == Vote.Yes) {
             proposal.yesVotes = proposal.yesVotes.add(member.shares);
 
+            // set highest index (latest) yes vote - must be processed for member to ragequit
             if (proposalIndex > member.highestIndexYesVote) {
                 member.highestIndexYesVote = proposalIndex;
             }
@@ -255,13 +263,13 @@ contract Moloch {
             proposal.didPass = true;
 
             // if the applicant is already a member, add to their existing shares
-            if (members[proposal.applicant].isActive) {
+            if (members[proposal.applicant].exists) {
                 members[proposal.applicant].shares = members[proposal.applicant].shares.add(proposal.sharesRequested);
 
             // the applicant is a new member, create a new record for them
             } else {
                 // if the applicant address is already taken by a member's delegateKey, reset it to their member address
-                if (members[memberAddressByDelegateKey[proposal.applicant]].isActive) {
+                if (members[memberAddressByDelegateKey[proposal.applicant]].exists) {
                     address memberToOverride = memberAddressByDelegateKey[proposal.applicant];
                     memberAddressByDelegateKey[memberToOverride] = memberToOverride;
                     members[memberToOverride].delegateKey = memberToOverride;
@@ -319,7 +327,7 @@ contract Moloch {
 
         require(member.shares >= sharesToBurn, "Moloch::ragequit - insufficient shares");
 
-        require(canRagequit(member.highestIndexYesVote), "Moloch::ragequit - can't ragequit until highest index proposal member voted YES on is processed or the vote fails");
+        require(canRagequit(member.highestIndexYesVote), "Moloch::ragequit - cant ragequit until highest index proposal member voted YES on is processed");
 
         // burn shares
         member.shares = member.shares.sub(sharesToBurn);
@@ -340,6 +348,7 @@ contract Moloch {
 
         require(msg.sender == proposal.applicant, "Moloch::abort - msg.sender must be applicant");
         require(getCurrentPeriod() < proposal.startingPeriod.add(abortWindow), "Moloch::abort - abort window must not have passed");
+        require(!proposal.aborted, "Moloch::abort - proposal must not have already been aborted");
 
         uint256 tokensToAbort = proposal.tokenTribute;
         proposal.tokenTribute = 0;
@@ -348,7 +357,7 @@ contract Moloch {
         // return all tokens to the applicant
         require(
             approvedToken.transfer(proposal.applicant, tokensToAbort),
-            "Moloch::processProposal - failing vote token transfer failed"
+            "Moloch::processProposal - failed to return tribute to applicant"
         );
 
         emit Abort(proposalIndex, msg.sender);
@@ -359,8 +368,8 @@ contract Moloch {
 
         // skip checks if member is setting the delegate key to their member address
         if (newDelegateKey != msg.sender) {
-            require(!members[newDelegateKey].isActive, "Moloch::updateDelegateKey - can't overwrite existing members");
-            require(!members[memberAddressByDelegateKey[newDelegateKey]].isActive, "Moloch::updateDelegateKey - can't overwrite existing delegate keys");
+            require(!members[newDelegateKey].exists, "Moloch::updateDelegateKey - cant overwrite existing members");
+            require(!members[memberAddressByDelegateKey[newDelegateKey]].exists, "Moloch::updateDelegateKey - cant overwrite existing delegate keys");
         }
 
         Member storage member = members[msg.sender];
@@ -375,11 +384,19 @@ contract Moloch {
     GETTER FUNCTIONS
     ***************/
 
+    function max(uint256 x, uint256 y) internal pure returns (uint256) {
+        return x >= y ? x : y;
+    }
+
     function getCurrentPeriod() public view returns (uint256) {
         return now.sub(summoningTime).div(periodDuration);
     }
 
-    // can only ragequit if the latest proposal you voted YES on has either been processed OR voting has expired and it didn't pass
+    function getProposalQueueLength() public view returns (uint256) {
+        return proposalQueue.length;
+    }
+
+    // can only ragequit if the latest proposal you voted YES on has been processed
     function canRagequit(uint256 highestIndexYesVote) public view returns (bool) {
         require(highestIndexYesVote < proposalQueue.length, "Moloch::canRagequit - proposal does not exist");
         return proposalQueue[highestIndexYesVote].processed;
@@ -390,7 +407,7 @@ contract Moloch {
     }
 
     function getMemberProposalVote(address memberAddress, uint256 proposalIndex) public view returns (Vote) {
-        require(members[memberAddress].isActive, "Moloch::getMemberProposalVote - member doesn't exist");
+        require(members[memberAddress].exists, "Moloch::getMemberProposalVote - member doesn't exist");
         require(proposalIndex < proposalQueue.length, "Moloch::getMemberProposalVote - proposal doesn't exist");
         return proposalQueue[proposalIndex].votesByMember[memberAddress];
     }
