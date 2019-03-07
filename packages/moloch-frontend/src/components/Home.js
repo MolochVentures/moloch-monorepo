@@ -109,7 +109,7 @@ class HomePage extends React.Component {
                   <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
                     <Link to="/guildbank" className="text_link">
                       <p className="subtext">Guild Bank Value</p>
-                      <p className="amount">${convertWeiToDollars(guildBankValue, exchangeRate)}</p>
+                      <p className="amount">{convertWeiToDollars(guildBankValue, exchangeRate)}</p>
                     </Link>
                   </Grid.Column>
                   <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons">
