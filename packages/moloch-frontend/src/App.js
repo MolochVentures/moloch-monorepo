@@ -139,7 +139,6 @@ class App extends React.Component {
         <Router>
           <Query query={IS_LOGGED_IN}>
             {({ data }) => {
-              console.log("data: ", data.loggedInUser);
               return (
                 <>
                   <Background />
