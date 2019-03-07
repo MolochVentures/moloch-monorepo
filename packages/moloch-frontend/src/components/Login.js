@@ -10,6 +10,9 @@ export default class Login extends Component {
   // bypass auth for now
   loginWithMetamask = async client => {
     const web3 = await initMetmask();
+    if (!web3) {
+      return
+    }
     await this.doLoginBypassAuth(client, web3);
   };
 
