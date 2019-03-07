@@ -8,6 +8,7 @@ import gql from "graphql-tag";
 import { Query } from "react-apollo";
 import { Vote } from "./ProposalDetail";
 import { utils } from "ethers"
+import { formatter } from "../helpers/currency";
 
 const GET_MEMBER_DETAIL = gql`
   query Member($id: String!) {
@@ -34,7 +35,7 @@ const MemberDetail = ({ name, loggedInUser }) => (
             </Grid.Column>
             <Grid.Column textAlign="right">
               <p className="subtext">Total Value</p>
-              <p className="amount">${parseFloat(utils.bigNumberify(data.member.shares).mul(data.shareValue)).toFixed(2)}</p>
+              <p className="amount">{formatter.format(utils.bigNumberify(data.member.shares).mul(data.shareValue).toString())}</p>
             </Grid.Column>
           </Grid>
           <Grid>
@@ -131,7 +132,7 @@ const ProposalDetail = ({ name }) => (
                         <p className="subtext date">{p.sharesRequested}</p>
                       </Grid.Column>
                       <Grid.Column textAlign="center">
-                        <p className="subtext date">{p.tokenTribute}</p>
+                        <p className="subtext date">{utils.formatEther(p.tokenTribute)}</p>
                       </Grid.Column>
                       <Grid.Column textAlign="center">
                         <Header as="p" color={p.vote === 2 ? "green" : p.vote === 1 ? "red" : null}>
