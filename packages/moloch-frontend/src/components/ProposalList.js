@@ -96,6 +96,10 @@ const GET_PROPOSAL_LIST = gql`
       status @client
       title @client
       description @client
+      gracePeriod @client
+      votingEnds @client
+      votingStarts @client
+      readyForProcessing @client
     }
   }
 `;
@@ -155,14 +159,22 @@ class ProposalList extends React.Component {
             id: proposal.id,
             status: fullProp.status,
             title: fullProp.title,
-            description: fullProp.description || ""
+            description: fullProp.description || "",
+            gracePeriod: fullProp.gracePeriod || "",
+            votingEnds: `${fullProp.votingEnds}` || "",
+            votingStarts: `${fullProp.votingStarts}` || "",
+            readyForProcessing: fullProp.readyForProcessing || ""
           }
         });
         fullProps.push({
           ...proposal,
           status: result.data.setAttributes.status,
           title: result.data.setAttributes.title,
-          description: result.data.setAttributes.description
+          description: result.data.setAttributes.description,
+          gracePeriod: result.data.setAttributes.gracePeriod,
+          votingEnds: result.data.setAttributes.votingEnds,
+          votingStarts: result.data.setAttributes.votingStarts,
+          readyForProcessing: result.data.setAttributes.readyForProcessing
         });
       } else {
         fullProps.push(proposal);
