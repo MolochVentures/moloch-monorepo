@@ -108,7 +108,7 @@ contract('Moloch', accounts => {
     const member = await moloch.members(summoner)
     const summoningTime =  await moloch.summoningTime()
 
-    assert.equal(member.isActive, true)
+    assert.equal(member.exists, true)
     assert.equal(await moloch.approvedToken(), simpleToken.address)
     assert.equal(await moloch.periodDuration(), configJSON.PERIOD_DURATION)
     assert.equal(await moloch.votingPeriodLength(), configJSON.VOTING_PERIOD_LENGTH)
