@@ -1,11 +1,11 @@
 self.__precacheManifest = [
   {
-    "revision": "dbec4e92b2632aa2ba28",
+    "revision": "231a95c48be3d02125e3",
     "url": "/moloch-monorepo/static/css/main.337b8df1.chunk.css"
   },
   {
-    "revision": "dbec4e92b2632aa2ba28",
-    "url": "/moloch-monorepo/static/js/main.dbec4e92.chunk.js"
+    "revision": "231a95c48be3d02125e3",
+    "url": "/moloch-monorepo/static/js/main.231a95c4.chunk.js"
   },
   {
     "revision": "7a1e1a38344e5be4e128",
@@ -72,16 +72,16 @@ self.__precacheManifest = [
     "url": "/moloch-monorepo/static/media/brand-icons.13db00b7.eot"
   },
   {
-    "revision": "c5ebe0b32dc1b5cc449a76c4204d13bb",
-    "url": "/moloch-monorepo/static/media/brand-icons.c5ebe0b3.ttf"
-  },
-  {
     "revision": "b87b9ba532ace76ae9f6edfe9f72ded2",
     "url": "/moloch-monorepo/static/media/icons.b87b9ba5.ttf"
   },
   {
     "revision": "82f60bd0b94a1ed68b1e6e309ce2e8c3",
     "url": "/moloch-monorepo/static/media/outline-icons.82f60bd0.svg"
+  },
+  {
+    "revision": "c5ebe0b32dc1b5cc449a76c4204d13bb",
+    "url": "/moloch-monorepo/static/media/brand-icons.c5ebe0b3.ttf"
   },
   {
     "revision": "962a1bf31c081691065fe333d9fa8105",
@@ -96,7 +96,7 @@ self.__precacheManifest = [
     "url": "/moloch-monorepo/static/media/moloch_owl.d5fb9e9e.jpg"
   },
   {
-    "revision": "bfdfa987564936d9a0a3f5ff2b22abdc",
+    "revision": "9552e2eca3bf3184c35892125637b3e0",
     "url": "/moloch-monorepo/index.html"
   }
 ];
