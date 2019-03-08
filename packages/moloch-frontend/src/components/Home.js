@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Button, Segment, Modal, Form } from "semantic-ui-react";
+import { Grid, Button, Segment, Modal, Form, Statistic } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import gql from "graphql-tag";
 import { Query, withApollo } from "react-apollo";
@@ -108,8 +108,7 @@ class HomePage extends React.Component {
                 <Grid columns={16} verticalAlign="middle">
                   <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
                     <Link to="/guildbank" className="text_link">
-                      <p className="subtext">Guild Bank Value</p>
-                      <p className="amount">{convertWeiToDollars(guildBankValue, exchangeRate)}</p>
+                      <Statistic inverted label='Guild Bank Value' value={convertWeiToDollars(guildBankValue, exchangeRate)} />
                     </Link>
                   </Grid.Column>
                   <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons">
@@ -145,18 +144,13 @@ class HomePage extends React.Component {
                     <Segment className="blurred box">
                       <Grid columns="equal" className="graph_values">
                         <Grid.Column textAlign="left">
-                          <p className="subtext">Total Shares</p>
-                          <p className="amount">{totalShares}</p>
+                          <Statistic inverted label='Total Shares' value={totalShares} />
                         </Grid.Column>
                         <Grid.Column textAlign="center">
-                          <p className="subtext">Total ETH</p>
-                          <p className="amount">{utils.formatEther(guildBankValue)}</p>
+                          <Statistic inverted label='Total ETH' value={utils.formatEther(guildBankValue)} />
                         </Grid.Column>
                         <Grid.Column textAlign="right">
-                          <p className="subtext">Share Value</p>
-                          <p className="amount">
-                            {convertWeiToDollars(shareValue, exchangeRate)}
-                          </p>
+                          <Statistic inverted label='Share Value' value={convertWeiToDollars(shareValue, exchangeRate)} />
                         </Grid.Column>
                       </Grid>
                     </Segment>
