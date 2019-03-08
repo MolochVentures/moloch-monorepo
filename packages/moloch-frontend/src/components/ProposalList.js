@@ -7,8 +7,9 @@ import ProgressBar from "./ProgressBar";
 import { Query, withApollo } from "react-apollo";
 import gql from "graphql-tag";
 import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
-import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES, GET_CURRENT_PERIOD, GET_TOTAL_SHARES } from "../helpers/graphQlQueries";
-import { formatter } from "../helpers/currency";
+import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES, GET_CURRENT_PERIOD, GET_TOTAL_SHARES, GET_SHARE_VALUE } from "../helpers/graphQlQueries";
+import { currencyFormatter } from "../helpers/currency";
+import { utils } from "ethers";
 
 function getProposalCountdownText(proposal) {
   switch (proposal.status) {
@@ -33,7 +34,7 @@ function getProposalCountdownText(proposal) {
     case ProposalStatus.GracePeriod:
       return (
         <>
-          <span className="subtext">Voting Ends: </span>
+          <span className="subtext">Grace Period Ends: </span>
           <span>
             {proposal.gracePeriod ? proposal.gracePeriod : "-"} period{proposal.gracePeriod === 1 ? null : "s"}
           </span>
@@ -44,7 +45,7 @@ function getProposalCountdownText(proposal) {
   }
 }
 
-const ProposalCard = ({ proposal, totalShares }) => {
+const ProposalCard = ({ proposal, totalShares, shareValue = 0 }) => {
   let id = proposal.id;
   return (
     <Grid.Column mobile={16} tablet={8} computer={5}>
@@ -60,7 +61,7 @@ const ProposalCard = ({ proposal, totalShares }) => {
               </Grid.Column>
               <Grid.Column textAlign="center">
                 <p className="subtext">Total Value</p>
-                <p className="amount">{formatter.format(0)}</p>
+                <p className="amount">{currencyFormatter.format(utils.bigNumberify(proposal.sharesRequested).mul(shareValue).toString())}</p>
               </Grid.Column>
             </Grid.Row>
           </Grid>
@@ -131,6 +132,10 @@ class ProposalList extends React.Component {
     const { data: totalSharesData } = await client.query({
       query: GET_TOTAL_SHARES
     });
+
+    const { data: shareValueData } = await client.query({
+      query: GET_SHARE_VALUE
+    });
     try {
       await this.determineProposalStatuses(client, proposalData.proposals, currentPeriodData.currentPeriod);
     } catch (e) {
@@ -138,7 +143,8 @@ class ProposalList extends React.Component {
     } finally {
       this.setState({
         loading: false,
-        totalShares: +totalSharesData.totalShares
+        totalShares: +totalSharesData.totalShares,
+        shareValue: shareValueData.shareValue
       });
     }
   }
