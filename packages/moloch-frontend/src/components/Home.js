@@ -1,8 +1,7 @@
 import React from "react";
 import { Grid, Button, Segment, Modal, Form, Statistic } from "semantic-ui-react";
 import { Link } from "react-router-dom";
-import gql from "graphql-tag";
-import { Query, withApollo } from "react-apollo";
+import { Query } from "react-apollo";
 import { getToken } from "../web3";
 import { utils } from "ethers";
 import { GET_METADATA, GET_MEMBERS, GET_PROPOSALS } from "../helpers/graphQlQueries";
@@ -59,9 +58,6 @@ export default class HomePage extends React.Component {
     return (
       <Composed>
         {({ members, proposals, metadata }) => {
-          console.log('metadata: ', metadata);
-          console.log('proposals: ', proposals);
-          console.log('members: ', members);
           if (members.loading || proposals.loading || metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
           if (members.error) throw new Error(`Error!: ${members.error}`);
           if (proposals.error) throw new Error(`Error!: ${proposals.error}`);
