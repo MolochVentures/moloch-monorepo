@@ -117,19 +117,24 @@ class App extends React.Component {
 
     const token = await getToken();
     if (!guildBankValue || refetch) {
-      guildBankValue = await token.balanceOf(loggedInUser);
+      guildBankValue = await token.balanceOf(process.env.REACT_APP_GUILD_BANK_ADDRESS);
     }
 
-    shareValue = utils.bigNumberify(guildBankValue).gt(0) ? utils.bigNumberify(totalShares).div(guildBankValue) : 0
+    if (guildBankValue && totalShares) {
+      const ethPerShare = guildBankValue.gt(0) ? totalShares.toNumber() / parseFloat(utils.formatEther(guildBankValue)) : 0 // in eth
+      shareValue = utils.parseEther(ethPerShare.toString()) // in wei
+    }
+
+    const dataToWrite = {
+      guildBankValue: guildBankValue.toString(),
+      shareValue: shareValue.toString(),
+      totalShares: totalShares.toString(),
+      currentPeriod: currentPeriod.toString(),
+      exchangeRate: exchangeRate.toString()
+    }
 
     client.writeData({
-      data: {
-        guildBankValue: guildBankValue.toString(),
-        shareValue: shareValue.toString(),
-        totalShares: totalShares.toString(),
-        currentPeriod: currentPeriod.toString(),
-        exchangeRate: exchangeRate.toString()
-      }
+      data: dataToWrite
     });
   }
 
