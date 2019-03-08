@@ -8,7 +8,7 @@ import gql from "graphql-tag";
 import { Query } from "react-apollo";
 import { Vote } from "./ProposalDetail";
 import { utils } from "ethers"
-import { formatter } from "../helpers/currency";
+import { convertWeiToDollars } from "../helpers/currency";
 
 const GET_MEMBER_DETAIL = gql`
   query Member($id: String!) {
@@ -18,6 +18,7 @@ const GET_MEMBER_DETAIL = gql`
       tokenTribute
     }
     shareValue @client
+    exchangeRate @client
   }
 `;
 const MemberDetail = ({ name, loggedInUser }) => (
@@ -25,7 +26,7 @@ const MemberDetail = ({ name, loggedInUser }) => (
     {({ loading, error, data }) => {
       if (loading) return <Segment className="blurred box">Loading...</Segment>;
       if (error) throw new Error(`Error!: ${error}`);
-
+      console.log('data: ', data);
       return (
         <Segment className="blurred box">
           <Grid columns="equal">
@@ -35,7 +36,7 @@ const MemberDetail = ({ name, loggedInUser }) => (
             </Grid.Column>
             <Grid.Column textAlign="right">
               <p className="subtext">Total Value</p>
-              <p className="amount">{formatter.format(utils.bigNumberify(data.member.shares).mul(data.shareValue).toString())}</p>
+              <p className="amount">{convertWeiToDollars(utils.bigNumberify(data.member.shares).mul(data.shareValue).toString(), data.exchangeRate)}</p>
             </Grid.Column>
           </Grid>
           <Grid>
