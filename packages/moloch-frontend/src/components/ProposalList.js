@@ -112,12 +112,14 @@ class ProposalList extends React.Component {
       loading: true,
       totalShares: 0
     };
+  }
 
-    this.fetchData(props);
+  async componentDidMount() {
+    this.fetchData();
   }
 
   async fetchData(props) {
-    const { client } = props;
+    const { client } = this.props;
     this.setState({
       loading: true
     });
@@ -158,18 +160,17 @@ class ProposalList extends React.Component {
     for (const proposal of proposals) {
       if (proposal.status === ProposalStatus.Unknown) {
         const fullProp = await getProposalDetailsFromOnChain(proposal, currentPeriod);
-        console.log("fullProp: ", fullProp);
         const result = await client.mutate({
           mutation: SET_PROPOSAL_ATTRIBUTES,
           variables: {
             id: proposal.id,
             status: fullProp.status,
             title: fullProp.title,
-            description: fullProp.description || "",
-            gracePeriod: fullProp.gracePeriod || "",
-            votingEnds: `${fullProp.votingEnds}` || "",
-            votingStarts: `${fullProp.votingStarts}` || "",
-            readyForProcessing: fullProp.readyForProcessing || ""
+            description: fullProp.description,
+            gracePeriod: fullProp.gracePeriod,
+            votingEnds: `${fullProp.votingEnds}`,
+            votingStarts: `${fullProp.votingStarts}`,
+            readyForProcessing: fullProp.readyForProcessing
           }
         });
         fullProps.push({
