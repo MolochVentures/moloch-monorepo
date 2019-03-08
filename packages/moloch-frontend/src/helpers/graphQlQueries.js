@@ -58,6 +58,15 @@ export const GET_MEMBERS = gql`
   }
 `;
 
+// TODO filter this to get current proposals?
+export const GET_PROPOSALS = gql`
+  {
+    proposals {
+      id
+    }
+  }
+`;
+
 export const SET_PROPOSAL_ATTRIBUTES = gql`
   mutation SetAttributes($status: String!, $title: String!, $description: String!) {
     setAttributes(status: $status, title: $title, description: $description) @client {
