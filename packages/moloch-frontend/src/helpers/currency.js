@@ -12,8 +12,6 @@ export const currencyFormatter = new Intl.NumberFormat("en-US", {
  * @param {*} exchangeRate in Wei units
  */
 export function convertWeiToDollars(weiAmount, exchangeRate) {
-  console.log('exchangeRate: ', exchangeRate);
-  console.log('weiAmount: ', weiAmount);
   const weitoEth = utils.formatEther(weiAmount)
   const exchWeiToEth = utils.formatEther(exchangeRate)
   
