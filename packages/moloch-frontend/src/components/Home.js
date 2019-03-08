@@ -155,7 +155,7 @@ class HomePage extends React.Component {
                         <Grid.Column textAlign="right">
                           <p className="subtext">Share Value</p>
                           <p className="amount">
-                            {shareValue}
+                            {convertWeiToDollars(shareValue, exchangeRate)}
                           </p>
                         </Grid.Column>
                       </Grid>
