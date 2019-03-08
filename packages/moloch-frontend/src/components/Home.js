@@ -5,71 +5,33 @@ import gql from "graphql-tag";
 import { Query, withApollo } from "react-apollo";
 import { getToken } from "../web3";
 import { utils } from "ethers";
-import { GET_METADATA } from "../helpers/graphQlQueries";
+import { GET_METADATA, GET_MEMBERS, GET_PROPOSALS } from "../helpers/graphQlQueries";
 import { convertWeiToDollars } from "../helpers/currency";
+import { adopt } from "react-adopt";
 
-const GET_MEMBERS = gql`
-  {
-    members(where: { shares_gt: 0, isActive: true }) {
-      id
-    }
-  }
-`;
-const NumMembers = () => (
-  <Query query={GET_MEMBERS}>
-    {({ loading, error, data }) => {
-      let members;
-      if (error) {
-        members = "NA";
-        console.error(`Could not load members: ${error}`);
-      } else if (loading) {
-        members = "-";
-      } else {
-        members = data.members.length;
-      }
-      return (
-        <Link to="/members" className="link">
-          <Button size="large" color="grey" className="btn_link">
-            {members} Members
-          </Button>
-        </Link>
-      );
-    }}
-  </Query>
+const Composed = adopt({
+  members: ({ render }) => <Query query={GET_MEMBERS}>{render}</Query>,
+  proposals: ({ render }) => <Query query={GET_PROPOSALS}>{render}</Query>,
+  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>
+});
+
+const NumMembers = ({ members }) => (
+  <Link to="/members" className="link">
+    <Button size="large" color="grey" className="btn_link">
+      {members.length} Members
+    </Button>
+  </Link>
 );
 
-// TODO filter this to get current proposals?
-const GET_PROPOSALS = gql`
-  {
-    proposals {
-      id
-    }
-  }
-`;
-const NumProposals = () => (
-  <Query query={GET_PROPOSALS}>
-    {({ loading, error, data }) => {
-      let proposals;
-      if (error) {
-        proposals = "NA";
-        console.error(`Could not load proposals: ${error}`);
-      } else if (loading) {
-        proposals = "-";
-      } else {
-        proposals = data.proposals.length;
-      }
-      return (
-        <Link to="/proposals" className="link">
-          <Button size="large" color="grey" className="btn_link">
-            {proposals} Proposals
-          </Button>
-        </Link>
-      );
-    }}
-  </Query>
+const NumProposals = ({ proposals }) => (
+  <Link to="/proposals" className="link">
+    <Button size="large" color="grey" className="btn_link">
+      {proposals.length} Proposals
+    </Button>
+  </Link>
 );
 
-class HomePage extends React.Component {
+export default class HomePage extends React.Component {
   state = {
     approval: "",
     token: null,
@@ -95,74 +57,73 @@ class HomePage extends React.Component {
   render() {
     const { approval } = this.state;
     return (
-      <Query query={GET_METADATA}>
-        {({ loading, error, data }) => {
-          if (error) {
-            console.error(`Could not load page: ${error}`);
-          } else if (loading) {
-            return "Loading...";
-          } else {
-            const { guildBankValue, exchangeRate, totalShares, shareValue } = data
-            return (
-              <div id="homepage">
-                <Grid columns={16} verticalAlign="middle">
-                  <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
-                    <Link to="/guildbank" className="text_link">
-                      <Statistic inverted label='Guild Bank Value' value={convertWeiToDollars(guildBankValue, exchangeRate)} />
-                    </Link>
-                  </Grid.Column>
-                  <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons">
-                    <NumMembers />
-                    <NumProposals />
-                  </Grid.Column>
-                  <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
-                    <Modal
-                      basic
-                      size="small"
-                      trigger={
-                        <Button size="large" color="grey" className="browse_buttons">
-                          Approve wETH
+      <Composed>
+        {({ members, proposals, metadata }) => {
+          console.log('metadata: ', metadata);
+          console.log('proposals: ', proposals);
+          console.log('members: ', members);
+          if (members.loading || proposals.loading || metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
+          if (members.error) throw new Error(`Error!: ${members.error}`);
+          if (proposals.error) throw new Error(`Error!: ${proposals.error}`);
+          if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
+          const { guildBankValue, exchangeRate, totalShares, shareValue } = metadata.data;
+          return (
+            <div id="homepage">
+              <Grid columns={16} verticalAlign="middle">
+                <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
+                  <Link to="/guildbank" className="text_link">
+                    <Statistic inverted label="Guild Bank Value" value={convertWeiToDollars(guildBankValue, exchangeRate)} />
+                  </Link>
+                </Grid.Column>
+                <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons">
+                  <NumMembers members={members.data.members} />
+                  <NumProposals proposals={proposals.data.proposals} />
+                </Grid.Column>
+                <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
+                  <Modal
+                    basic
+                    size="small"
+                    trigger={
+                      <Button size="large" color="grey" className="browse_buttons">
+                        Approve wETH
+                      </Button>
+                    }
+                  >
+                    <Modal.Header>Approve wETH</Modal.Header>
+                    <Modal.Content>
+                      <Form onSubmit={this.handleSubmit}>
+                        <Form.Field>
+                          <label>Amount to Approve</label>
+                          <input placeholder="Amount in Wei" name="amount" value={approval} onChange={this.handleChange} className="asset_amount" />
+                        </Form.Field>
+                        <Button type="submit" color="grey" className="btn_link">
+                          Submit
                         </Button>
-                      }
-                    >
-                      <Modal.Header>Approve wETH</Modal.Header>
-                      <Modal.Content>
-                        <Form onSubmit={this.handleSubmit}>
-                          <Form.Field>
-                            <label>Amount to Approve</label>
-                            <input placeholder="Amount in Wei" name="amount" value={approval} onChange={this.handleChange} className="asset_amount" />
-                          </Form.Field>
-                          <Button type="submit" color="grey" className="btn_link">
-                            Submit
-                          </Button>
-                        </Form>
-                      </Modal.Content>
-                    </Modal>
-                  </Grid.Column>
+                      </Form>
+                    </Modal.Content>
+                  </Modal>
+                </Grid.Column>
 
-                  <Grid.Column width={16}>
-                    <Segment className="blurred box">
-                      <Grid columns="equal" className="graph_values">
-                        <Grid.Column textAlign="left">
-                          <Statistic inverted label='Total Shares' value={totalShares} />
-                        </Grid.Column>
-                        <Grid.Column textAlign="center">
-                          <Statistic inverted label='Total ETH' value={utils.formatEther(guildBankValue)} />
-                        </Grid.Column>
-                        <Grid.Column textAlign="right">
-                          <Statistic inverted label='Share Value' value={convertWeiToDollars(shareValue, exchangeRate)} />
-                        </Grid.Column>
-                      </Grid>
-                    </Segment>
-                  </Grid.Column>
-                </Grid>
-              </div>
-            );
-          }
+                <Grid.Column width={16}>
+                  <Segment className="blurred box">
+                    <Grid columns="equal" className="graph_values">
+                      <Grid.Column textAlign="left">
+                        <Statistic inverted label="Total Shares" value={totalShares} />
+                      </Grid.Column>
+                      <Grid.Column textAlign="center">
+                        <Statistic inverted label="Total ETH" value={utils.formatEther(guildBankValue)} />
+                      </Grid.Column>
+                      <Grid.Column textAlign="right">
+                        <Statistic inverted label="Share Value" value={convertWeiToDollars(shareValue, exchangeRate)} />
+                      </Grid.Column>
+                    </Grid>
+                  </Segment>
+                </Grid.Column>
+              </Grid>
+            </div>
+          );
         }}
-      </Query>
+      </Composed>
     );
   }
 }
-
-export default withApollo(HomePage);
