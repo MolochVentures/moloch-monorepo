@@ -6,14 +6,14 @@ export const resolvers = {
     status: () => ProposalStatus.Unknown,
     title: () => "",
     description: () => "",
-    gracePeriod: () => "",
-    votingEnds: () => "",
-    votingStarts: () => "",
+    gracePeriod: () => 0,
+    votingEnds: () => 0,
+    votingStarts: () => 0,
     readyForProcessing: () => false
   },
   Mutation: {
-    setAttributes: (_, variables, { cache, getCacheKey }) => {
-      const id = getCacheKey({ __typename: "Proposal", id: variables.id });
+    setAttributes: (_, variables, { cache }) => {
+      const id = `Proposal:${variables.id}`;
       console.log('variables: ', variables);
       const fragment = gql`
         fragment getMeta on Proposal {
@@ -27,18 +27,16 @@ export const resolvers = {
         }
       `;
       const proposal = cache.readFragment({ fragment, id });
-      console.log('proposal: ', proposal);
       const data = {
         ...proposal,
         status: variables.status,
-        title: variables.title || "",
-        description: variables.description || "",
-        gracePeriod: variables.gracePeriod || "",
-        votingEnds: variables.votingEnds || "",
-        votingStarts: variables.votingStarts || "",
-        readyForProcessing: variables.readyForProcessing || false
+        title: variables.title,
+        description: variables.description,
+        gracePeriod: variables.gracePeriod,
+        votingEnds: variables.votingEnds,
+        votingStarts: variables.votingStarts,
+        readyForProcessing: variables.readyForProcessing
       };
-      console.log('data: ', data);
       cache.writeData({ id, data });
       return data;
     }

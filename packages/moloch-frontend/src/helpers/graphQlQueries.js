@@ -4,31 +4,31 @@ export const GET_EXCHANGE_RATE = gql`
   query ExchangeRate {
     exchangeRate @client
   }
-`
+`;
 
 export const GET_TOTAL_SHARES = gql`
   query TotalShares {
     totalShares @client
   }
-`
+`;
 
 export const GET_GUILD_BANK_VALUE = gql`
   query GuildBankValue {
     guildBankValue @client
   }
-`
+`;
 
 export const GET_SHARE_VALUE = gql`
   query ShareValue {
     shareValue @client
   }
-`
+`;
 
 export const GET_CURRENT_PERIOD = gql`
   query CurrentPeriod {
     currentPeriod @client
   }
-`
+`;
 
 export const GET_METADATA = gql`
   query GetMetadata {
@@ -38,7 +38,7 @@ export const GET_METADATA = gql`
     shareValue @client
     currentPeriod @client
   }
-`
+`;
 
 export const GET_LOGGED_IN_USER = gql`
   query User($address: String!) {
@@ -68,11 +68,31 @@ export const GET_PROPOSALS = gql`
 `;
 
 export const SET_PROPOSAL_ATTRIBUTES = gql`
-  mutation SetAttributes($status: String!, $title: String!, $description: String!) {
-    setAttributes(status: $status, title: $title, description: $description) @client {
+  mutation SetAttributes(
+    $status: String!, 
+    $title: String!, 
+    $description: String!, 
+    $gracePeriod: Number!, 
+    $votingEnds: Number!, 
+    $votingStarts: Number!, 
+    $readyForProcessing: Bool!
+  ) {
+    setAttributes(
+      status: $status, 
+      title: $title, 
+      description: $description, 
+      gracePeriod: $gracePeriod, 
+      votingEnds: $votingEnds, 
+      votingStarts: $votingStarts, 
+      readyForProcessing: $readyForProcessing
+    ) @client {
       status
       title
       description
+      gracePeriod
+      votingEnds
+      votingStarts
+      readyForProcessing
     }
   }
 `;
