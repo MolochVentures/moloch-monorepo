@@ -186,7 +186,10 @@ class App extends React.Component {
                         }
                       />
                       <Route path="/login" render={props => <Login {...props} loginComplete={() => this.populateData(true)} />} />
-                      <Route component={NotFound} />
+                      <Route render={props =>
+                          data.loggedInUser ? <Home {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                        }
+                      />
                     </Switch>
                   </Wrapper>
                 </>
