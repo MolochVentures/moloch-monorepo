@@ -7,8 +7,10 @@ import hood from "assets/hood.png";
 import gql from "graphql-tag";
 import { Query } from "react-apollo";
 import { Vote } from "./ProposalDetail";
-import { utils } from "ethers"
+import { utils } from "ethers";
 import { convertWeiToDollars } from "../helpers/currency";
+import { adopt } from "react-adopt";
+import { GET_SHARE_VALUE, GET_EXCHANGE_RATE } from "../helpers/graphQlQueries";
 
 const GET_MEMBER_DETAIL = gql`
   query Member($id: String!) {
@@ -17,26 +19,44 @@ const GET_MEMBER_DETAIL = gql`
       shares
       tokenTribute
     }
-    shareValue @client
-    exchangeRate @client
   }
 `;
+
+const Composed = adopt({
+  memberDetail: ({ render, name }) => (
+    <Query query={GET_MEMBER_DETAIL} variables={{ id: name }}>
+      {render}
+    </Query>
+  ),
+  shareValue: ({ render }) => <Query query={GET_SHARE_VALUE}>{render}</Query>,
+  exchangeRate: ({ render }) => <Query query={GET_EXCHANGE_RATE}>{render}</Query>
+});
+
 const MemberDetail = ({ name, loggedInUser }) => (
-  <Query query={GET_MEMBER_DETAIL} variables={{ id: name }}>
-    {({ loading, error, data }) => {
-      if (loading) return <Segment className="blurred box">Loading...</Segment>;
-      if (error) throw new Error(`Error!: ${error}`);
-      console.log('data: ', data);
+  <Composed name={name}>
+    {({ memberDetail, shareValue, exchangeRate }) => {
+      if (memberDetail.loading || shareValue.loading || exchangeRate.loading) return <Segment className="blurred box">Loading...</Segment>;
+      if (memberDetail.error) throw new Error(`Error!: ${memberDetail.error}`);
+      if (shareValue.error) throw new Error(`Error!: ${shareValue.error}`);
+      if (exchangeRate.error) throw new Error(`Error!: ${exchangeRate.error}`);
       return (
         <Segment className="blurred box">
           <Grid columns="equal">
             <Grid.Column>
               <p className="subtext">Shares</p>
-              <p className="amount">{data.member.shares}</p>
+              <p className="amount">{memberDetail.data.member.shares}</p>
             </Grid.Column>
             <Grid.Column textAlign="right">
               <p className="subtext">Total Value</p>
-              <p className="amount">{convertWeiToDollars(utils.bigNumberify(data.member.shares).mul(data.shareValue).toString(), data.exchangeRate)}</p>
+              <p className="amount">
+                {convertWeiToDollars(
+                  utils
+                    .bigNumberify(memberDetail.data.member.shares)
+                    .mul(shareValue.data.shareValue)
+                    .toString(),
+                  exchangeRate.data.exchangeRate
+                )}
+              </p>
             </Grid.Column>
           </Grid>
           <Grid>
@@ -50,7 +70,7 @@ const MemberDetail = ({ name, loggedInUser }) => (
               <Grid.Column>
                 <Segment className="pill" textAlign="center">
                   <Icon name="ethereum" />
-                  {utils.formatEther(data.member.tokenTribute)} ETH
+                  {utils.formatEther(memberDetail.data.member.tokenTribute)} ETH
                 </Segment>
               </Grid.Column>
             </Grid.Row>
@@ -58,7 +78,7 @@ const MemberDetail = ({ name, loggedInUser }) => (
         </Segment>
       );
     }}
-  </Query>
+  </Composed>
 );
 
 const GET_PROPOSAL_HISTORY = gql`

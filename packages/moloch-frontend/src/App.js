@@ -25,6 +25,7 @@ import { CachePersistor } from "apollo-cache-persist";
 import { GET_METADATA } from "./helpers/graphQlQueries";
 import { getMedianizer, getMoloch, getToken } from "./web3";
 import { utils } from "ethers";
+import { adopt } from 'react-adopt'
 
 console.log(process.env);
 
@@ -68,6 +69,12 @@ const IS_LOGGED_IN = gql`
     loggedInUser @client
   }
 `;
+
+const Composed = adopt({
+  loggedInUserData: ({ render }) => <Query query={IS_LOGGED_IN}>{ render }</Query>,
+  metadata: ({ render }) => <Query query={GET_METADATA}>{ render }</Query>,
+})
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -142,38 +149,38 @@ class App extends React.Component {
     return this.state.restored ? (
       <ApolloProvider client={client}>
         <Router>
-          <Query query={IS_LOGGED_IN}>
-            {({ data }) => {
+          <Composed>
+            {({ loggedInUserData, metadata }) => {
               return (
                 <>
                   <Background />
-                  <Header loggedInUser={data.loggedInUser} />
+                  <Header loggedInUser={loggedInUserData.data.loggedInUser} />
                   <Wrapper>
                     <Switch>
                       <Route
                         exact
                         path="/"
                         render={props =>
-                          data.loggedInUser ? <Home {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                          loggedInUserData.data.loggedInUser ? <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
                         }
                       />
                       <Route
                         path="/proposals"
                         render={props =>
-                          data.loggedInUser ? <ProposalList {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                          loggedInUserData.data.loggedInUser ? <ProposalList {...props} loggedInUser={loggedInUserData.data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
                         }
                       />
                       <Route
                         path="/members"
                         render={props =>
-                          data.loggedInUser ? <MemberList {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                          loggedInUserData.data.loggedInUser ? <MemberList {...props} loggedInUser={loggedInUserData.data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
                         }
                       />
                       <Route
                         path="/proposalsubmission"
                         render={props =>
-                          data.loggedInUser ? (
-                            <ProposalSubmission {...props} loggedInUser={data.loggedInUser} />
+                          loggedInUserData.data.loggedInUser ? (
+                            <ProposalSubmission {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
                           ) : (
                             <Redirect to={{ pathname: "/login" }} />
                           )
@@ -182,12 +189,12 @@ class App extends React.Component {
                       <Route
                         path="/guildbank"
                         render={props =>
-                          data.loggedInUser ? <GuildBank {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                          loggedInUserData.data.loggedInUser ? <GuildBank {...props} loggedInUser={loggedInUserData.data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
                         }
                       />
                       <Route path="/login" render={props => <Login {...props} loginComplete={() => this.populateData(true)} />} />
                       <Route render={props =>
-                          data.loggedInUser ? <Home {...props} loggedInUser={data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                          loggedInUserData.data.loggedInUser ? <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
                         }
                       />
                     </Switch>
@@ -195,7 +202,7 @@ class App extends React.Component {
                 </>
               );
             }}
-          </Query>
+          </Composed>
         </Router>
       </ApolloProvider>
     ) : (
