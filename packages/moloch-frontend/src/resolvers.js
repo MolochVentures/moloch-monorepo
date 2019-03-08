@@ -1,15 +1,6 @@
 import { ProposalStatus } from "./helpers/proposals";
 import gql from "graphql-tag";
 
-export const defaults = {
-  loggedInUser: "",
-  exchangeRate: "",
-  totalShares: "",
-  guildBankValue: "",
-  shareValue: "",
-  currentPeriod: ""
-};
-
 export const resolvers = {
   Proposal: {
     status: () => ProposalStatus.Unknown,
@@ -25,21 +16,29 @@ export const resolvers = {
       const id = getCacheKey({ __typename: "Proposal", id: variables.id });
       console.log('variables: ', variables);
       const fragment = gql`
-        fragment getStatus on Proposal {
+        fragment getMeta on Proposal {
           status
+          title
+          description
+          gracePeriod
+          votingEnds
+          votingStarts
+          readyForProcessing
         }
       `;
       const proposal = cache.readFragment({ fragment, id });
+      console.log('proposal: ', proposal);
       const data = {
         ...proposal,
         status: variables.status,
-        title: variables.title,
-        description: variables.description,
-        gracePeriod: variables.gracePeriod,
-        votingEnds: variables.votingEnds,
-        votingStarts: variables.votingStarts,
-        readyForProcessing: variables.readyForProcessing
+        title: variables.title || "",
+        description: variables.description || "",
+        gracePeriod: variables.gracePeriod || "",
+        votingEnds: variables.votingEnds || "",
+        votingStarts: variables.votingStarts || "",
+        readyForProcessing: variables.readyForProcessing || false
       };
+      console.log('data: ', data);
       cache.writeData({ id, data });
       return data;
     }
