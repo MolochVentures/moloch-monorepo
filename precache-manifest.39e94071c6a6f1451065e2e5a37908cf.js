@@ -1,11 +1,11 @@
 self.__precacheManifest = [
   {
-    "revision": "722847bc0fb95fd14557",
+    "revision": "f0b8af4c16750ec5e3c3",
     "url": "/moloch-monorepo/static/css/main.337b8df1.chunk.css"
   },
   {
-    "revision": "722847bc0fb95fd14557",
-    "url": "/moloch-monorepo/static/js/main.722847bc.chunk.js"
+    "revision": "f0b8af4c16750ec5e3c3",
+    "url": "/moloch-monorepo/static/js/main.f0b8af4c.chunk.js"
   },
   {
     "revision": "7a1e1a38344e5be4e128",
@@ -40,12 +40,12 @@ self.__precacheManifest = [
     "url": "/moloch-monorepo/static/media/outline-icons.ef60a4f6.woff"
   },
   {
-    "revision": "ad97afd3337e8cda302d10ff5a4026b8",
-    "url": "/moloch-monorepo/static/media/outline-icons.ad97afd3.ttf"
-  },
-  {
     "revision": "701ae6abd4719e9c2ada3535a497b341",
     "url": "/moloch-monorepo/static/media/outline-icons.701ae6ab.eot"
+  },
+  {
+    "revision": "ad97afd3337e8cda302d10ff5a4026b8",
+    "url": "/moloch-monorepo/static/media/outline-icons.ad97afd3.ttf"
   },
   {
     "revision": "0ab54153eeeca0ce03978cc463b257f7",
@@ -64,10 +64,6 @@ self.__precacheManifest = [
     "url": "/moloch-monorepo/static/media/brand-icons.a046592b.woff"
   },
   {
-    "revision": "b87b9ba532ace76ae9f6edfe9f72ded2",
-    "url": "/moloch-monorepo/static/media/icons.b87b9ba5.ttf"
-  },
-  {
     "revision": "8e3c7f5520f5ae906c6cf6d7f3ddcd19",
     "url": "/moloch-monorepo/static/media/icons.8e3c7f55.eot"
   },
@@ -78,6 +74,10 @@ self.__precacheManifest = [
   {
     "revision": "c5ebe0b32dc1b5cc449a76c4204d13bb",
     "url": "/moloch-monorepo/static/media/brand-icons.c5ebe0b3.ttf"
+  },
+  {
+    "revision": "b87b9ba532ace76ae9f6edfe9f72ded2",
+    "url": "/moloch-monorepo/static/media/icons.b87b9ba5.ttf"
   },
   {
     "revision": "82f60bd0b94a1ed68b1e6e309ce2e8c3",
@@ -96,7 +96,7 @@ self.__precacheManifest = [
     "url": "/moloch-monorepo/static/media/moloch_owl.d5fb9e9e.jpg"
   },
   {
-    "revision": "4866b4cde7778388a5f4103a5e3be86e",
+    "revision": "23b2ad5b00d65a0c393059741b2677fd",
     "url": "/moloch-monorepo/index.html"
   }
 ];
