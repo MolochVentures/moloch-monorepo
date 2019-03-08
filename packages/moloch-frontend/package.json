@@ -17,6 +17,7 @@
     "moment": "^2.24.0",
     "node-sass": "^4.11.0",
     "react": "^16.7.0",
+    "react-adopt": "^0.6.0",
     "react-apollo": "^2.4.1",
     "react-dom": "^16.7.0",
     "react-redux": "^6.0.0",
