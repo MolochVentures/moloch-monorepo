@@ -45,6 +45,7 @@ const MainMenu = props => (
         className="link"
         onClick={async () => {
           props._handleCloseDropdown();
+          window.localStorage.setItem("loggedInUser", "")
           await props.client.resetStore();
         }}
       >
@@ -148,8 +149,9 @@ export default class Header extends Component {
   }
 
   render() {
+    const { loggedInUser } = this.props
     return (
-      <Query query={GET_LOGGED_IN_USER} variables={{ address: this.props.loggedInUser }}>
+      <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedInUser }}>
         {({ loading, error, data }) => {
           if (loading) return "Loading...";
           if (error) throw new Error(`Error!: ${error}`);
@@ -185,7 +187,7 @@ export default class Header extends Component {
                       open={this.state.visibleRightMenu}
                       onBlur={() => this._handleCloseDropdown()}
                       onFocus={() => this._handleOpenDropdown()}
-                      text={`${this.props.loggedInUser.substring(0,6)}...`}
+                      text={`${loggedInUser.substring(0,6)}...`}
                     >
                       <Dropdown.Menu className="menu blurred" direction="left">
                         {this.getTopRightMenuContent(data.member)}

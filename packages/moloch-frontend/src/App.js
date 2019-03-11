@@ -20,7 +20,7 @@ import { HttpLink } from "apollo-link-http";
 import { GET_METADATA } from "./helpers/graphQlQueries";
 import { getMedianizer, getMoloch, getToken } from "./web3";
 import { utils } from "ethers";
-import { adopt } from 'react-adopt'
+import { adopt } from "react-adopt";
 
 console.log(process.env);
 
@@ -35,16 +35,18 @@ const client = new ApolloClient({
   typeDefs
 });
 
+const initialData = {
+  loggedInUser: "",
+  guildBankValue: "",
+  shareValue: "",
+  totalShares: "",
+  currentPeriod: "",
+  exchangeRate: ""
+};
 cache.writeData({
-  data: {
-    loggedInUser: window.localStorage.getItem("loggedInUser") || "",
-    guildBankValue: "",
-    shareValue: "",
-    totalShares: "",
-    currentPeriod: "",
-    exchangeRate: ""
-  }
-})
+  data: { ...initialData, loggedInUser: window.localStorage.getItem("loggedInUser") || "" }
+});
+client.onResetStore(() => cache.writeData({ data: initialData }));
 
 const IS_LOGGED_IN = gql`
   query IsUserLoggedIn {
@@ -53,9 +55,9 @@ const IS_LOGGED_IN = gql`
 `;
 
 const Composed = adopt({
-  loggedInUserData: ({ render }) => <Query query={IS_LOGGED_IN}>{ render }</Query>,
-  metadata: ({ render }) => <Query query={GET_METADATA}>{ render }</Query>,
-})
+  loggedInUserData: ({ render }) => <Query query={IS_LOGGED_IN}>{render}</Query>,
+  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>
+});
 
 class App extends React.Component {
   constructor(props) {
@@ -64,34 +66,38 @@ class App extends React.Component {
       restored: false,
       exchangeRate: "0",
       totalShares: "0",
-      guildBankValue: "0",
+      guildBankValue: "0"
     };
   }
 
   async componentDidMount() {
     // await persistor.restore();
-    await this.populateData(true)
+    await this.populateData(true);
     this.setState({ restored: true });
   }
 
   async populateData(refetch) {
-    let { data: { loggedInUser } } = await client.query({
+    let {
+      data: { loggedInUser }
+    } = await client.query({
       query: IS_LOGGED_IN
     });
 
     if (!loggedInUser) {
-      console.log(`User not logged in, cannot fetch`)
-      return
+      console.log(`User not logged in, cannot fetch`);
+      return;
     }
 
-    let { data: { exchangeRate, totalShares, currentPeriod, guildBankValue, shareValue } } = await client.query({
+    let {
+      data: { exchangeRate, totalShares, currentPeriod, guildBankValue, shareValue }
+    } = await client.query({
       query: GET_METADATA
     });
 
     if (!exchangeRate || refetch) {
       const medianizer = await getMedianizer();
       exchangeRate = (await medianizer.compute())[0];
-      exchangeRate = utils.bigNumberify(exchangeRate)
+      exchangeRate = utils.bigNumberify(exchangeRate);
     }
 
     if (!totalShares || !currentPeriod || refetch) {
@@ -106,8 +112,8 @@ class App extends React.Component {
     }
 
     if (guildBankValue && totalShares) {
-      const ethPerShare = guildBankValue.gt(0) ? totalShares.toNumber() / parseFloat(utils.formatEther(guildBankValue)) : 0 // in eth
-      shareValue = utils.parseEther(ethPerShare.toString()) // in wei
+      const ethPerShare = guildBankValue.gt(0) ? totalShares.toNumber() / parseFloat(utils.formatEther(guildBankValue)) : 0; // in eth
+      shareValue = utils.parseEther(ethPerShare.toString()); // in wei
     }
 
     const dataToWrite = {
@@ -116,8 +122,8 @@ class App extends React.Component {
       totalShares: totalShares.toString(),
       currentPeriod: currentPeriod.toString(),
       exchangeRate: exchangeRate.toString()
-    }
-    console.log('dataToWrite: ', dataToWrite);
+    };
+    console.log("dataToWrite: ", dataToWrite);
 
     client.writeData({
       data: dataToWrite
@@ -140,19 +146,31 @@ class App extends React.Component {
                         exact
                         path="/"
                         render={props =>
-                          loggedInUserData.data.loggedInUser ? <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                          loggedInUserData.data.loggedInUser ? (
+                            <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
+                          ) : (
+                            <Redirect to={{ pathname: "/login" }} />
+                          )
                         }
                       />
                       <Route
                         path="/proposals"
                         render={props =>
-                          loggedInUserData.data.loggedInUser ? <ProposalList {...props} loggedInUser={loggedInUserData.data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                          loggedInUserData.data.loggedInUser ? (
+                            <ProposalList {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
+                          ) : (
+                            <Redirect to={{ pathname: "/login" }} />
+                          )
                         }
                       />
                       <Route
                         path="/members"
                         render={props =>
-                          loggedInUserData.data.loggedInUser ? <MemberList {...props} loggedInUser={loggedInUserData.data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                          loggedInUserData.data.loggedInUser ? (
+                            <MemberList {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
+                          ) : (
+                            <Redirect to={{ pathname: "/login" }} />
+                          )
                         }
                       />
                       <Route
@@ -168,12 +186,21 @@ class App extends React.Component {
                       <Route
                         path="/guildbank"
                         render={props =>
-                          loggedInUserData.data.loggedInUser ? <GuildBank {...props} loggedInUser={loggedInUserData.data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                          loggedInUserData.data.loggedInUser ? (
+                            <GuildBank {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
+                          ) : (
+                            <Redirect to={{ pathname: "/login" }} />
+                          )
                         }
                       />
                       <Route path="/login" render={props => <Login {...props} loginComplete={() => this.populateData(true)} />} />
-                      <Route render={props =>
-                          loggedInUserData.data.loggedInUser ? <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} /> : <Redirect to={{ pathname: "/login" }} />
+                      <Route
+                        render={props =>
+                          loggedInUserData.data.loggedInUser ? (
+                            <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
+                          ) : (
+                            <Redirect to={{ pathname: "/login" }} />
+                          )
                         }
                       />
                     </Switch>
