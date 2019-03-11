@@ -114,6 +114,10 @@ export const GET_PROPOSAL_DETAIL = gql`
       status @client
       title @client
       description @client
+      gracePeriod @client
+      votingEnds @client
+      votingStarts @client
+      readyForProcessing @client
     }
   }
 `;
