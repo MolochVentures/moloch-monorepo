@@ -6,8 +6,13 @@ import ProposalDetail from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
 import { Query, withApollo } from "react-apollo";
 import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
-import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES, GET_CURRENT_PERIOD, GET_TOTAL_SHARES, GET_SHARE_VALUE, GET_PROPOSAL_LIST } from "../helpers/graphQlQueries";
-import { currencyFormatter } from "../helpers/currency";
+import {
+  GET_LOGGED_IN_USER,
+  SET_PROPOSAL_ATTRIBUTES,
+  GET_PROPOSAL_LIST,
+  GET_METADATA
+} from "../helpers/graphQlQueries";
+import { convertWeiToDollars } from "../helpers/currency";
 import { utils } from "ethers";
 
 function getProposalCountdownText(proposal) {
@@ -44,7 +49,7 @@ function getProposalCountdownText(proposal) {
   }
 }
 
-const ProposalCard = ({ proposal, totalShares, shareValue = 0 }) => {
+const ProposalCard = ({ proposal, totalShares, shareValue, exchangeRate }) => {
   let id = proposal.id;
   return (
     <Grid.Column mobile={16} tablet={8} computer={5}>
@@ -61,11 +66,12 @@ const ProposalCard = ({ proposal, totalShares, shareValue = 0 }) => {
               <Grid.Column textAlign="center">
                 <p className="subtext">Total Value</p>
                 <p className="amount">
-                  {currencyFormatter.format(
+                  {convertWeiToDollars(
                     utils
                       .bigNumberify(proposal.sharesRequested)
                       .mul(shareValue)
-                      .toString()
+                      .toString(),
+                    exchangeRate
                   )}
                 </p>
               </Grid.Column>
@@ -88,20 +94,19 @@ const ProposalCard = ({ proposal, totalShares, shareValue = 0 }) => {
 };
 
 class ProposalList extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      proposals: [],
-      loading: true,
-      totalShares: 0
-    };
-  }
+  state = {
+    proposals: [],
+    loading: true,
+    totalShares: 0,
+    shareValue: 0,
+    exchangeRate: "0"
+  };
 
   async componentDidMount() {
     this.fetchData();
   }
 
-  async fetchData(props) {
+  async fetchData() {
     const { client } = this.props;
     this.setState({
       loading: true
@@ -110,26 +115,22 @@ class ProposalList extends React.Component {
       query: GET_PROPOSAL_LIST
     });
 
-    const { data: currentPeriodData } = await client.query({
-      query: GET_CURRENT_PERIOD
+    const { data: metadata } = await client.query({
+      query: GET_METADATA
     });
 
-    const { data: totalSharesData } = await client.query({
-      query: GET_TOTAL_SHARES
-    });
+    console.log('metadata: ', metadata);
 
-    const { data: shareValueData } = await client.query({
-      query: GET_SHARE_VALUE
-    });
     try {
-      await this.determineProposalStatuses(client, proposalData.proposals, currentPeriodData.currentPeriod);
+      await this.determineProposalStatuses(client, proposalData.proposals, metadata.currentPeriod);
     } catch (e) {
       console.error(e);
     } finally {
       this.setState({
         loading: false,
-        totalShares: +totalSharesData.totalShares,
-        shareValue: shareValueData.shareValue
+        totalShares: +metadata.totalShares,
+        shareValue: metadata.shareValue,
+        exchangeRate: metadata.exchangeRate
       });
     }
   }
@@ -142,36 +143,38 @@ class ProposalList extends React.Component {
     const fullProps = [];
 
     // parallelize data fetch
-    await Promise.all(proposals.map(async proposal => {
-      if (proposal.status === ProposalStatus.Unknown) {
-        const fullProp = await getProposalDetailsFromOnChain(proposal, currentPeriod);
-        const result = await client.mutate({
-          mutation: SET_PROPOSAL_ATTRIBUTES,
-          variables: {
-            id: proposal.id,
-            status: fullProp.status,
-            title: fullProp.title,
-            description: fullProp.description,
-            gracePeriod: fullProp.gracePeriod,
-            votingEnds: `${fullProp.votingEnds}`,
-            votingStarts: `${fullProp.votingStarts}`,
-            readyForProcessing: fullProp.readyForProcessing
-          }
-        });
-        fullProps.push({
-          ...proposal,
-          status: result.data.setAttributes.status,
-          title: result.data.setAttributes.title,
-          description: result.data.setAttributes.description,
-          gracePeriod: result.data.setAttributes.gracePeriod,
-          votingEnds: result.data.setAttributes.votingEnds,
-          votingStarts: result.data.setAttributes.votingStarts,
-          readyForProcessing: result.data.setAttributes.readyForProcessing
-        });
-      } else {
-        fullProps.push(proposal);
-      }
-    }))
+    await Promise.all(
+      proposals.map(async proposal => {
+        if (proposal.status === ProposalStatus.Unknown) {
+          const fullProp = await getProposalDetailsFromOnChain(proposal, currentPeriod);
+          const result = await client.mutate({
+            mutation: SET_PROPOSAL_ATTRIBUTES,
+            variables: {
+              id: proposal.id,
+              status: fullProp.status,
+              title: fullProp.title,
+              description: fullProp.description,
+              gracePeriod: fullProp.gracePeriod,
+              votingEnds: `${fullProp.votingEnds}`,
+              votingStarts: `${fullProp.votingStarts}`,
+              readyForProcessing: fullProp.readyForProcessing
+            }
+          });
+          fullProps.push({
+            ...proposal,
+            status: result.data.setAttributes.status,
+            title: result.data.setAttributes.title,
+            description: result.data.setAttributes.description,
+            gracePeriod: result.data.setAttributes.gracePeriod,
+            votingEnds: result.data.setAttributes.votingEnds,
+            votingStarts: result.data.setAttributes.votingStarts,
+            readyForProcessing: result.data.setAttributes.readyForProcessing
+          });
+        } else {
+          fullProps.push(proposal);
+        }
+      })
+    );
 
     this.setState({
       proposals: fullProps
@@ -181,7 +184,7 @@ class ProposalList extends React.Component {
 
   render() {
     const { isActive } = this.props;
-    const { proposals, totalShares, loading } = this.state;
+    const { proposals, totalShares, loading, shareValue, exchangeRate } = this.state;
     const gracePeriod = proposals.filter(p => p.status === ProposalStatus.GracePeriod);
     const votingPeriod = proposals.filter(p => p.status === ProposalStatus.VotingPeriod);
     const inQueue = proposals.filter(p => p.status === ProposalStatus.InQueue);
@@ -199,7 +202,7 @@ class ProposalList extends React.Component {
             ) : (
               <Grid columns={3}>
                 {votingPeriod.map((p, index) => (
-                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
+                  <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={totalShares} proposal={p} key={index} />
                 ))}
               </Grid>
             )}
@@ -212,7 +215,7 @@ class ProposalList extends React.Component {
           <Tab.Pane attached={false}>
             <Grid columns={3}>
               {gracePeriod.map((p, index) => (
-                <ProposalCard totalShares={totalShares} proposal={p} key={index} />
+                <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={totalShares} proposal={p} key={index} />
               ))}
             </Grid>
           </Tab.Pane>
@@ -227,7 +230,7 @@ class ProposalList extends React.Component {
             ) : (
               <Grid columns={3}>
                 {inQueue.map((p, index) => (
-                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
+                  <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={totalShares} proposal={p} key={index} />
                 ))}
               </Grid>
             )}
@@ -243,7 +246,7 @@ class ProposalList extends React.Component {
             ) : (
               <Grid columns={3}>
                 {completed.map((p, index) => (
-                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
+                  <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={totalShares} proposal={p} key={index} />
                 ))}
               </Grid>
             )}
