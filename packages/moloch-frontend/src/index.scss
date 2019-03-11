@@ -386,6 +386,10 @@ body {
   }
 
   .ui.pointing.secondary.menu {
+    a {
+      font-size: 25px;
+    }
+
     .item {
       color: #fff;
     }
