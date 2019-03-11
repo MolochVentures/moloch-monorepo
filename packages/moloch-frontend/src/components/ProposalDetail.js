@@ -5,11 +5,10 @@ import hood from "assets/hood.png";
 
 import ProgressBar from "./ProgressBar";
 
-import gql from "graphql-tag";
 import { withApollo } from "react-apollo";
 import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
 import { getMoloch } from "../web3";
-import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES } from "../helpers/graphQlQueries";
+import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES, GET_PROPOSAL_DETAIL } from "../helpers/graphQlQueries";
 
 const formatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -34,32 +33,6 @@ const MemberAvatar = ({ member, shares }) => {
   );
 };
 
-const GET_PROPOSAL_DETAIL = gql`
-  query Proposal($id: String!) {
-    proposal(id: $id) {
-      id
-      timestamp
-      tokenTribute
-      sharesRequested
-      processed
-      didPass
-      aborted
-      yesVotes
-      noVotes
-      proposalIndex
-      votes {
-        member {
-          id
-          shares
-        }
-        uintVote
-      }
-      status @client
-      title @client
-      description @client
-    }
-  }
-`;
 class ProposalDetail extends Component {
   constructor(props) {
     super(props);
