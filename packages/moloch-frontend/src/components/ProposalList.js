@@ -5,7 +5,7 @@ import { Route, Switch, Link } from "react-router-dom";
 import ProposalDetail from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
 import { Query, withApollo } from "react-apollo";
-import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
+import { getProposalDetailsFromOnChain, ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import {
   GET_LOGGED_IN_USER,
   SET_PROPOSAL_ATTRIBUTES,
@@ -14,40 +14,6 @@ import {
 } from "../helpers/graphQlQueries";
 import { convertWeiToDollars } from "../helpers/currency";
 import { utils } from "ethers";
-
-function getProposalCountdownText(proposal) {
-  switch (proposal.status) {
-    case ProposalStatus.InQueue:
-      return (
-        <>
-          <span className="subtext">Voting Begins: </span>
-          <span>
-            {proposal.votingStarts ? proposal.votingStarts : "-"} period{proposal.votingStarts === 1 ? null : "s"}
-          </span>
-        </>
-      );
-    case ProposalStatus.VotingPeriod:
-      return (
-        <>
-          <span className="subtext">Voting Ends: </span>
-          <span>
-            {proposal.votingEnds ? proposal.votingEnds : "-"} period{proposal.votingEnds === 1 ? null : "s"}
-          </span>
-        </>
-      );
-    case ProposalStatus.GracePeriod:
-      return (
-        <>
-          <span className="subtext">Grace Period Ends: </span>
-          <span>
-            {proposal.gracePeriod ? proposal.gracePeriod : "-"} period{proposal.gracePeriod === 1 ? null : "s"}
-          </span>
-        </>
-      );
-    default:
-      return <></>;
-  }
-}
 
 const ProposalCard = ({ proposal, totalShares, shareValue, exchangeRate }) => {
   let id = proposal.id;
@@ -275,16 +241,16 @@ class ProposalList extends React.Component {
 }
 const ProposalListHOC = withApollo(ProposalList);
 
-const ProposalListView = props => {
+const ProposalListView = ({ loggedInUser }) => {
   return (
-    <Query query={GET_LOGGED_IN_USER} variables={{ address: props.loggedInUser }}>
+    <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedInUser }}>
       {({ loading, error, data }) => {
         if (loading) return "Loading...";
         if (error) throw new Error(`Error!: ${error}`);
         return (
           <Switch>
-            <Route exact path="/proposals" render={() => <ProposalListHOC isActive={data.member ? data.member.isActive : false} />} />
-            <Route path="/proposals/:id" component={ProposalDetail} />
+            <Route exact path="/proposals" render={props => <ProposalListHOC {...props} isActive={data.member ? data.member.isActive : false} />} />
+            <Route path="/proposals/:id" render={props => <ProposalDetail {...props} loggedInUser={loggedInUser} />} />
           </Switch>
         );
       }}
