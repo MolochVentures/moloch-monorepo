@@ -67,6 +67,57 @@ export const GET_PROPOSALS = gql`
   }
 `;
 
+export const GET_PROPOSAL_LIST = gql`
+  {
+    proposals(orderBy: proposalIndex, orderDirection: desc) {
+      id
+      timestamp
+      tokenTribute
+      sharesRequested
+      processed
+      didPass
+      aborted
+      yesVotes
+      noVotes
+      proposalIndex
+      status @client
+      title @client
+      description @client
+      gracePeriod @client
+      votingEnds @client
+      votingStarts @client
+      readyForProcessing @client
+    }
+  }
+`;
+
+export const GET_PROPOSAL_DETAIL = gql`
+  query Proposal($id: String!) {
+    proposal(id: $id) {
+      id
+      timestamp
+      tokenTribute
+      sharesRequested
+      processed
+      didPass
+      aborted
+      yesVotes
+      noVotes
+      proposalIndex
+      votes {
+        member {
+          id
+          shares
+        }
+        uintVote
+      }
+      status @client
+      title @client
+      description @client
+    }
+  }
+`;
+
 export const SET_PROPOSAL_ATTRIBUTES = gql`
   mutation SetAttributes(
     $status: String!, 
