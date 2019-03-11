@@ -37,7 +37,7 @@ const client = new ApolloClient({
 
 cache.writeData({
   data: {
-    loggedInUser: "",
+    loggedInUser: window.localStorage.getItem("loggedInUser") || "",
     guildBankValue: "",
     shareValue: "",
     totalShares: "",

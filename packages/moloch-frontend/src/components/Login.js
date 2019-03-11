@@ -34,6 +34,7 @@ export default class Login extends Component {
         }
       });
       this.props.loginComplete()
+      window.localStorage.setItem("loggedInUser", coinbase.toLowerCase())
       this.props.history.push("/");
     }
   };
