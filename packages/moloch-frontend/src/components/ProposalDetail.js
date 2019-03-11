@@ -6,15 +6,11 @@ import hood from "assets/hood.png";
 import ProgressBar from "./ProgressBar";
 
 import { withApollo } from "react-apollo";
-import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
+import { getProposalDetailsFromOnChain, ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import { getMoloch } from "../web3";
-import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES, GET_PROPOSAL_DETAIL } from "../helpers/graphQlQueries";
-
-const formatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  minimumFractionDigits: 2
-});
+import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES, GET_PROPOSAL_DETAIL, GET_METADATA } from "../helpers/graphQlQueries";
+import { convertWeiToDollars } from "../helpers/currency";
+import { utils } from "ethers";
 
 export const Vote = {
   Null: 0, // default value, counted as abstention
@@ -52,7 +48,9 @@ class ProposalDetail extends Component {
         shares: 0,
         isActive: false
       },
-      moloch: null
+      moloch: null,
+      shareValue: "0",
+      exchangeRate: "0"
     };
 
     this.fetchData(props);
@@ -67,40 +65,53 @@ class ProposalDetail extends Component {
 
   async fetchData(props) {
     const { client, loggedInUser } = props;
-    const proposalResult = await client.query({
+
+    const { data: proposalResult } = await client.query({
       query: GET_PROPOSAL_DETAIL,
       variables: { id: this.props.match.params.id }
+    });
+
+    const { data: metadata } = await client.query({
+      query: GET_METADATA
     });
 
     const userResult = await client.query({
       query: GET_LOGGED_IN_USER,
       variables: { address: loggedInUser }
     });
-    this.setState({
-      user: userResult.data.member
-    });
 
-    let proposal = proposalResult.data.proposal
-    if (proposalResult.data.proposal.status === ProposalStatus.Unknown) {
-      const onChain = await getProposalDetailsFromOnChain(proposalResult.data.proposal);
+    let proposal = proposalResult.proposal
+    if (proposal.status === ProposalStatus.Unknown) {
+      const fullProp = await getProposalDetailsFromOnChain(proposal, metadata.currentPeriod);
       const result = await client.mutate({
         mutation: SET_PROPOSAL_ATTRIBUTES,
         variables: {
-          id: proposalResult.data.proposal.id,
-          status: onChain.status,
-          title: onChain.title,
-          description: onChain.description || ""
+          id: proposal.id,
+          status: fullProp.status,
+          title: fullProp.title,
+          description: fullProp.description,
+          gracePeriod: fullProp.gracePeriod,
+          votingEnds: `${fullProp.votingEnds}`,
+          votingStarts: `${fullProp.votingStarts}`,
+          readyForProcessing: fullProp.readyForProcessing
         }
       });
       proposal = {
-        ...proposalResult.data.proposal,
+        ...proposal,
         status: result.data.setAttributes.status,
         title: result.data.setAttributes.title,
-        description: result.data.setAttributes.description
+        description: result.data.setAttributes.description,
+        gracePeriod: result.data.setAttributes.gracePeriod,
+        votingEnds: result.data.setAttributes.votingEnds,
+        votingStarts: result.data.setAttributes.votingStarts,
+        readyForProcessing: result.data.setAttributes.readyForProcessing
       }
     }
     this.setState({
-      proposal
+      proposal,
+      user: userResult.data.member,
+      shareValue: metadata.shareValue,
+      exchangeRate: metadata.exchangeRate
     });
   }
 
@@ -135,24 +146,25 @@ class ProposalDetail extends Component {
   }
 
   render() {
+    const { shareValue, proposal, user, exchangeRate } = this.state
     return (
       <div id="proposal_detail">
         <Grid centered columns={16}>
           <Segment className="transparent box segment" textAlign="center">
             <Grid centered columns={14}>
               <Grid.Column mobile={16} tablet={16} computer={12}>
-                <span className="title">{this.state.proposal.title ? this.state.proposal.title : "N/A"}</span>
+                <span className="title">{proposal.title ? proposal.title : "N/A"}</span>
               </Grid.Column>
             </Grid>
             <Grid centered columns={14}>
               <Grid.Column mobile={16} tablet={16} computer={4}>
-                <div className="subtext description">{this.state.proposal.description ? this.state.proposal.description : "N/A"}</div>
+                <div className="subtext description">{proposal.description ? proposal.description : "N/A"}</div>
                 <Grid columns="equal" className="tokens">
                   <Grid.Row>
                     <Grid.Column className="tributes">
                       <Segment className="pill" textAlign="center">
                         <Icon name="ethereum" />
-                        {this.state.proposal.tokenTribute} ETH
+                        {utils.formatEther(proposal.tokenTribute)} ETH
                       </Segment>
                     </Grid.Column>
                   </Grid.Row>
@@ -160,11 +172,17 @@ class ProposalDetail extends Component {
                 <Grid columns="equal">
                   <Grid.Column>
                     <p className="subtext voting">Shares</p>
-                    <p className="amount">{this.state.proposal.sharesRequested}</p>
+                    <p className="amount">{proposal.sharesRequested}</p>
                   </Grid.Column>
                   <Grid.Column textAlign="right">
                     <p className="subtext">Total USD Value</p>
-                    <p className="amount">{formatter.format(0)}</p>
+                    <p className="amount">{convertWeiToDollars(
+                    utils
+                      .bigNumberify(proposal.sharesRequested)
+                      .mul(shareValue)
+                      .toString(),
+                    exchangeRate
+                  )}</p>
                   </Grid.Column>
                 </Grid>
               </Grid.Column>
@@ -175,45 +193,20 @@ class ProposalDetail extends Component {
 
               <Grid.Column mobile={16} tablet={16} computer={6}>
                 <Grid columns={16}>
-                  <Grid.Column textAlign="left" mobile={16} tablet={8} computer={8} className="pill_column">
+                  <Grid.Column textAlign="center" mobile={16} tablet={16} computer={16} className="pill_column">
                     <span className="pill">
-                      {this.state.proposal.votingEnded ? (
-                        <span className="subtext">Voting Ended</span>
-                      ) : (
-                        <>
-                          <span className="subtext">Voting Ends: </span>
-                          <span>
-                            {this.state.proposal.votingEnds ? this.state.proposal.votingEnds : "-"} period
-                            {this.state.proposal.votingEnds === 1 ? null : "s"}
-                          </span>
-                        </>
-                      )}
-                    </span>
-                  </Grid.Column>
-                  <Grid.Column textAlign="right" className="pill_column grace" mobile={16} tablet={8} computer={8}>
-                    <span className="pill">
-                      {this.state.proposal.graceEnded ? (
-                        <span className="subtext">Grace Ended</span>
-                      ) : (
-                        <>
-                          <span className="subtext">Grace Period Ends: </span>
-                          <span>
-                            {this.state.proposal.gracePeriod ? this.state.proposal.gracePeriod : "-"} period
-                            {this.state.proposal.gracePeriod === 1 ? null : "s"}
-                          </span>
-                        </>
-                      )}
+                      {getProposalCountdownText(proposal)}
                     </span>
                   </Grid.Column>
                 </Grid>
                 <Grid columns={16} className="member_list">
                   <Grid.Row>
                     <Grid.Column mobile={16} tablet={16} computer={16} className="pill_column">
-                      {this.state.proposal.votes && this.state.proposal.votes.length > 0 ? (
+                      {proposal.votes && proposal.votes.length > 0 ? (
                         <Grid>
                           <Grid.Row className="members_row">
                             {/* centered */}
-                            {this.state.proposal.votes.map((vote, idx) => <MemberAvatar member={vote.member.id} shares={vote.member.shares} key={idx} />)}
+                            {proposal.votes.map((vote, idx) => <MemberAvatar member={vote.member.id} shares={vote.member.shares} key={idx} />)}
                           </Grid.Row>
                         </Grid>
                       ) : null}
@@ -222,7 +215,7 @@ class ProposalDetail extends Component {
                 </Grid>
                 <Grid>
                   <Grid.Column>
-                    <ProgressBar yes={parseInt(this.state.proposal.yesVotes)} no={parseInt(this.state.proposal.noVotes)} />
+                    <ProgressBar yes={parseInt(proposal.yesVotes)} no={parseInt(proposal.noVotes)} />
                   </Grid.Column>
                 </Grid>
                 <Grid columns="equal" centered>
@@ -232,7 +225,7 @@ class ProposalDetail extends Component {
                       color="grey"
                       disabled={
                         this.state.userHasVoted ||
-                        this.state.proposal.status !== ProposalStatus.VotingPeriod ||
+                        proposal.status !== ProposalStatus.VotingPeriod ||
                         (!(this.state.user && this.state.user.shares) || !(this.state.user && this.state.user.isActive))
                       }
                       onClick={this.handleNo}
@@ -246,7 +239,7 @@ class ProposalDetail extends Component {
                       color="grey"
                       disabled={
                         this.state.userHasVoted ||
-                        this.state.proposal.status !== ProposalStatus.VotingPeriod ||
+                        proposal.status !== ProposalStatus.VotingPeriod ||
                         (!(this.state.user && this.state.user.shares) || !(this.state.user && this.state.user.isActive))
                       }
                       onClick={this.handleYes}
@@ -255,7 +248,7 @@ class ProposalDetail extends Component {
                     </Button>
                   </Grid.Column>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                    <Button className="btn" color="grey" onClick={this.handleProcess} disabled={!this.state.proposal.readyForProcessing}>
+                    <Button className="btn" color="grey" onClick={this.handleProcess} disabled={!proposal.readyForProcessing}>
                       Process Proposal
                     </Button>
                   </Grid.Column>
