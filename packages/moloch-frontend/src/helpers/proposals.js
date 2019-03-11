@@ -1,3 +1,4 @@
+import React from "react"
 import { getMoloch } from "../web3";
 
 const VOTING_PERIOD_LENGTH = 35;
@@ -13,6 +14,40 @@ export const ProposalStatus = {
   Failed: "Failed",
   ReadyForProcessing: "ReadyForProcessing"
 };
+
+export function getProposalCountdownText(proposal) {
+  switch (proposal.status) {
+    case ProposalStatus.InQueue:
+      return (
+        <>
+          <span className="subtext">Voting Begins: </span>
+          <span>
+            {proposal.votingStarts ? proposal.votingStarts : "-"} period{proposal.votingStarts === 1 ? null : "s"}
+          </span>
+        </>
+      );
+    case ProposalStatus.VotingPeriod:
+      return (
+        <>
+          <span className="subtext">Voting Ends: </span>
+          <span>
+            {proposal.votingEnds ? proposal.votingEnds : "-"} period{proposal.votingEnds === 1 ? null : "s"}
+          </span>
+        </>
+      );
+    case ProposalStatus.GracePeriod:
+      return (
+        <>
+          <span className="subtext">Grace Period Ends: </span>
+          <span>
+            {proposal.gracePeriod ? proposal.gracePeriod : "-"} period{proposal.gracePeriod === 1 ? null : "s"}
+          </span>
+        </>
+      );
+    default:
+      return <></>;
+  }
+}
 
 // fill in missing data from onchain
 export async function getProposalDetailsFromOnChain(proposal, currentPeriod) {
