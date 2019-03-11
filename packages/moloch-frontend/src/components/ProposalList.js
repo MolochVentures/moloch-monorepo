@@ -85,8 +85,6 @@ class ProposalList extends React.Component {
       query: GET_METADATA
     });
 
-    console.log('metadata: ', metadata);
-
     try {
       await this.determineProposalStatuses(client, proposalData.proposals, metadata.currentPeriod);
     } catch (e) {

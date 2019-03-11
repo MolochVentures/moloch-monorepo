@@ -16,7 +16,7 @@ export const Vote = {
   Null: 0, // default value, counted as abstention
   Yes: 1,
   No: 2
-}
+};
 
 const MemberAvatar = ({ member, shares }) => {
   return (
@@ -80,7 +80,7 @@ class ProposalDetail extends Component {
       variables: { address: loggedInUser }
     });
 
-    let proposal = proposalResult.proposal
+    let proposal = proposalResult.proposal;
     if (proposal.status === ProposalStatus.Unknown) {
       const fullProp = await getProposalDetailsFromOnChain(proposal, metadata.currentPeriod);
       const result = await client.mutate({
@@ -105,7 +105,7 @@ class ProposalDetail extends Component {
         votingEnds: result.data.setAttributes.votingEnds,
         votingStarts: result.data.setAttributes.votingStarts,
         readyForProcessing: result.data.setAttributes.readyForProcessing
-      }
+      };
     }
     this.setState({
       proposal,
@@ -125,28 +125,28 @@ class ProposalDetail extends Component {
   }
 
   handleNo = () => {
-    const { proposal, moloch, user } = this.state
-    moloch.methods.submitVote(proposal.proposalIndex, Vote.No).send({ from: user.id })
+    const { proposal, moloch, user } = this.state;
+    moloch.methods.submitVote(proposal.proposalIndex, Vote.No).send({ from: user.id });
     this.setState({
       userHasVoted: true
-    })
-  }
+    });
+  };
 
   handleYes = () => {
-    const { proposal, moloch, user } = this.state
-    moloch.methods.submitVote(proposal.proposalIndex, Vote.Yes).send({ from: user.id })
+    const { proposal, moloch, user } = this.state;
+    moloch.methods.submitVote(proposal.proposalIndex, Vote.Yes).send({ from: user.id });
     this.setState({
       userHasVoted: true
-    })
-  }
+    });
+  };
 
   handleProcess = () => {
-    const { proposal, moloch, user } = this.state
-    moloch.methods.processProposal(proposal.proposalIndex).send({ from: user.id })
-  }
+    const { proposal, moloch, user } = this.state;
+    moloch.methods.processProposal(proposal.proposalIndex).send({ from: user.id });
+  };
 
   render() {
-    const { shareValue, proposal, user, exchangeRate } = this.state
+    const { shareValue, proposal, user, exchangeRate, userHasVoted } = this.state;
     return (
       <div id="proposal_detail">
         <Grid centered columns={16}>
@@ -176,13 +176,15 @@ class ProposalDetail extends Component {
                   </Grid.Column>
                   <Grid.Column textAlign="right">
                     <p className="subtext">Total USD Value</p>
-                    <p className="amount">{convertWeiToDollars(
-                    utils
-                      .bigNumberify(proposal.sharesRequested)
-                      .mul(shareValue)
-                      .toString(),
-                    exchangeRate
-                  )}</p>
+                    <p className="amount">
+                      {convertWeiToDollars(
+                        utils
+                          .bigNumberify(proposal.sharesRequested)
+                          .mul(shareValue)
+                          .toString(),
+                        exchangeRate
+                      )}
+                    </p>
                   </Grid.Column>
                 </Grid>
               </Grid.Column>
@@ -194,9 +196,7 @@ class ProposalDetail extends Component {
               <Grid.Column mobile={16} tablet={16} computer={6}>
                 <Grid columns={16}>
                   <Grid.Column textAlign="center" mobile={16} tablet={16} computer={16} className="pill_column">
-                    <span className="pill">
-                      {getProposalCountdownText(proposal)}
-                    </span>
+                    <span className="pill">{getProposalCountdownText(proposal)}</span>
                   </Grid.Column>
                 </Grid>
                 <Grid columns={16} className="member_list">
@@ -206,7 +206,9 @@ class ProposalDetail extends Component {
                         <Grid>
                           <Grid.Row className="members_row">
                             {/* centered */}
-                            {proposal.votes.map((vote, idx) => <MemberAvatar member={vote.member.id} shares={vote.member.shares} key={idx} />)}
+                            {proposal.votes.map((vote, idx) => (
+                              <MemberAvatar member={vote.member.id} shares={vote.member.shares} key={idx} />
+                            ))}
                           </Grid.Row>
                         </Grid>
                       ) : null}
@@ -224,9 +226,7 @@ class ProposalDetail extends Component {
                       className="btn"
                       color="grey"
                       disabled={
-                        this.state.userHasVoted ||
-                        proposal.status !== ProposalStatus.VotingPeriod ||
-                        (!(this.state.user && this.state.user.shares) || !(this.state.user && this.state.user.isActive))
+                        userHasVoted || proposal.status !== ProposalStatus.VotingPeriod || (!(user && user.shares) || !(user && user.isActive))
                       }
                       onClick={this.handleNo}
                     >
@@ -238,9 +238,7 @@ class ProposalDetail extends Component {
                       className="btn"
                       color="grey"
                       disabled={
-                        this.state.userHasVoted ||
-                        proposal.status !== ProposalStatus.VotingPeriod ||
-                        (!(this.state.user && this.state.user.shares) || !(this.state.user && this.state.user.isActive))
+                        userHasVoted || proposal.status !== ProposalStatus.VotingPeriod || (!(user && user.shares) || !(user && user.isActive))
                       }
                       onClick={this.handleYes}
                     >
