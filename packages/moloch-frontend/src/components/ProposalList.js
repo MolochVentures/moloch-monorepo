@@ -1,13 +1,12 @@
 import React from "react";
-import { Segment, Grid, Button } from "semantic-ui-react";
+import { Segment, Grid, Button, Tab } from "semantic-ui-react";
 import { Route, Switch, Link } from "react-router-dom";
 
 import ProposalDetail from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
 import { Query, withApollo } from "react-apollo";
-import gql from "graphql-tag";
 import { getProposalDetailsFromOnChain, ProposalStatus } from "../helpers/proposals";
-import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES, GET_CURRENT_PERIOD, GET_TOTAL_SHARES, GET_SHARE_VALUE } from "../helpers/graphQlQueries";
+import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES, GET_CURRENT_PERIOD, GET_TOTAL_SHARES, GET_SHARE_VALUE, GET_PROPOSAL_LIST } from "../helpers/graphQlQueries";
 import { currencyFormatter } from "../helpers/currency";
 import { utils } from "ethers";
 
@@ -21,7 +20,7 @@ function getProposalCountdownText(proposal) {
             {proposal.votingStarts ? proposal.votingStarts : "-"} period{proposal.votingStarts === 1 ? null : "s"}
           </span>
         </>
-      )
+      );
     case ProposalStatus.VotingPeriod:
       return (
         <>
@@ -61,7 +60,14 @@ const ProposalCard = ({ proposal, totalShares, shareValue = 0 }) => {
               </Grid.Column>
               <Grid.Column textAlign="center">
                 <p className="subtext">Total Value</p>
-                <p className="amount">{currencyFormatter.format(utils.bigNumberify(proposal.sharesRequested).mul(shareValue).toString())}</p>
+                <p className="amount">
+                  {currencyFormatter.format(
+                    utils
+                      .bigNumberify(proposal.sharesRequested)
+                      .mul(shareValue)
+                      .toString()
+                  )}
+                </p>
               </Grid.Column>
             </Grid.Row>
           </Grid>
@@ -81,29 +87,6 @@ const ProposalCard = ({ proposal, totalShares, shareValue = 0 }) => {
   );
 };
 
-const GET_PROPOSAL_LIST = gql`
-  {
-    proposals(orderBy: proposalIndex, orderDirection: desc) {
-      id
-      timestamp
-      tokenTribute
-      sharesRequested
-      processed
-      didPass
-      aborted
-      yesVotes
-      noVotes
-      proposalIndex
-      status @client
-      title @client
-      description @client
-      gracePeriod @client
-      votingEnds @client
-      votingStarts @client
-      readyForProcessing @client
-    }
-  }
-`;
 class ProposalList extends React.Component {
   constructor(props) {
     super(props);
@@ -157,7 +140,9 @@ class ProposalList extends React.Component {
     }
 
     const fullProps = [];
-    for (const proposal of proposals) {
+
+    // parallelize data fetch
+    await Promise.all(proposals.map(async proposal => {
       if (proposal.status === ProposalStatus.Unknown) {
         const fullProp = await getProposalDetailsFromOnChain(proposal, currentPeriod);
         const result = await client.mutate({
@@ -186,7 +171,7 @@ class ProposalList extends React.Component {
       } else {
         fullProps.push(proposal);
       }
-    }
+    }))
 
     this.setState({
       proposals: fullProps
@@ -196,16 +181,80 @@ class ProposalList extends React.Component {
 
   render() {
     const { isActive } = this.props;
-    const { proposals, totalShares } = this.state;
+    const { proposals, totalShares, loading } = this.state;
     const gracePeriod = proposals.filter(p => p.status === ProposalStatus.GracePeriod);
     const votingPeriod = proposals.filter(p => p.status === ProposalStatus.VotingPeriod);
     const inQueue = proposals.filter(p => p.status === ProposalStatus.InQueue);
     const completed = proposals.filter(
       p => p.status === ProposalStatus.Aborted || p.status === ProposalStatus.Passed || p.status === ProposalStatus.Failed
     );
+
+    const panes = [
+      {
+        menuItem: `Voting Period (${loading ? "..." : votingPeriod.length})`,
+        render: () => (
+          <Tab.Pane attached={false}>
+            {this.state.loading ? (
+              <>Loading proposals...</>
+            ) : (
+              <Grid columns={3}>
+                {votingPeriod.map((p, index) => (
+                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
+                ))}
+              </Grid>
+            )}
+          </Tab.Pane>
+        )
+      },
+      {
+        menuItem: `Grace Period (${loading ? "..." : gracePeriod.length})`,
+        render: () => (
+          <Tab.Pane attached={false}>
+            <Grid columns={3}>
+              {gracePeriod.map((p, index) => (
+                <ProposalCard totalShares={totalShares} proposal={p} key={index} />
+              ))}
+            </Grid>
+          </Tab.Pane>
+        )
+      },
+      {
+        menuItem: `In Queue (${loading ? "..." : inQueue.length})`,
+        render: () => (
+          <Tab.Pane attached={false}>
+            {this.state.loading ? (
+              <>Loading proposals...</>
+            ) : (
+              <Grid columns={3}>
+                {inQueue.map((p, index) => (
+                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
+                ))}
+              </Grid>
+            )}
+          </Tab.Pane>
+        )
+      },
+      {
+        menuItem: `Completed (${loading ? "..." : completed.length})`,
+        render: () => (
+          <Tab.Pane attached={false}>
+            {this.state.loading ? (
+              <>Loading proposals...</>
+            ) : (
+              <Grid columns={3}>
+                {completed.map((p, index) => (
+                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
+                ))}
+              </Grid>
+            )}
+          </Tab.Pane>
+        )
+      }
+    ];
+
     return (
       <div id="proposal_list">
-        <React.Fragment>
+        <>
           <Grid columns={16} verticalAlign="middle">
             <Grid.Column mobile={16} tablet={8} computer={4} textAlign="right" floated="right" className="submit_button">
               <Link to={isActive ? "/proposalsubmission" : "/proposals"} className="link">
@@ -215,69 +264,8 @@ class ProposalList extends React.Component {
               </Link>
             </Grid.Column>
           </Grid>
-          {this.state.loading ? (
-            <>Loading proposals...</>
-          ) : (
-            <>
-              {/* Grace Period */}
-              <Grid columns={16} verticalAlign="middle">
-                <Grid.Column mobile={16} tablet={8} computer={8} textAlign="left">
-                  <p className="subtext">
-                    {gracePeriod.length} Proposal{gracePeriod.length > 1 || gracePeriod.length === 0 ? "s" : ""}
-                  </p>
-                  <p className="title">In Grace Period</p>
-                </Grid.Column>
-              </Grid>
-              <Grid columns={3}>
-                {gracePeriod.map((p, index) => (
-                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
-                ))}
-              </Grid>
-              {/* Voting Period */}
-              <Grid columns={16} verticalAlign="middle">
-                <Grid.Column mobile={16} tablet={8} computer={8} textAlign="left">
-                  <p className="subtext">
-                    {votingPeriod.length} Proposal{votingPeriod.length > 1 || votingPeriod.length === 0 ? "s" : ""}
-                  </p>
-                  <p className="title">In Voting Period</p>
-                </Grid.Column>
-              </Grid>
-              <Grid columns={3}>
-                {votingPeriod.map((p, index) => (
-                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
-                ))}
-              </Grid>
-              {/* In Queue */}
-              <Grid columns={16} verticalAlign="middle">
-                <Grid.Column mobile={16} tablet={8} computer={8} textAlign="left">
-                  <p className="subtext">
-                    {inQueue.length} Proposal{inQueue.length > 1 || inQueue.length === 0 ? "s" : ""}
-                  </p>
-                  <p className="title">In Queue</p>
-                </Grid.Column>
-              </Grid>
-              <Grid columns={3}>
-                {inQueue.map((p, index) => (
-                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
-                ))}
-              </Grid>
-              {/* Completed */}
-              <Grid columns={16} verticalAlign="middle">
-                <Grid.Column mobile={16} tablet={8} computer={8} textAlign="left">
-                  <p className="subtext">
-                    {completed.length} Proposal{completed.length > 1 || completed.length === 0 ? "s" : ""}
-                  </p>
-                  <p className="title">Completed</p>
-                </Grid.Column>
-              </Grid>
-              <Grid columns={3}>
-                {completed.map((p, index) => (
-                  <ProposalCard totalShares={totalShares} proposal={p} key={index} />
-                ))}
-              </Grid>
-            </>
-          )}
-        </React.Fragment>
+          <Tab menu={{ secondary: true, pointing: true }} panes={panes} />
+        </>
       </div>
     );
   }
