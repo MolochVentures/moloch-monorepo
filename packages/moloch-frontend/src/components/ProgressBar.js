@@ -18,8 +18,9 @@ const ProgressBar = ({ yes, no, totalShares }) => {
           top: "0",
           width: "100%"
         }}
+        className={no === 0 ? "hide-bar" : ""}
       />
-      <Progress percent={percentYes} color="green" size="small" />
+      <Progress percent={percentYes} color="green" size="small" className={yes === 0 ? "hide-bar" : ""} />
     </div>
     <Grid columns="equal">
       <Grid.Column floated="left">{yes} Yes Votes</Grid.Column>
