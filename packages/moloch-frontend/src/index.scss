@@ -384,6 +384,21 @@ body {
   .progress .bar {
     border-radius: 20px;
   }
+
+  .ui.pointing.secondary.menu {
+    .item {
+      color: #fff;
+    }
+
+    .active.item {
+      border-color: #fff;
+    }
+  }
+
+  .ui.segment.active.tab {
+    background: transparent;
+    border-width: 0px;
+  }
   
   @media only screen and (min-width: 320px) and (max-width: 374px) {
     .blurred.box { padding: 30px 7px; }
