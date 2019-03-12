@@ -108,7 +108,6 @@ class ProposalDetail extends Component {
       };
     }
 
-    console.log('proposal: ', proposal);
     const userHasVoted = proposal.votes.find(vote => vote.member.id === loggedInUser) ? true : false;
 
     this.setState({
