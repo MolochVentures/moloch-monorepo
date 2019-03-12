@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Grid, Icon, Dropdown, Form, Button } from "semantic-ui-react";
 import { Query, withApollo } from "react-apollo";
 import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
+import { getMoloch } from "../web3";
 
 const MainMenu = props => (
   <div className="dropdownItems">
@@ -30,7 +31,7 @@ const MainMenu = props => (
         <Dropdown.Item
           icon="dollar"
           className="item"
-          content="Rage Quit"
+          content="Ragequit"
           onClick={() => {
             props._handleOpenDropdown();
             props.onLoadWithdrawLootToken();
@@ -45,7 +46,7 @@ const MainMenu = props => (
         className="link"
         onClick={async () => {
           props._handleCloseDropdown();
-          window.localStorage.setItem("loggedInUser", "")
+          window.localStorage.setItem("loggedInUser", "");
           await props.client.resetStore();
         }}
       >
@@ -59,45 +60,92 @@ const MainMenu = props => (
 );
 const MainMenuWrapped = withApollo(MainMenu);
 
-const ChangeDelegateKeyMenu = () => (
-  <div>
-    <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => this.props.onLoadMain()} />
-    <Dropdown.Divider />
-    <Dropdown.Item className="item submenu">
-      <p>
-        <Icon name="key" />
-        Change Delegate Key
-      </p>
-      <Form.Input placeholder="Enter new key address" />
-      <Button>Save</Button>
-    </Dropdown.Item>
-  </div>
-);
+class ChangeDelegateKeyMenu extends React.Component {
+  state = {
+    newDelegateKey: ""
+  }
 
-const WithdrawLootTokenMenu = () => (
-  <div>
-    <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => this.props.onLoadMain()} />
-    <Dropdown.Divider />
-    <Dropdown.Item className="item submenu">
-      <p>
-        <Icon name="dollar" />
-        Rage Quit
-      </p>
-      <Form.Input placeholder="Enter withdrawal address" />
-      <Form.Input placeholder="0" />
-      <Button>Withdraw</Button>
-    </Dropdown.Item>
-  </div>
-);
+  submitChangeDelegateKey = async () => {
+    const { newDelegateKey } = this.state;
+    const { moloch } = this.props
+
+    console.log(`Sending moloch.updateDelegateKey(${newDelegateKey})`);
+
+    const tx = await moloch.updateDelegateKey(newDelegateKey);
+    console.log("tx: ", tx);
+    this._handleCloseDropdown();
+  };
+
+  render() {
+    const { newDelegateKey } = this.state;
+    const { onLoadMain } = this.props
+    return (
+      <div>
+        <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => onLoadMain()} />
+        <Dropdown.Divider />
+        <Dropdown.Item className="item submenu">
+          <p>
+            <Icon name="key" />
+            Change Delegate Key
+          </p>
+          <Form.Input placeholder="Enter new key address" onChange={event => this.setState({ newDelegateKey: event.target })} value={newDelegateKey} />
+          <Button onClick={this.submitChangeDelegateKey}>Save</Button>
+        </Dropdown.Item>
+      </div>
+    );
+  }
+}
+
+class WithdrawLootTokenMenu extends React.Component {
+  state = {
+    ragequitAmount: ""
+  };
+
+  submitRagequit = async () => {
+    const { ragequitAmount } = this.state;
+    const { moloch } = this.props;
+
+    console.log(`Sending moloch.ragequit(${ragequitAmount})`);
+
+    const tx = await moloch.ragequit(ragequitAmount);
+    console.log("tx: ", tx);
+    this._handleCloseDropdown();
+  };
+
+  render() {
+    const { ragequitAmount } = this.state;
+    const { onLoadMain } = this.props
+    return (
+      <div>
+        <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => onLoadMain()} />
+        <Dropdown.Divider />
+        <Dropdown.Item className="item submenu">
+          <p>
+            <Icon name="dollar" />
+            Ragequit
+          </p>
+          <Form.Input
+            placeholder="Number of shares"
+            onChange={event => this.setState({ ragequitAmount: event.target })}
+            value={ragequitAmount}
+          />
+          <Button onClick={this.submitRagequit}>Withdraw</Button>
+        </Dropdown.Item>
+      </div>
+    );
+  }
+}
 
 export default class Header extends Component {
-  constructor(props) {
-    super(props);
+  state = {
+    visibleMenu: "main",
+    visibleRightMenu: false,
+    moloch: {},
+  };
 
-    this.state = {
-      visibleMenu: "main",
-      visibleRightMenu: false
-    };
+  async componentDidMount() {
+    const moloch = await getMoloch();
+    this.setState({ moloch });
   }
 
   _handleOpenDropdown() {
@@ -110,6 +158,7 @@ export default class Header extends Component {
 
   getTopRightMenuContent(member) {
     let topRightMenuContent;
+    const { moloch } = this.state;
     switch (this.state.visibleMenu) {
       case "main":
         topRightMenuContent = (
@@ -129,6 +178,7 @@ export default class Header extends Component {
               this._handleOpenDropdown();
               this.setState({ visibleMenu: "main" });
             }}
+            moloch={moloch}
           />
         );
         break;
@@ -139,6 +189,7 @@ export default class Header extends Component {
               this._handleOpenDropdown();
               this.setState({ visibleMenu: "main" });
             }}
+            moloch={moloch}
           />
         );
         break;
@@ -149,7 +200,7 @@ export default class Header extends Component {
   }
 
   render() {
-    const { loggedInUser } = this.props
+    const { loggedInUser } = this.props;
     return (
       <Query query={GET_MEMBER_DETAIL} variables={{ address: loggedInUser }}>
         {({ loading, error, data }) => {
@@ -187,7 +238,7 @@ export default class Header extends Component {
                       open={this.state.visibleRightMenu}
                       onBlur={() => this._handleCloseDropdown()}
                       onFocus={() => this._handleOpenDropdown()}
-                      text={`${loggedInUser.substring(0,6)}...`}
+                      text={`${loggedInUser.substring(0, 6)}...`}
                     >
                       <Dropdown.Menu className="menu blurred" direction="left">
                         {this.getTopRightMenuContent(data.member)}
