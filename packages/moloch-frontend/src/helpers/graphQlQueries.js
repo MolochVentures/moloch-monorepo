@@ -31,7 +31,7 @@ export const GET_CURRENT_PERIOD = gql`
 `;
 
 export const GET_METADATA = gql`
-  query GetMetadata {
+  query Metadata {
     exchangeRate @client
     totalShares @client
     guildBankValue @client
@@ -40,12 +40,14 @@ export const GET_METADATA = gql`
   }
 `;
 
-export const GET_LOGGED_IN_USER = gql`
-  query User($address: String!) {
+export const GET_MEMBER_DETAIL = gql`
+  query Member($address: String!) {
     member(id: $address) {
       id
       shares
       isActive
+      tokenTribute
+      delegateKey
     }
   }
 `;
@@ -80,6 +82,31 @@ export const GET_PROPOSAL_LIST = gql`
       yesVotes
       noVotes
       proposalIndex
+      status @client
+      title @client
+      description @client
+      gracePeriod @client
+      votingEnds @client
+      votingStarts @client
+      readyForProcessing @client
+    }
+  }
+`;
+
+export const GET_PROPOSAL_HISTORY = gql`
+  query Proposals($id: String!) {
+    proposals {
+      id
+      timestamp
+      tokenTribute
+      sharesRequested
+      processed
+      didPass
+      aborted
+      votes(where: { memberAddress: $id }) {
+        id
+        uintVote
+      }
       status @client
       title @client
       description @client
