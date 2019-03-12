@@ -10,7 +10,7 @@ let token
 let medianizer
 let eth
 
-export async function initMetmask() {
+export async function initMetamask() {
   if (!window.ethereum && !window.web3) {
     // Non-DApp browsers won't work.
     alert("This page must be viewed on a Web3 enabled browser.");
@@ -21,6 +21,7 @@ export async function initMetmask() {
       await window.ethereum.enable()
       let web3Provider = window['ethereum'] || window.web3.currentProvider
       eth = new ethers.providers.Web3Provider(web3Provider);
+      eth = eth.getSigner()
       localStorage.setItem("loginType", "metamask");
     } catch (error) {
       alert("Metamask needs to be enabled.")
@@ -49,7 +50,7 @@ export function initGnosisSafe() {
 export async function initMoloch() {
   if (!eth) {
     if (localStorage.getItem("loginType") === "metamask") {
-      eth = await initMetmask()
+      eth = await initMetamask()
     } else if (localStorage.getItem("loginType") === "gnosis") {
       eth = await initGnosisSafe()
     } else {
@@ -64,7 +65,7 @@ export async function initMoloch() {
 export async function initToken() {
   if (!eth) {
     if (localStorage.getItem("loginType") === "metamask") {
-      eth = await initMetmask()
+      eth = await initMetamask()
     } else if (localStorage.getItem("loginType") === "gnosis") {
       eth = await initGnosisSafe()
     } else {
@@ -86,7 +87,7 @@ export async function initMedianizer() {
 export async function getWeb3() {
   if (!eth) {
     if (localStorage.getItem("loginType") === "metamask") {
-      eth = await initMetmask()
+      eth = await initMetamask()
     } else if (localStorage.getItem("loginType") === "gnosis") {
       eth = await initGnosisSafe()
     } else {
