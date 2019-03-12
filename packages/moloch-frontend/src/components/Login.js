@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Grid, Button } from "semantic-ui-react";
 
-import { initMetmask, initGnosisSafe } from "../web3";
+import { initGnosisSafe, initMetamask } from "../web3";
 import { ApolloConsumer } from "react-apollo";
 
 let coinbase;
@@ -9,7 +9,7 @@ let coinbase;
 export default class Login extends Component {
   // bypass auth for now
   loginWithMetamask = async client => {
-    const web3 = await initMetmask();
+    const web3 = await initMetamask();
     if (!web3) {
       return
     }
