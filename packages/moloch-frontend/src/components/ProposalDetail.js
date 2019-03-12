@@ -107,21 +107,17 @@ class ProposalDetail extends Component {
         readyForProcessing: result.data.setAttributes.readyForProcessing
       };
     }
+
+    console.log('proposal: ', proposal);
+    const userHasVoted = proposal.votes.find(vote => vote.member.id === loggedInUser) ? true : false;
+
     this.setState({
       proposal,
       user: userResult.data.member,
       shareValue: metadata.shareValue,
-      exchangeRate: metadata.exchangeRate
+      exchangeRate: metadata.exchangeRate,
+      userHasVoted
     });
-  }
-
-  loadData(responseJson) {
-    let proposal = responseJson.items.member ? responseJson.items.member : responseJson.items;
-    this.setState({ proposal_detail: proposal, isAccepted: proposal.status === "accepted" || proposal.status === "active" ? true : false });
-    let voters = this.state.proposal_detail.voters ? this.state.proposal_detail.voters : [];
-    let userHasVoted = voters.find(voter => voter.member === this.state.loggedUser) ? true : false;
-    this.setState({ userHasVoted });
-    this.calculateVote(voters);
   }
 
   handleNo = async () => {
