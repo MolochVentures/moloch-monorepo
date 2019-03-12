@@ -124,29 +124,31 @@ class ProposalDetail extends Component {
     this.calculateVote(voters);
   }
 
-  handleNo = () => {
-    const { proposal, moloch, user } = this.state;
-    moloch.methods.submitVote(proposal.proposalIndex, Vote.No).send({ from: user.id });
+  handleNo = async () => {
+    const { proposal, moloch } = this.state;
+    await moloch.submitVote(proposal.proposalIndex, Vote.No);
     this.setState({
       userHasVoted: true
     });
   };
 
-  handleYes = () => {
-    const { proposal, moloch, user } = this.state;
-    moloch.methods.submitVote(proposal.proposalIndex, Vote.Yes).send({ from: user.id });
+  handleYes = async () => {
+    const { proposal, moloch } = this.state;
+    await moloch.submitVote(proposal.proposalIndex, Vote.Yes);
     this.setState({
       userHasVoted: true
     });
   };
 
-  handleProcess = () => {
-    const { proposal, moloch, user } = this.state;
-    moloch.methods.processProposal(proposal.proposalIndex).send({ from: user.id });
+  handleProcess = async () => {
+    const { proposal, moloch } = this.state;
+    await moloch.processProposal(proposal.proposalIndex);
   };
 
   render() {
     const { shareValue, proposal, user, exchangeRate, userHasVoted } = this.state;
+
+    const cannotVote = userHasVoted || proposal.status !== ProposalStatus.VotingPeriod || (!(user && user.shares) || !(user && user.isActive));
     return (
       <div id="proposal_detail">
         <Grid centered columns={16}>
@@ -222,26 +224,12 @@ class ProposalDetail extends Component {
                 </Grid>
                 <Grid columns="equal" centered>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                    <Button
-                      className="btn"
-                      color="grey"
-                      disabled={
-                        userHasVoted || proposal.status !== ProposalStatus.VotingPeriod || (!(user && user.shares) || !(user && user.isActive))
-                      }
-                      onClick={this.handleNo}
-                    >
+                    <Button className="btn" color="grey" disabled={cannotVote} onClick={this.handleNo}>
                       Vote No
                     </Button>
                   </Grid.Column>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                    <Button
-                      className="btn"
-                      color="grey"
-                      disabled={
-                        userHasVoted || proposal.status !== ProposalStatus.VotingPeriod || (!(user && user.shares) || !(user && user.isActive))
-                      }
-                      onClick={this.handleYes}
-                    >
+                    <Button className="btn" color="grey" disabled={cannotVote} onClick={this.handleYes}>
                       Vote Yes
                     </Button>
                   </Grid.Column>
