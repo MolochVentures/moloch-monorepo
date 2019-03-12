@@ -8,7 +8,7 @@ import hood from "assets/hood.png";
 
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
-import { GET_LOGGED_IN_USER, GET_MEMBERS } from "../helpers/graphQlQueries";
+import { GET_MEMBERS, GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 
 const MemberAvatar = ({ address, shares }) => (
   <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={address}>
@@ -21,7 +21,7 @@ const MemberAvatar = ({ address, shares }) => (
 );
 
 const LoggedInUser = props => (
-  <Query query={GET_LOGGED_IN_USER} variables={{ address: props.loggedInUser }}>
+  <Query query={GET_MEMBER_DETAIL} variables={{ address: props.loggedInUser }}>
     {({ loading, error, data }) => {
       if (loading) return "...";
       if (error) throw new Error(`Error!: ${error}`);
