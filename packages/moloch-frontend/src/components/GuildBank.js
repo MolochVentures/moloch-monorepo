@@ -2,7 +2,7 @@ import React from "react";
 import { Grid, Image, Divider, Button } from "semantic-ui-react";
 import ethereumIcon from "assets/ethereumIcon.png";
 import { Query } from "react-apollo";
-import { GET_LOGGED_IN_USER } from "../helpers/graphQlQueries";
+import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 
 const currencies = [
   {
@@ -31,7 +31,7 @@ export default class GuildBank extends React.Component {
 
   render() {
     return (
-      <Query query={GET_LOGGED_IN_USER} variables={{ address: this.props.loggedInUser }}>
+      <Query query={GET_MEMBER_DETAIL} variables={{ address: this.props.loggedInUser }}>
         {({ loading, error, data }) => {
           if (loading) return "Loading...";
           if (error) throw new Error(`Error!: ${error}`);

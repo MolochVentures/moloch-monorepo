@@ -8,7 +8,7 @@ import ProgressBar from "./ProgressBar";
 import { withApollo } from "react-apollo";
 import { getProposalDetailsFromOnChain, ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import { getMoloch } from "../web3";
-import { GET_LOGGED_IN_USER, SET_PROPOSAL_ATTRIBUTES, GET_PROPOSAL_DETAIL, GET_METADATA } from "../helpers/graphQlQueries";
+import { SET_PROPOSAL_ATTRIBUTES, GET_PROPOSAL_DETAIL, GET_METADATA, GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 import { convertWeiToDollars } from "../helpers/currency";
 import { utils } from "ethers";
 
@@ -76,7 +76,7 @@ class ProposalDetail extends Component {
     });
 
     const userResult = await client.query({
-      query: GET_LOGGED_IN_USER,
+      query: GET_MEMBER_DETAIL,
       variables: { address: loggedInUser }
     });
 

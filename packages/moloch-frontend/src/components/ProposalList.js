@@ -7,10 +7,10 @@ import ProgressBar from "./ProgressBar";
 import { Query, withApollo } from "react-apollo";
 import { getProposalDetailsFromOnChain, ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import {
-  GET_LOGGED_IN_USER,
   SET_PROPOSAL_ATTRIBUTES,
   GET_PROPOSAL_LIST,
-  GET_METADATA
+  GET_METADATA,
+  GET_MEMBER_DETAIL
 } from "../helpers/graphQlQueries";
 import { convertWeiToDollars } from "../helpers/currency";
 import { utils } from "ethers";
@@ -241,7 +241,7 @@ const ProposalListHOC = withApollo(ProposalList);
 
 const ProposalListView = ({ loggedInUser }) => {
   return (
-    <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedInUser }}>
+    <Query query={GET_MEMBER_DETAIL} variables={{ address: loggedInUser }}>
       {({ loading, error, data }) => {
         if (loading) return "Loading...";
         if (error) throw new Error(`Error!: ${error}`);

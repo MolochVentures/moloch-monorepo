@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { Grid, Icon, Dropdown, Form, Button } from "semantic-ui-react";
 import { Query, withApollo } from "react-apollo";
-import { GET_LOGGED_IN_USER } from "../helpers/graphQlQueries";
+import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 
 const MainMenu = props => (
   <div className="dropdownItems">
@@ -151,7 +151,7 @@ export default class Header extends Component {
   render() {
     const { loggedInUser } = this.props
     return (
-      <Query query={GET_LOGGED_IN_USER} variables={{ address: loggedInUser }}>
+      <Query query={GET_MEMBER_DETAIL} variables={{ address: loggedInUser }}>
         {({ loading, error, data }) => {
           if (loading) return "Loading...";
           if (error) throw new Error(`Error!: ${error}`);
