@@ -48,9 +48,8 @@ export default class HomePage extends React.Component {
   handleChange = e => this.setState({ approval: e.target.value });
 
   handleSubmit = () => {
-    const { loggedInUser } = this.props;
     const { approval, token } = this.state;
-    token.methods.approve(process.env.REACT_APP_MOLOCH_ADDRESS, approval).send({ from: loggedInUser });
+    token.approve(process.env.REACT_APP_MOLOCH_ADDRESS, approval);
   };
 
   render() {
