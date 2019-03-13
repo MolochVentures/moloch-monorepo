@@ -1,18 +1,12 @@
 import React from "react";
-import { Segment, Grid, Button, Tab } from "semantic-ui-react";
+import { Segment, Grid, Button, Tab, Icon } from "semantic-ui-react";
 import { Route, Switch, Link } from "react-router-dom";
 
 import ProposalDetail from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
 import { Query, withApollo } from "react-apollo";
 import { getProposalDetailsFromOnChain, ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
-import {
-  SET_PROPOSAL_ATTRIBUTES,
-  GET_PROPOSAL_LIST,
-  GET_METADATA,
-  GET_MEMBER_DETAIL
-} from "../helpers/graphQlQueries";
-import { convertWeiToDollars } from "../helpers/currency";
+import { SET_PROPOSAL_ATTRIBUTES, GET_PROPOSAL_LIST, GET_METADATA, GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 import { utils } from "ethers";
 
 const ProposalCard = ({ proposal, totalShares, shareValue, exchangeRate }) => {
@@ -30,16 +24,8 @@ const ProposalCard = ({ proposal, totalShares, shareValue, exchangeRate }) => {
                 <p className="amount">{proposal.sharesRequested}</p>
               </Grid.Column>
               <Grid.Column textAlign="center">
-                <p className="subtext">Total Value</p>
-                <p className="amount">
-                  {convertWeiToDollars(
-                    utils
-                      .bigNumberify(proposal.sharesRequested)
-                      .mul(shareValue)
-                      .toString(),
-                    exchangeRate
-                  )}
-                </p>
+                <p className="subtext">Tribute <Icon name="ethereum" /></p>
+                <p className="amount">{utils.formatEther(proposal.tokenTribute)}</p>
               </Grid.Column>
             </Grid.Row>
           </Grid>
