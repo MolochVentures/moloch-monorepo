@@ -56,20 +56,20 @@ self.__precacheManifest = [
     "url": "/moloch-monorepo/static/media/icons.faff9214.woff"
   },
   {
-    "revision": "e8c322de9658cbeb8a774b6624167c2c",
-    "url": "/moloch-monorepo/static/media/brand-icons.e8c322de.woff2"
-  },
-  {
     "revision": "a046592bac8f2fd96e994733faf3858c",
     "url": "/moloch-monorepo/static/media/brand-icons.a046592b.woff"
   },
   {
-    "revision": "8e3c7f5520f5ae906c6cf6d7f3ddcd19",
-    "url": "/moloch-monorepo/static/media/icons.8e3c7f55.eot"
+    "revision": "e8c322de9658cbeb8a774b6624167c2c",
+    "url": "/moloch-monorepo/static/media/brand-icons.e8c322de.woff2"
   },
   {
     "revision": "b87b9ba532ace76ae9f6edfe9f72ded2",
     "url": "/moloch-monorepo/static/media/icons.b87b9ba5.ttf"
+  },
+  {
+    "revision": "8e3c7f5520f5ae906c6cf6d7f3ddcd19",
+    "url": "/moloch-monorepo/static/media/icons.8e3c7f55.eot"
   },
   {
     "revision": "13db00b7a34fee4d819ab7f9838cc428",
