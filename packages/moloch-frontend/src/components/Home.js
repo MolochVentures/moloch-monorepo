@@ -66,9 +66,9 @@ export default class HomePage extends React.Component {
             <div id="homepage">
               <Grid columns={16} verticalAlign="middle">
                 <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
-                  <Link to="/guildbank" className="text_link">
-                    <Statistic inverted label="Guild Bank Value" value={convertWeiToDollars(guildBankValue, exchangeRate)} />
-                  </Link>
+                  {/* <Link to="/guildbank" className="text_link"> */}
+                  <Statistic inverted label="Guild Bank Value" value={convertWeiToDollars(guildBankValue, exchangeRate)} />
+                  {/* </Link> */}
                 </Grid.Column>
                 <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons">
                   <NumMembers members={members.data.members} />
