@@ -73,7 +73,6 @@ class ChangeDelegateKeyMenu extends React.Component {
 
     const tx = await moloch.updateDelegateKey(newDelegateKey);
     console.log("tx: ", tx);
-    this._handleCloseDropdown();
   };
 
   render() {
@@ -88,7 +87,7 @@ class ChangeDelegateKeyMenu extends React.Component {
             <Icon name="key" />
             Change Delegate Key
           </p>
-          <Form.Input placeholder="Enter new key address" onChange={event => this.setState({ newDelegateKey: event.target })} value={newDelegateKey} />
+          <Form.Input placeholder="Enter new key address" onChange={event => this.setState({ newDelegateKey: event.target.value })} value={newDelegateKey} />
           <Button onClick={this.submitChangeDelegateKey}>Save</Button>
         </Dropdown.Item>
       </div>
@@ -109,7 +108,6 @@ class WithdrawLootTokenMenu extends React.Component {
 
     const tx = await moloch.ragequit(ragequitAmount);
     console.log("tx: ", tx);
-    this._handleCloseDropdown();
   };
 
   render() {
@@ -126,7 +124,7 @@ class WithdrawLootTokenMenu extends React.Component {
           </p>
           <Form.Input
             placeholder="Number of shares"
-            onChange={event => this.setState({ ragequitAmount: event.target })}
+            onChange={event => this.setState({ ragequitAmount: event.target.value })}
             value={ragequitAmount}
           />
           <Button onClick={this.submitRagequit}>Withdraw</Button>
