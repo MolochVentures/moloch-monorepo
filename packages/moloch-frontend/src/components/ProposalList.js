@@ -135,12 +135,16 @@ class ProposalList extends React.Component {
   render() {
     const { isActive } = this.props;
     const { proposals, totalShares, loading, shareValue, exchangeRate } = this.state;
-    const gracePeriod = proposals.filter(p => p.status === ProposalStatus.GracePeriod);
-    const votingPeriod = proposals.filter(p => p.status === ProposalStatus.VotingPeriod);
-    const inQueue = proposals.filter(p => p.status === ProposalStatus.InQueue);
+
+    // sort in descending order of index
+    const sortProposals = (a, b) => b.proposalIndex - a.proposalIndex
+
+    const gracePeriod = proposals.filter(p => p.status === ProposalStatus.GracePeriod).sort(sortProposals);
+    const votingPeriod = proposals.filter(p => p.status === ProposalStatus.VotingPeriod).sort(sortProposals);
+    const inQueue = proposals.filter(p => p.status === ProposalStatus.InQueue).sort(sortProposals);
     const completed = proposals.filter(
       p => p.status === ProposalStatus.Aborted || p.status === ProposalStatus.Passed || p.status === ProposalStatus.Failed
-    );
+    ).sort(sortProposals);
 
     const panes = [
       {
