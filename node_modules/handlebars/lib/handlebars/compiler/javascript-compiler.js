@@ -13,9 +13,6 @@ JavaScriptCompiler.prototype = {
   // PUBLIC API: You can override these methods in a subclass to provide
   // alternative compiled forms for name lookup and buffering semantics
   nameLookup: function(parent, name/* , type*/) {
-    if (name === 'constructor') {
-      return ['(', parent, '.propertyIsEnumerable(\'constructor\') ? ', parent, '.constructor : undefined', ')'];
-    }
     if (JavaScriptCompiler.isValidJavaScriptVariableName(name)) {
       return [parent, '.', name];
     } else {
