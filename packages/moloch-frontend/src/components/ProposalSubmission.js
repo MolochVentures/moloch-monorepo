@@ -3,23 +3,19 @@ import { Button, Divider, Form, Grid, Input, Segment, GridColumn } from "semanti
 import { getMoloch } from "../web3";
 
 export default class ProposalSubmission extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      address: props.loggedInUser,
-      title: "",
-      description: "",
-      shares: "",
-      tribute: "", // TODO: this will be calculated with the blockchain
-      fieldValidationErrors: { title: "", description: "", assets: "", shares: "" },
-      titleValid: false,
-      descriptionValid: false,
-      tributeValid: false,
-      sharesValid: false,
-      formValid: false
-    };
-  }
+  state = {
+    address: this.props.loggedInUser,
+    title: "",
+    description: "",
+    shares: "",
+    tribute: "", // TODO: this will be calculated with the blockchain
+    fieldValidationErrors: { title: "", description: "", assets: "", shares: "" },
+    titleValid: false,
+    descriptionValid: false,
+    tributeValid: false,
+    sharesValid: false,
+    formValid: false
+  };
 
   async componentDidMount() {
     const moloch = await getMoloch();
@@ -64,7 +60,8 @@ export default class ProposalSubmission extends Component {
   }
 
   validateForm = () => {
-    this.setState({ formValid: this.state.titleValid && this.state.descriptionValid && this.state.sharesValid });
+    const { titleValid, descriptionValid, sharesValid } = this.state
+    this.setState({ formValid: titleValid && descriptionValid && sharesValid });
   }
 
   handleInput = (event) => {
