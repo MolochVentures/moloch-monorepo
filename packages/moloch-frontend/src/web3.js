@@ -21,7 +21,6 @@ export async function initMetamask() {
       await window.ethereum.enable()
       let web3Provider = window['ethereum'] || window.web3.currentProvider
       eth = new ethers.providers.Web3Provider(web3Provider);
-      eth = eth.getSigner()
       localStorage.setItem("loginType", "metamask");
     } catch (error) {
       alert("Metamask needs to be enabled.")
@@ -57,7 +56,7 @@ export async function initMoloch() {
       throw new Error("Not logged in with web3.")
     }
   }
-  moloch = new ethers.Contract(process.env.REACT_APP_MOLOCH_ADDRESS, molochAbi, eth)
+  moloch = new ethers.Contract(process.env.REACT_APP_MOLOCH_ADDRESS, molochAbi, eth.getSigner())
   // moloch = new web3.eth.Contract(molochAbi, process.env.REACT_APP_MOLOCH_ADDRESS)
   return moloch
 }
@@ -73,7 +72,7 @@ export async function initToken() {
     }
   }
   // token = new web3.eth.Contract(erc20Abi, process.env.REACT_APP_TOKEN_ADDRESS)
-  token = new ethers.Contract(process.env.REACT_APP_TOKEN_ADDRESS, erc20Abi, eth)
+  token = new ethers.Contract(process.env.REACT_APP_TOKEN_ADDRESS, erc20Abi, eth.getSigner())
   return token
 }
 
