@@ -56,6 +56,10 @@ export const GET_MEMBERS = gql`
   {
     members(where: { shares_gt: 0, isActive: true }) {
       id
+      shares
+      isActive
+      tokenTribute
+      delegateKey
     }
   }
 `;

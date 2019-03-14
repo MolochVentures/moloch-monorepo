@@ -6,7 +6,7 @@ import ProposalDetail from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
 import { Query, withApollo } from "react-apollo";
 import { getProposalDetailsFromOnChain, ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
-import { SET_PROPOSAL_ATTRIBUTES, GET_PROPOSAL_LIST, GET_METADATA, GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
+import { SET_PROPOSAL_ATTRIBUTES, GET_PROPOSAL_LIST, GET_METADATA, GET_MEMBERS } from "../helpers/graphQlQueries";
 import { utils } from "ethers";
 
 const ProposalCard = ({ proposal, totalShares, shareValue, exchangeRate }) => {
@@ -230,13 +230,14 @@ const ProposalListHOC = withApollo(ProposalList);
 
 const ProposalListView = ({ loggedInUser }) => {
   return (
-    <Query query={GET_MEMBER_DETAIL} variables={{ address: loggedInUser }}>
+    <Query query={GET_MEMBERS}>
       {({ loading, error, data }) => {
         if (loading) return "Loading...";
         if (error) throw new Error(`Error!: ${error}`);
+        const member = data.members.find(m => m.delegateKey === loggedInUser)
         return (
           <Switch>
-            <Route exact path="/proposals" render={props => <ProposalListHOC {...props} isActive={data.member ? data.member.isActive : false} />} />
+            <Route exact path="/proposals" render={props => <ProposalListHOC {...props} isActive={member ? member.isActive : false} />} />
             <Route path="/proposals/:id" render={props => <ProposalDetail {...props} loggedInUser={loggedInUser} />} />
           </Switch>
         );

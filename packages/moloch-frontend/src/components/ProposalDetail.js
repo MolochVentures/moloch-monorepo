@@ -8,7 +8,7 @@ import ProgressBar from "./ProgressBar";
 import { withApollo } from "react-apollo";
 import { getProposalDetailsFromOnChain, ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import { getMoloch } from "../web3";
-import { SET_PROPOSAL_ATTRIBUTES, GET_PROPOSAL_DETAIL, GET_METADATA, GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
+import { SET_PROPOSAL_ATTRIBUTES, GET_PROPOSAL_DETAIL, GET_METADATA, GET_MEMBERS } from "../helpers/graphQlQueries";
 import { convertWeiToDollars } from "../helpers/currency";
 import { utils } from "ethers";
 
@@ -76,9 +76,10 @@ class ProposalDetail extends Component {
     });
 
     const userResult = await client.query({
-      query: GET_MEMBER_DETAIL,
-      variables: { address: loggedInUser }
+      query: GET_MEMBERS
     });
+
+    const member = userResult.data.members.find(m => m.delegateKey === loggedInUser)
 
     let proposal = proposalResult.proposal;
     if (proposal.status === ProposalStatus.Unknown) {
@@ -112,7 +113,7 @@ class ProposalDetail extends Component {
 
     this.setState({
       proposal,
-      user: userResult.data.member,
+      user: member,
       shareValue: metadata.shareValue,
       exchangeRate: metadata.exchangeRate,
       userHasVoted

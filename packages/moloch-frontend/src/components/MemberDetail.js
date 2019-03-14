@@ -9,7 +9,7 @@ import { Vote } from "./ProposalDetail";
 import { utils } from "ethers";
 import { convertWeiToDollars } from "../helpers/currency";
 import { adopt } from "react-adopt";
-import { GET_MEMBER_DETAIL, GET_METADATA, GET_PROPOSAL_HISTORY } from "../helpers/graphQlQueries";
+import { GET_METADATA, GET_PROPOSAL_HISTORY, GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 
 const Composed = adopt({
   memberDetail: ({ render, name }) => (
@@ -19,7 +19,7 @@ const Composed = adopt({
   ),
   metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>,
   proposalHistory: ({ render, name }) => (
-    <Query query={GET_PROPOSAL_HISTORY} variables={{ id: name }}>
+    <Query query={GET_PROPOSAL_HISTORY} variables={{ id: "blah" }}>
       {render}
     </Query>
   )
@@ -47,7 +47,7 @@ const MemberDetail = ({ loggedInUser, member, shareValue, exchangeRate }) => (
     </Grid>
     <Grid>
       <Grid.Column textAlign="center" className="avatar">
-        <Image centered src={loggedInUser === member.id ? bull : hood} size="tiny" />
+        <Image centered src={loggedInUser === member.id || loggedInUser === member.delegateKey ? bull : hood} size="tiny" />
       </Grid.Column>
     </Grid>
     <p className="subtext">Tribute</p>
@@ -132,7 +132,11 @@ const ProposalDetail = ({ proposals }) => (
           );
         })
       ) : (
-        <>This member hasn't voted on any proposals yet.</>
+        <Grid.Row verticalAlign="middle">
+          <Grid.Column textAlign="center">
+            This member hasn't voted on any proposals yet.
+          </Grid.Column>
+        </Grid.Row>
       )}
     </Grid>
   </Segment>
@@ -146,8 +150,8 @@ const MemberDetailView = props => (
       if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
       if (proposalHistory.error) throw new Error(`Error!: ${proposalHistory.error}`);
 
-      console.log('proposalHistory.data.proposals: ', proposalHistory.data.proposals);
-      const proposalsMemberVotedOn = proposalHistory.data.proposals.filter(proposal => proposal.votes.length > 0)
+      console.log("proposalHistory.data.proposals: ", proposalHistory.data.proposals);
+      const proposalsMemberVotedOn = proposalHistory.data.proposals.filter(proposal => proposal.votes.length > 0);
       return (
         <div id="member_detail">
           <p className="title"> {props.match.params.name} </p>
