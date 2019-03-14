@@ -14,7 +14,6 @@ export const resolvers = {
   Mutation: {
     setAttributes: (_, variables, { cache }) => {
       const id = `Proposal:${variables.id}`;
-      console.log('variables: ', variables);
       const fragment = gql`
         fragment getMeta on Proposal {
           status

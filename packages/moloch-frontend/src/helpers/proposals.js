@@ -134,11 +134,7 @@ export async function getProposalDetailsFromOnChain(proposal, currentPeriod) {
     proposal.description = details.description || "";
   } catch (e) {
     console.log(
-      `Could not parse details from proposal.proposalIndex: ${proposal.proposalIndex} proposalFromChain: ${JSON.stringify(
-        proposalFromChain,
-        null,
-        2
-      )}`
+      `Could not parse details from proposal.proposalIndex: ${proposal.proposalIndex} proposalFromChain.details: ${proposalFromChain.details}`
     );
     proposal.title = proposalFromChain.details || ""
     proposal.description = ""
