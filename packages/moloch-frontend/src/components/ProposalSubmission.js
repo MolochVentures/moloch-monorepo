@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import { Button, Divider, Form, Grid, Input, Segment, GridColumn } from "semantic-ui-react";
 import { getMoloch } from "../web3";
+import { utils } from "ethers";
 
 export default class ProposalSubmission extends Component {
   state = {
-    address: this.props.loggedInUser,
+    address: "",
     title: "",
     description: "",
     shares: "",
@@ -14,6 +15,7 @@ export default class ProposalSubmission extends Component {
     descriptionValid: false,
     tributeValid: false,
     sharesValid: false,
+    addressValid: false,
     formValid: false
   };
 
@@ -25,13 +27,19 @@ export default class ProposalSubmission extends Component {
   }
 
   validateField = (fieldName, value) => {
-    let { fieldValidationErrors, titleValid, descriptionValid, tributeValid, sharesValid } = this.state
+    let { fieldValidationErrors, titleValid, descriptionValid, tributeValid, sharesValid, addressValid } = this.state
 
     switch (fieldName) {
       case "title":
         titleValid = value !== "";
         fieldValidationErrors.title = titleValid ? "" : "Title is invalid";
         break;
+      case "address":
+        addressValid = utils.isHexString(value)
+        console.log('utils.isHexString(value): ', utils.isHexString(value));
+        console.log('value: ', value);
+        fieldValidationErrors.address = addressValid ? "" : "Address is invalid";
+        break
       case "description":
         descriptionValid = value !== "";
         fieldValidationErrors.description = descriptionValid ? "" : "Description is invalid";
@@ -41,7 +49,7 @@ export default class ProposalSubmission extends Component {
         fieldValidationErrors.shares = sharesValid ? "" : "Shares is invalid";
         break;
       case "tribute":
-        sharesValid = value > 0;
+        tributeValid = value > 0;
         fieldValidationErrors.tribute = tributeValid ? "" : "Tribute is invalid";
         break;
       default:
@@ -53,15 +61,16 @@ export default class ProposalSubmission extends Component {
         titleValid,
         descriptionValid,
         tributeValid,
-        sharesValid
+        sharesValid,
+        addressValid
       },
       this.validateForm
     );
   }
 
   validateForm = () => {
-    const { titleValid, descriptionValid, sharesValid } = this.state
-    this.setState({ formValid: titleValid && descriptionValid && sharesValid });
+    const { titleValid, descriptionValid, sharesValid, tributeValid, addressValid } = this.state
+    this.setState({ formValid: titleValid && descriptionValid && sharesValid && tributeValid && addressValid});
   }
 
   handleInput = (event) => {
@@ -75,9 +84,10 @@ export default class ProposalSubmission extends Component {
   handleSubmit = async () => {
     const { moloch, formValid, address, title, description, shares, tribute } = this.state
 
-    if (formValid) {
+    if (formValid || true) {
       try {
-        await moloch.submitProposal(address, tribute, shares, JSON.stringify({ title, description }))
+        const tx = await moloch.submitProposal(address, tribute, shares, JSON.stringify({ title, description }))
+        console.log('tx: ', tx);
       } catch (e) {
         console.error(e);
         alert("Error processing proposal");
@@ -88,7 +98,7 @@ export default class ProposalSubmission extends Component {
   }
 
   render() {
-    const { shares, tribute, title, description } = this.state
+    const { shares, tribute, title, description, address } = this.state
     return (
       <div id="proposal_submission">
         <Form>
@@ -110,6 +120,14 @@ export default class ProposalSubmission extends Component {
             <Grid.Row stretched>
               <Grid.Column mobile={16} tablet={16} computer={12}>
                 <Segment className="blurred box">
+                  <Form.Input
+                    name="address"
+                    label="Beneficiary or Applicant"
+                    placeholder="Address"
+                    fluid
+                    onChange={this.handleInput}
+                    value={address}
+                  />
                   <Form.Input
                     name="shares"
                     label="Shares Requested"
