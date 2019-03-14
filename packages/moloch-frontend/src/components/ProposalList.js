@@ -71,18 +71,13 @@ class ProposalList extends React.Component {
       query: GET_METADATA
     });
 
-    try {
-      await this.determineProposalStatuses(client, proposalData.proposals, metadata.currentPeriod);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      this.setState({
-        loading: false,
-        totalShares: +metadata.totalShares,
-        shareValue: metadata.shareValue,
-        exchangeRate: metadata.exchangeRate
-      });
-    }
+    await this.determineProposalStatuses(client, proposalData.proposals, metadata.currentPeriod);
+    this.setState({
+      loading: false,
+      totalShares: +metadata.totalShares,
+      shareValue: metadata.shareValue,
+      exchangeRate: metadata.exchangeRate
+    });
   }
 
   determineProposalStatuses = async (client, proposals, currentPeriod) => {
@@ -96,30 +91,34 @@ class ProposalList extends React.Component {
     await Promise.all(
       proposals.map(async proposal => {
         if (proposal.status === ProposalStatus.Unknown) {
-          const fullProp = await getProposalDetailsFromOnChain(proposal, currentPeriod);
-          const result = await client.mutate({
-            mutation: SET_PROPOSAL_ATTRIBUTES,
-            variables: {
-              id: proposal.id,
-              status: fullProp.status,
-              title: fullProp.title,
-              description: fullProp.description,
-              gracePeriod: fullProp.gracePeriod,
-              votingEnds: `${fullProp.votingEnds}`,
-              votingStarts: `${fullProp.votingStarts}`,
-              readyForProcessing: fullProp.readyForProcessing
-            }
-          });
-          fullProps.push({
-            ...proposal,
-            status: result.data.setAttributes.status,
-            title: result.data.setAttributes.title,
-            description: result.data.setAttributes.description,
-            gracePeriod: result.data.setAttributes.gracePeriod,
-            votingEnds: result.data.setAttributes.votingEnds,
-            votingStarts: result.data.setAttributes.votingStarts,
-            readyForProcessing: result.data.setAttributes.readyForProcessing
-          });
+          try {
+            const fullProp = await getProposalDetailsFromOnChain(proposal, currentPeriod);
+            const result = await client.mutate({
+              mutation: SET_PROPOSAL_ATTRIBUTES,
+              variables: {
+                id: proposal.id,
+                status: fullProp.status,
+                title: fullProp.title,
+                description: fullProp.description,
+                gracePeriod: fullProp.gracePeriod,
+                votingEnds: `${fullProp.votingEnds}`,
+                votingStarts: `${fullProp.votingStarts}`,
+                readyForProcessing: fullProp.readyForProcessing
+              }
+            });
+            fullProps.push({
+              ...proposal,
+              status: result.data.setAttributes.status,
+              title: result.data.setAttributes.title,
+              description: result.data.setAttributes.description,
+              gracePeriod: result.data.setAttributes.gracePeriod,
+              votingEnds: result.data.setAttributes.votingEnds,
+              votingStarts: result.data.setAttributes.votingStarts,
+              readyForProcessing: result.data.setAttributes.readyForProcessing
+            });
+          } catch (e) {
+            console.error(e)
+          }
         } else {
           fullProps.push(proposal);
         }
