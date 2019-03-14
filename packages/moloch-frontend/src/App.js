@@ -133,7 +133,7 @@ class App extends React.Component {
   render() {
     return this.state.restored ? (
       <ApolloProvider client={client}>
-        <Router>
+        <Router basename={process.env.PUBLIC_URL}>
           <Composed>
             {({ loggedInUserData, metadata }) => {
               return (
