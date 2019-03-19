@@ -32,6 +32,7 @@ NOTE: every time ganache-cli is restarted, the name of the network (dev in this 
 1. go to moloch-monorepo/packages/moloch
 2. run `npm install`
 3. run `truffle test test/single.js`
+4. Copy `moloch.address` from the output of the test. You'll need it in the next step!
 
 **run subgraph**
 1. go to moloch-monorepo/packages/moloch-subgraph
