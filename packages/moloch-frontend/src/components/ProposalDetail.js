@@ -230,7 +230,7 @@ class ProposalDetail extends Component {
                     </Button>
                   </Grid.Column>
                   <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                    <Button className="btn" color="grey" onClick={this.handleProcess} disabled={!proposal.readyForProcessing}>
+                    <Button className="btn" color="grey" onClick={this.handleProcess} disabled={proposal.status !== ProposalStatus.ReadyForProcessing}>
                       Process Proposal
                     </Button>
                   </Grid.Column>
