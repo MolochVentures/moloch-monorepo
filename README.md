@@ -30,7 +30,8 @@ NOTE: every time ganache-cli is restarted, the name of the network (dev in this 
 
 **run truffle tests to populate graph and update contract address**
 1. go to moloch-monorepo/packages/moloch
-2. run `truffle test test/single.js`
+2. run `npm install`
+3. run `truffle test test/single.js`
 
 **run subgraph**
 1. run `yarn codegen`
