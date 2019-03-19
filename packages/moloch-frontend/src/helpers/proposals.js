@@ -50,6 +50,8 @@ export function getProposalCountdownText(proposal) {
       return (<span className="subtext">Failed</span>);
     case ProposalStatus.Aborted:
       return (<span className="subtext">Aborted</span>);
+    case ProposalStatus.ReadyForProcessing:
+    return (<span className="subtext">Ready For Processing</span>);
     default:
       return <></>;
   }
@@ -120,7 +122,6 @@ export async function getProposalDetailsFromOnChain(proposal, currentPeriod) {
 
   proposal.readyForProcessing = false;
   if (
-    proposal.status === ProposalStatus.InQueue &&
     passedVotingAndGrace(proposal) &&
     enoughPassingVotes(proposal) &&
     proposal.lastProposalProcessed
