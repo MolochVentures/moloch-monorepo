@@ -142,7 +142,14 @@ export default class Header extends Component {
   };
 
   async componentDidMount() {
-    const moloch = await getMoloch();
+    let moloch;
+    try {
+      moloch = await getMoloch();
+    } catch (err) {
+        // NOTE: When the header is loaded for the first time, loading Moloch
+        // will fail as no values have been set in local storage. The user can
+        // set them on the home screen
+    }
     this.setState({ moloch });
   }
 
