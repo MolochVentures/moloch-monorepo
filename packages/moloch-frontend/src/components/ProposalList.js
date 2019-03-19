@@ -141,11 +141,28 @@ class ProposalList extends React.Component {
     const gracePeriod = proposals.filter(p => p.status === ProposalStatus.GracePeriod).sort(sortProposals);
     const votingPeriod = proposals.filter(p => p.status === ProposalStatus.VotingPeriod).sort(sortProposals);
     const inQueue = proposals.filter(p => p.status === ProposalStatus.InQueue).sort(sortProposals);
+    const readyForProcessing = proposals.filter(p => p.status === ProposalStatus.ReadyForProcessing).sort(sortProposals);
     const completed = proposals.filter(
       p => p.status === ProposalStatus.Aborted || p.status === ProposalStatus.Passed || p.status === ProposalStatus.Failed
     ).sort(sortProposals);
 
     const panes = [
+      {
+        menuItem: `Ready For Processing (${loading ? "..." : readyForProcessing.length})`,
+        render: () => (
+          <Tab.Pane attached={false}>
+            {this.state.loading ? (
+              <>Loading proposals...</>
+            ) : (
+              <Grid columns={3}>
+                {readyForProcessing.map((p, index) => (
+                  <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={totalShares} proposal={p} key={index} />
+                ))}
+              </Grid>
+            )}
+          </Tab.Pane>
+        )
+      },
       {
         menuItem: `Voting Period (${loading ? "..." : votingPeriod.length})`,
         render: () => (
