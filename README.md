@@ -34,10 +34,11 @@ NOTE: every time ganache-cli is restarted, the name of the network (dev in this 
 3. run `truffle test test/single.js`
 
 **run subgraph**
-1. run `yarn codegen`
-2. go to  moloch-monorepo/packages/moloch-subgraph/subgraph.yaml
-3. update dataSources.source.address with output from running test. You should see something like this "moloch.address 0x9463308d1C9032cC464E395e54E55EDA77495c00". cut and paste the address, "0x9463308d1C9032cC464E395e54E55EDA77495c00" in this example.
-4. run `graph deploy moloch --debug --ipfs http://localhost:5001/ --node http://127.0.0.1:8020`
+1. go to moloch-monorepo/packages/moloch-subgraph
+2. run `yarn codegen`
+3. go to  moloch-monorepo/packages/moloch-subgraph/subgraph.yaml
+4. update dataSources.source.address with output from running test. You should see something like this "moloch.address 0x9463308d1C9032cC464E395e54E55EDA77495c00". cut and paste the address, "0x9463308d1C9032cC464E395e54E55EDA77495c00" in this example.
+5. run `graph deploy moloch --debug --ipfs http://localhost:5001/ --node http://127.0.0.1:8020`
 
 **run front-end**
 1. open new terminal window
