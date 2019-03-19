@@ -10,6 +10,7 @@ import { utils } from "ethers";
 import { convertWeiToDollars } from "../helpers/currency";
 import { adopt } from "react-adopt";
 import { GET_METADATA, GET_PROPOSAL_HISTORY, GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
+import { getProposalCountdownText } from "../helpers/proposals";
 
 const Composed = adopt({
   memberDetail: ({ render, name }) => (
@@ -19,7 +20,7 @@ const Composed = adopt({
   ),
   metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>,
   proposalHistory: ({ render, name }) => (
-    <Query query={GET_PROPOSAL_HISTORY} variables={{ id: "blah" }}>
+    <Query query={GET_PROPOSAL_HISTORY} variables={{ id: name }}>
       {render}
     </Query>
   )
@@ -104,27 +105,27 @@ const ProposalDetail = ({ proposals }) => (
             <React.Fragment key={idx}>
               <Grid.Row verticalAlign="middle">
                 <Grid.Column textAlign="center">
-                  {p.votes.uintVote === Vote.Yes && <Label className="dot" circular color="green" empty />}
+                  {p.uintVote === Vote.Yes && <Label className="dot" circular color="green" empty />}
                   {/* TODO: is this right? */}
-                  {(p.votes.uintVote === Vote.No || p.votes.uintVote === Vote.Null) && <Label className="dot" circular color="red" empty />}
-                  {p.title}
+                  {(p.uintVote === Vote.No || p.votes.uintVote === Vote.Null) && <Label className="dot" circular color="red" empty />}
+                  {p.proposal.title}
                 </Grid.Column>
                 <Grid.Column textAlign="center">
-                  <p className="subtext date">{new Date(p.timestamp * 1000).toISOString().slice(0, 10)}</p>
+                  <p className="subtext date">{new Date(p.proposal.timestamp * 1000).toISOString().slice(0, 10)}</p>
                 </Grid.Column>
                 <Grid.Column textAlign="center">
-                  <p className="subtext date">{p.sharesRequested}</p>
+                  <p className="subtext date">{p.proposal.sharesRequested}</p>
                 </Grid.Column>
                 <Grid.Column textAlign="center">
-                  <p className="subtext date">{utils.formatEther(p.tokenTribute)}</p>
+                  <p className="subtext date">{utils.formatEther(p.proposal.tokenTribute)}</p>
                 </Grid.Column>
                 <Grid.Column textAlign="center">
-                  <Header as="p" color={p.vote === 2 ? "green" : p.vote === 1 ? "red" : null}>
-                    {p.vote === 2 ? "Y" : p.vote === 1 ? "N" : ""}
+                  <Header as="p" color={p.uintVote === Vote.Yes ? "green" : p.uintVote === Vote.No ? "red" : null}>
+                    {p.uintVote === Vote.Yes ? "Y" : p.uintVote === Vote.No ? "N" : ""}
                   </Header>
                 </Grid.Column>
                 <Grid.Column textAlign="center">
-                  <p className="subtext date">{p.aborted ? "Aborted" : p.processed ? (p.didPass ? "Passed" : "Failed") : "Pending"}</p>
+                  <p className="subtext date">{getProposalCountdownText(p.proposal)}</p>
                 </Grid.Column>
               </Grid.Row>
               <Divider />
@@ -150,8 +151,7 @@ const MemberDetailView = props => (
       if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
       if (proposalHistory.error) throw new Error(`Error!: ${proposalHistory.error}`);
 
-      console.log("proposalHistory.data.proposals: ", proposalHistory.data.proposals);
-      const proposalsMemberVotedOn = proposalHistory.data.proposals.filter(proposal => proposal.votes.length > 0);
+      console.log("proposalHistory.data: ", proposalHistory.data);
       return (
         <div id="member_detail">
           <p className="title"> {props.match.params.name} </p>
@@ -167,7 +167,7 @@ const MemberDetailView = props => (
                 />
               </Grid.Column>
               <Grid.Column mobile={16} tablet={16} computer={10} className="proposals">
-                <ProposalDetail proposals={proposalsMemberVotedOn} />
+                <ProposalDetail proposals={proposalHistory.data.votes} />
               </Grid.Column>
             </Grid.Row>
           </Grid>

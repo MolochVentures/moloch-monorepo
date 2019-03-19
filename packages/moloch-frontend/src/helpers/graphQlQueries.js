@@ -99,25 +99,27 @@ export const GET_PROPOSAL_LIST = gql`
 
 export const GET_PROPOSAL_HISTORY = gql`
   query Proposals($id: String!) {
-    proposals(first: 100) {
-      id
-      timestamp
-      tokenTribute
-      sharesRequested
-      processed
-      didPass
-      aborted
-      votes(first: 100, where: { memberAddress: $id }) {
+    votes(first: 100, where: { memberAddress: $id }) {
+      uintVote
+      proposal {
         id
-        uintVote
+        timestamp
+        tokenTribute
+        sharesRequested
+        processed
+        didPass
+        aborted
+        yesVotes
+        noVotes
+        proposalIndex
+        status @client
+        title @client
+        description @client
+        gracePeriod @client
+        votingEnds @client
+        votingStarts @client
+        readyForProcessing @client
       }
-      status @client
-      title @client
-      description @client
-      gracePeriod @client
-      votingEnds @client
-      votingStarts @client
-      readyForProcessing @client
     }
   }
 `;
