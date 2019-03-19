@@ -54,7 +54,7 @@ export const GET_MEMBER_DETAIL = gql`
 
 export const GET_MEMBERS = gql`
   {
-    members(where: { shares_gt: 0, isActive: true }) {
+    members(first: 100, where: { shares_gt: 0, isActive: true }) {
       id
       shares
       isActive
@@ -67,7 +67,7 @@ export const GET_MEMBERS = gql`
 // TODO filter this to get current proposals?
 export const GET_PROPOSALS = gql`
   {
-    proposals {
+    proposals(first: 100) {
       id
     }
   }
@@ -75,7 +75,7 @@ export const GET_PROPOSALS = gql`
 
 export const GET_PROPOSAL_LIST = gql`
   {
-    proposals(orderBy: proposalIndex, orderDirection: desc) {
+    proposals(first: 100, orderBy: proposalIndex, orderDirection: desc) {
       id
       timestamp
       tokenTribute
@@ -99,7 +99,7 @@ export const GET_PROPOSAL_LIST = gql`
 
 export const GET_PROPOSAL_HISTORY = gql`
   query Proposals($id: String!) {
-    proposals {
+    proposals(first: 100) {
       id
       timestamp
       tokenTribute
@@ -107,7 +107,7 @@ export const GET_PROPOSAL_HISTORY = gql`
       processed
       didPass
       aborted
-      votes(where: { memberAddress: $id }) {
+      votes(first: 100, where: { memberAddress: $id }) {
         id
         uintVote
       }
@@ -135,7 +135,7 @@ export const GET_PROPOSAL_DETAIL = gql`
       yesVotes
       noVotes
       proposalIndex
-      votes {
+      votes(first: 100) {
         member {
           id
           shares
