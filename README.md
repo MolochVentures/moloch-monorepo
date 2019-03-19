@@ -4,6 +4,8 @@
 1. npm install -g ganache-cli
 2. ganache-cli -m \"fetch local valve black attend double eye excite planet primary install allow\" -a 100
 
+**install graph-cli**
+1. npm install -g @graphprotocol/graph-cli
 
 **install graph protocol**
 1. clone repo https://github.com/graphprotocol/graph-node
@@ -16,6 +18,7 @@ with :
 `ethereum: "dev:http://host.docker.internal:8545"` 
 
 NOTE: every time ganache-cli is restarted, the name of the network (dev in this reference) needs to be changed with a new name
+
 3. run `docker-compose up`
 
 **create subgraph**
