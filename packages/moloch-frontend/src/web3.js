@@ -13,7 +13,7 @@ let eth
 export async function initMetamask() {
   if (!window.ethereum && !window.web3) {
     // Non-DApp browsers won't work.
-    alert("This page must be viewed on a Web3 enabled browser.");
+    alert("Web3 not detected.");
   }
   if (window.ethereum) {
     // Modern DApp browsers need to enable Metamask access.
@@ -46,44 +46,7 @@ export function initGnosisSafe() {
   return eth
 }
 
-export async function initMoloch() {
-  if (!eth) {
-    if (localStorage.getItem("loginType") === "metamask") {
-      eth = await initMetamask()
-    } else if (localStorage.getItem("loginType") === "gnosis") {
-      eth = await initGnosisSafe()
-    } else {
-      throw new Error("Not logged in with web3.")
-    }
-  }
-  moloch = new ethers.Contract(process.env.REACT_APP_MOLOCH_ADDRESS, molochAbi, eth.getSigner())
-  // moloch = new web3.eth.Contract(molochAbi, process.env.REACT_APP_MOLOCH_ADDRESS)
-  return moloch
-}
-
-export async function initToken() {
-  if (!eth) {
-    if (localStorage.getItem("loginType") === "metamask") {
-      eth = await initMetamask()
-    } else if (localStorage.getItem("loginType") === "gnosis") {
-      eth = await initGnosisSafe()
-    } else {
-      throw new Error("Not logged in with web3.")
-    }
-  }
-  // token = new web3.eth.Contract(erc20Abi, process.env.REACT_APP_TOKEN_ADDRESS)
-  token = new ethers.Contract(process.env.REACT_APP_TOKEN_ADDRESS, erc20Abi, eth.getSigner())
-  return token
-}
-
-export async function initMedianizer() {
-  // pull from mainnet
-  let provider = ethers.getDefaultProvider();
-  medianizer = new ethers.Contract(process.env.REACT_APP_MEDIANIZER_ADDRESS, medianizerAbi, provider)
-  return medianizer
-}
-
-export async function getWeb3() {
+export async function getEthSigner() {
   if (!eth) {
     if (localStorage.getItem("loginType") === "metamask") {
       eth = await initMetamask()
@@ -96,16 +59,46 @@ export async function getWeb3() {
   return eth
 }
 
-export async function getMoloch() {
-  if (!moloch) {
-    await initMoloch()
+export async function initMoloch(loggedInUser) {
+  if (loggedInUser) {
+    eth = await getEthSigner()
+    moloch = new ethers.Contract(process.env.REACT_APP_MOLOCH_ADDRESS, molochAbi, eth.getSigner())
+  } else {
+    const provider = ethers.getDefaultProvider();
+    moloch = new ethers.Contract(process.env.REACT_APP_MOLOCH_ADDRESS, molochAbi, provider)
   }
   return moloch
 }
 
-export async function getToken() {
+export async function initToken(loggedInUser) {
+  if (loggedInUser) {
+    eth = await getEthSigner()
+    token = new ethers.Contract(process.env.REACT_APP_TOKEN_ADDRESS, erc20Abi, eth.getSigner())
+  } else {
+    const provider = ethers.getDefaultProvider();
+    token = new ethers.Contract(process.env.REACT_APP_TOKEN_ADDRESS, erc20Abi, provider)
+  }
+  // token = new web3.eth.Contract(erc20Abi, process.env.REACT_APP_TOKEN_ADDRESS)
+  return token
+}
+
+export async function initMedianizer(loggedInUser) {
+  // pull from mainnet
+  let provider = ethers.getDefaultProvider();
+  medianizer = new ethers.Contract(process.env.REACT_APP_MEDIANIZER_ADDRESS, medianizerAbi, provider)
+  return medianizer
+}
+
+export async function getMoloch(loggedInUser) {
+  if (!moloch) {
+    await initMoloch(loggedInUser)
+  }
+  return moloch
+}
+
+export async function getToken(loggedInUser) {
   if (!token) {
-    await initToken()
+    await initToken(loggedInUser)
   }
   return token
 }

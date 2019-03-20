@@ -83,11 +83,6 @@ class App extends React.Component {
       query: IS_LOGGED_IN
     });
 
-    if (!loggedInUser) {
-      console.log(`User not logged in, cannot fetch`);
-      return;
-    }
-
     let {
       data: { exchangeRate, totalShares, currentPeriod, guildBankValue, shareValue }
     } = await client.query({
@@ -95,7 +90,7 @@ class App extends React.Component {
     });
 
     if (!exchangeRate || refetch) {
-      const medianizer = await getMedianizer();
+      const medianizer = await getMedianizer(loggedInUser);
       exchangeRate = (await medianizer.compute())[0];
       exchangeRate = utils.bigNumberify(exchangeRate);
     }
@@ -139,39 +134,21 @@ class App extends React.Component {
               return (
                 <>
                   <Background />
-                  <Header loggedInUser={loggedInUserData.data.loggedInUser} />
+                  <Header loggedInUser={loggedInUserData.data.loggedInUser} client={client} populateData={this.populateData} />
                   <Wrapper>
                     <Switch>
                       <Route
                         exact
                         path="/"
-                        render={props =>
-                          loggedInUserData.data.loggedInUser ? (
-                            <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
-                          ) : (
-                            <Redirect to={{ pathname: "/login" }} />
-                          )
-                        }
+                        render={props => <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
                       />
                       <Route
                         path="/proposals"
-                        render={props =>
-                          loggedInUserData.data.loggedInUser ? (
-                            <ProposalList {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
-                          ) : (
-                            <Redirect to={{ pathname: "/login" }} />
-                          )
-                        }
+                        render={props =><ProposalList {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
                       />
                       <Route
                         path="/members"
-                        render={props =>
-                          loggedInUserData.data.loggedInUser ? (
-                            <MemberList {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
-                          ) : (
-                            <Redirect to={{ pathname: "/login" }} />
-                          )
-                        }
+                        render={props => <MemberList {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
                       />
                       <Route
                         path="/proposalsubmission"
@@ -179,29 +156,12 @@ class App extends React.Component {
                           loggedInUserData.data.loggedInUser ? (
                             <ProposalSubmission {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
                           ) : (
-                            <Redirect to={{ pathname: "/login" }} />
+                            <Redirect to={{ pathname: "/" }} />
                           )
                         }
                       />
                       <Route
-                        path="/guildbank"
-                        render={props =>
-                          loggedInUserData.data.loggedInUser ? (
-                            <GuildBank {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
-                          ) : (
-                            <Redirect to={{ pathname: "/login" }} />
-                          )
-                        }
-                      />
-                      <Route path="/login" render={props => <Login {...props} loginComplete={() => this.populateData(true)} />} />
-                      <Route
-                        render={props =>
-                          loggedInUserData.data.loggedInUser ? (
-                            <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
-                          ) : (
-                            <Redirect to={{ pathname: "/login" }} />
-                          )
-                        }
+                        component={props => <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
                       />
                     </Switch>
                   </Wrapper>

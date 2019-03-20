@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { Grid, Icon, Dropdown, Form, Button } from "semantic-ui-react";
 import { Query, withApollo } from "react-apollo";
 import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
-import { getMoloch } from "../web3";
+import { getMoloch, initMetamask, initGnosisSafe } from "../web3";
+import ProposalDetail from "./ProposalDetail";
 
 const MainMenu = props => (
   <div className="dropdownItems">
@@ -48,6 +49,7 @@ const MainMenu = props => (
           props._handleCloseDropdown();
           window.localStorage.setItem("loggedInUser", "");
           await props.client.resetStore();
+          await props.populateData(true);
         }}
       >
         <p>
@@ -142,14 +144,8 @@ export default class Header extends Component {
   };
 
   async componentDidMount() {
-    let moloch;
-    try {
-      moloch = await getMoloch();
-    } catch (err) {
-        // NOTE: When the header is loaded for the first time, loading Moloch
-        // will fail as no values have been set in local storage. The user can
-        // set them on the home screen
-    }
+    const { loggedInUser } = this.props;
+    const moloch = await getMoloch(loggedInUser);
     this.setState({ moloch });
   }
 
@@ -161,45 +157,99 @@ export default class Header extends Component {
     this.setState({ visibleRightMenu: false });
   }
 
+  logIn = async (method) => {
+    const { loggedInUser } = this.props;
+    const { client } = this.props
+    let eth
+    if (method === 'metamask') {
+      eth = await initMetamask();
+    } else if (method === 'gnosis') {
+      eth = await initGnosisSafe()
+    } else {
+      throw new Error('Unsupported Web3 login method')
+    }
+    if (!eth) {
+      return
+    }
+
+    const coinbase = (await eth.listAccounts())[0];
+
+    if (!coinbase) {
+      alert("Could not retrieve address from Gnosis Safe/MetaMask, is it configured and this domain whitelisted?");
+    } else {
+      // Try getting a user by their public address.
+      client.writeData({
+        data: {
+          loggedInUser: coinbase.toLowerCase()
+        }
+      });
+      window.localStorage.setItem("loggedInUser", coinbase.toLowerCase())
+    }
+    
+    const moloch = await getMoloch(loggedInUser);
+    this.setState({ moloch });
+  }
+
   getTopRightMenuContent(member) {
+    const { loggedInUser } = this.props;
     let topRightMenuContent;
     const { moloch } = this.state;
-    switch (this.state.visibleMenu) {
-      case "main":
-        topRightMenuContent = (
-          <MainMenuWrapped
-            member={member}
-            _handleOpenDropdown={() => this._handleOpenDropdown()}
-            _handleCloseDropdown={() => this._handleCloseDropdown()}
-            onLoadChangeDelegateKey={() => this.setState({ visibleMenu: "changeDelegateKey" })}
-            onLoadWithdrawLootToken={() => this.setState({ visibleMenu: "withdrawLootToken" })}
+    if (loggedInUser) {
+      switch (this.state.visibleMenu) {
+        case "main":
+          topRightMenuContent = (
+            <MainMenuWrapped
+              member={member}
+              _handleOpenDropdown={() => this._handleOpenDropdown()}
+              _handleCloseDropdown={() => this._handleCloseDropdown()}
+              onLoadChangeDelegateKey={() => this.setState({ visibleMenu: "changeDelegateKey" })}
+              onLoadWithdrawLootToken={() => this.setState({ visibleMenu: "withdrawLootToken" })}
+            />
+          );
+          break;
+        case "changeDelegateKey":
+          topRightMenuContent = (
+            <ChangeDelegateKeyMenu
+              onLoadMain={() => {
+                this._handleOpenDropdown();
+                this.setState({ visibleMenu: "main" });
+              }}
+              moloch={moloch}
+            />
+          );
+          break;
+        case "withdrawLootToken":
+          topRightMenuContent = (
+            <WithdrawLootTokenMenu
+              onLoadMain={() => {
+                this._handleOpenDropdown();
+                this.setState({ visibleMenu: "main" });
+              }}
+              moloch={moloch}
+            />
+          );
+          break;
+        default:
+          break;
+      }
+    } else {
+      topRightMenuContent = (
+        <>
+          <Dropdown.Item
+            icon="user"
+            className="item"
+            content="Log In With Metamask"
+            onClick={() => this.logIn('metamask')}
           />
-        );
-        break;
-      case "changeDelegateKey":
-        topRightMenuContent = (
-          <ChangeDelegateKeyMenu
-            onLoadMain={() => {
-              this._handleOpenDropdown();
-              this.setState({ visibleMenu: "main" });
-            }}
-            moloch={moloch}
+          <Dropdown.Divider />
+          <Dropdown.Item
+            icon="user"
+            className="item"
+            content="Log In With Gnosis Safe"
+            onClick={() => this.logIn('gnosis')}
           />
-        );
-        break;
-      case "withdrawLootToken":
-        topRightMenuContent = (
-          <WithdrawLootTokenMenu
-            onLoadMain={() => {
-              this._handleOpenDropdown();
-              this.setState({ visibleMenu: "main" });
-            }}
-            moloch={moloch}
-          />
-        );
-        break;
-      default:
-        break;
+        </>
+      );
     }
     return topRightMenuContent;
   }
@@ -211,10 +261,11 @@ export default class Header extends Component {
         {({ loading, error, data }) => {
           if (loading) return "Loading...";
           if (error) throw new Error(`Error!: ${error}`);
+          console.log('data: ', data);
           return (
             <div id="header">
               <Grid columns="equal" verticalAlign="middle">
-                {this.props.loggedInUser ? (
+                {loggedInUser ? (
                   <Grid.Column textAlign="left" className="menu">
                     {/* <Dropdown icon="bars">
                 <Dropdown.Menu className="menu blurred" direction="right">
@@ -236,21 +287,19 @@ export default class Header extends Component {
                 <Grid.Column textAlign="center" className="logo">
                   <Link to="/">MOLOCH</Link>
                 </Grid.Column>
-                {this.props.loggedInUser ? (
                   <Grid.Column textAlign="right" className="dropdown">
                     <Dropdown
                       className="right_dropdown"
                       open={this.state.visibleRightMenu}
                       onBlur={() => this._handleCloseDropdown()}
                       onFocus={() => this._handleOpenDropdown()}
-                      text={`${loggedInUser.substring(0, 6)}...`}
+                      text={loggedInUser ? `${loggedInUser.substring(0, 6)}...` : 'Web3 Login'}
                     >
                       <Dropdown.Menu className="menu blurred" direction="left">
                         {this.getTopRightMenuContent(data.member)}
                       </Dropdown.Menu>
                     </Dropdown>
                   </Grid.Column>
-                ) : null}
               </Grid>
             </div>
           );

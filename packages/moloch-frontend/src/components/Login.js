@@ -18,6 +18,9 @@ export default class Login extends Component {
 
   loginWithGnosisSafe = async client => {
     const web3 = initGnosisSafe();
+    if (!web3) {
+      return
+    }
     await this.doLoginBypassAuth(client, web3);
   };
 

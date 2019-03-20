@@ -3,6 +3,7 @@ import { getMoloch } from "../web3";
 
 const VOTING_PERIOD_LENGTH = 35;
 const GRACE_PERIOD_LENGTH = 35;
+const PERIOD_DURATION = 17280;
 
 export const ProposalStatus = {
   Unknown: "Unknown",
@@ -15,6 +16,21 @@ export const ProposalStatus = {
   ReadyForProcessing: "ReadyForProcessing"
 };
 
+export function periodsToTime(periods) {
+  const seconds = PERIOD_DURATION * periods
+
+  const days = Math.floor((seconds % 31536000) / 86400); 
+  const hours = Math.floor(((seconds % 31536000) % 86400) / 3600);
+  const minutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
+
+  let string
+  string = days ? `${days} days` : string
+  string = hours ? `${string} ${hours} hours` : string
+  string = minutes ? `${string} ${minutes} minutes` : string
+
+  return string
+}
+
 export function getProposalCountdownText(proposal) {
   switch (proposal.status) {
     case ProposalStatus.InQueue:
@@ -22,7 +38,7 @@ export function getProposalCountdownText(proposal) {
         <>
           <span className="subtext">Voting Begins: </span>
           <span>
-            {proposal.votingStarts ? proposal.votingStarts : "-"} period{proposal.votingStarts === 1 ? null : "s"}
+            {proposal.votingStarts ? periodsToTime(proposal.votingStarts) : "-"}
           </span>
         </>
       );
@@ -31,7 +47,7 @@ export function getProposalCountdownText(proposal) {
         <>
           <span className="subtext">Voting Ends: </span>
           <span>
-            {proposal.votingEnds ? proposal.votingEnds : "-"} period{proposal.votingEnds === 1 ? null : "s"}
+            {proposal.votingEnds ? periodsToTime(proposal.votingEnds) : "-"}
           </span>
         </>
       );
@@ -40,7 +56,7 @@ export function getProposalCountdownText(proposal) {
         <>
           <span className="subtext">Grace Period Ends: </span>
           <span>
-            {proposal.gracePeriod ? proposal.gracePeriod : "-"} period{proposal.gracePeriod === 1 ? null : "s"}
+            {proposal.gracePeriod ? periodsToTime(proposal.gracePeriod) : "-"}
           </span>
         </>
       );
