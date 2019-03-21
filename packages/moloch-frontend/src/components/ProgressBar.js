@@ -2,7 +2,7 @@ import React from 'react';
 import { Progress, Grid } from 'semantic-ui-react';
 
 
-const ProgressBar = ({ yes, no, totalShares }) => {
+const ProgressBar = ({ yes, no }) => {
   const total = yes + no
   const percentYes = yes === 0 ? 0 : Math.round((yes / total) * 100)
   const percentNo = no === 0 ? 0 : Math.round((no / total) * 100)
