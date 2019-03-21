@@ -176,14 +176,14 @@ class ProposalList extends React.Component {
         )
       },
       {
-        menuItem: `In Queue (${loading ? "..." : inQueue.length})`,
+        menuItem: `Ready For Processing (${loading ? "..." : readyForProcessing.length})`,
         render: () => (
           <Tab.Pane attached={false}>
             {this.state.loading ? (
               <>Loading proposals...</>
             ) : (
               <Grid columns={3}>
-                {inQueue.map((p, index) => (
+                {readyForProcessing.map((p, index) => (
                   <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={totalShares} proposal={p} key={index} />
                 ))}
               </Grid>
@@ -208,14 +208,14 @@ class ProposalList extends React.Component {
         )
       },
       {
-        menuItem: `Ready For Processing (${loading ? "..." : readyForProcessing.length})`,
+        menuItem: `In Queue (${loading ? "..." : inQueue.length})`,
         render: () => (
           <Tab.Pane attached={false}>
             {this.state.loading ? (
               <>Loading proposals...</>
             ) : (
               <Grid columns={3}>
-                {readyForProcessing.map((p, index) => (
+                {inQueue.map((p, index) => (
                   <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={totalShares} proposal={p} key={index} />
                 ))}
               </Grid>
