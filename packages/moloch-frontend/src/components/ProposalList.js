@@ -237,7 +237,7 @@ class ProposalList extends React.Component {
               </Link>
             </Grid.Column>
           </Grid>
-          <Tab menu={{ secondary: true, pointing: true }} panes={panes} />
+          <Tab menu={{ secondary: true, pointing: true, vertical: true }} panes={panes} />
         </>
       </div>
     );
