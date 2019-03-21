@@ -87,6 +87,7 @@ export async function getProposalDetailsFromOnChain(proposal, currentPeriod) {
 
   const inVotingPeriod = proposal => currentPeriod >= proposal.startingPeriod && currentPeriod <= proposal.startingPeriod + VOTING_PERIOD_LENGTH;
 
+  // TODO: fix to use number of shares
   const enoughPassingVotes = proposal => Math.round((parseInt(proposal.yesVotes) / (parseInt(proposal.yesVotes) + parseInt(proposal.noVotes))) * 100) > 50
 
   const passedVotingAndGrace = proposal => currentPeriod > proposal.startingPeriod + VOTING_PERIOD_LENGTH + GRACE_PERIOD_LENGTH
