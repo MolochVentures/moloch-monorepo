@@ -86,6 +86,12 @@ export const GET_PROPOSAL_LIST = gql`
       yesVotes
       noVotes
       proposalIndex
+      votes(first: 100) {
+        member {
+          shares
+        }
+        uintVote
+      }
       status @client
       title @client
       description @client

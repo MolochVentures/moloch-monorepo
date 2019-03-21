@@ -2,15 +2,32 @@ import React from "react";
 import { Segment, Grid, Button, Tab, Icon } from "semantic-ui-react";
 import { Route, Switch, Link } from "react-router-dom";
 
-import ProposalDetail from "./ProposalDetail";
+import ProposalDetail, { Vote } from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
 import { Query, withApollo } from "react-apollo";
 import { getProposalDetailsFromOnChain, ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import { SET_PROPOSAL_ATTRIBUTES, GET_PROPOSAL_LIST, GET_METADATA, GET_MEMBERS } from "../helpers/graphQlQueries";
 import { utils } from "ethers";
 
-const ProposalCard = ({ proposal, totalShares, shareValue, exchangeRate }) => {
+const ProposalCard = ({ proposal }) => {
   let id = proposal.id;
+
+  const yesShares = proposal.votes.reduce((totalVotes, vote) => {
+    if (vote.uintVote === Vote.Yes) {
+      return totalVotes += parseInt(vote.member.shares)
+    } else {
+      return totalVotes
+    }
+  }, 0)
+
+  const noShares = proposal.votes.reduce((totalVotes, vote) => {
+    if (vote.uintVote === Vote.No) {
+      return totalVotes += parseInt(vote.member.shares)
+    } else {
+      return totalVotes
+    }
+  }, 0)
+
   return (
     <Grid.Column mobile={16} tablet={8} computer={5}>
       <Link to={{ pathname: `/proposals/${id}` }} className="uncolored">
@@ -38,7 +55,7 @@ const ProposalCard = ({ proposal, totalShares, shareValue, exchangeRate }) => {
               </Grid.Column>
             </Grid.Row>
           </Grid>
-          <ProgressBar totalShares={totalShares} yes={parseInt(proposal.yesVotes)} no={parseInt(proposal.noVotes)} />
+          <ProgressBar yes={yesShares} no={noShares} />
         </Segment>
       </Link>
     </Grid.Column>

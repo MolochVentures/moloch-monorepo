@@ -18,7 +18,7 @@ export const Vote = {
   No: 2
 };
 
-const MemberAvatar = ({ member, shares }) => {
+const MemberAvatar = ({ member }) => {
   return (
     <Grid.Column mobile={4} tablet={3} computer={3} textAlign="center" className="member_avatar" title={member}>
       <Link to={`/members/${member}`} className="uncolored">
@@ -41,7 +41,8 @@ class ProposalDetail extends Component {
         graceEnded: true,
         yesVotes: 0,
         noVotes: 0,
-        status: ProposalStatus.InQueue
+        status: ProposalStatus.InQueue,
+        votes: []
       },
       user: {
         id: 0,
@@ -145,6 +146,22 @@ class ProposalDetail extends Component {
   render() {
     const { shareValue, proposal, user, exchangeRate, userHasVoted } = this.state;
 
+     const yesShares = proposal.votes.reduce((totalVotes, vote) => {
+        if (vote.uintVote === Vote.Yes) {
+          return totalVotes += parseInt(vote.member.shares)
+        } else {
+          return totalVotes
+        }
+      }, 0)
+    
+    const noShares = proposal.votes.reduce((totalVotes, vote) => {
+        if (vote.uintVote === Vote.No) {
+          return totalVotes += parseInt(vote.member.shares)
+        } else {
+          return totalVotes
+        }
+      }, 0)
+
     const cannotVote = userHasVoted || proposal.status !== ProposalStatus.VotingPeriod || (!(user && user.shares) || !(user && user.isActive));
     return (
       <div id="proposal_detail">
@@ -216,7 +233,7 @@ class ProposalDetail extends Component {
                 </Grid>
                 <Grid>
                   <Grid.Column>
-                    <ProgressBar yes={parseInt(proposal.yesVotes)} no={parseInt(proposal.noVotes)} />
+                    <ProgressBar yes={yesShares} no={noShares} />
                   </Grid.Column>
                 </Grid>
                 <Grid columns="equal" centered>
