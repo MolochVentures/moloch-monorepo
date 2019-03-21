@@ -82,7 +82,7 @@ export async function initToken(loggedInUser) {
   return token
 }
 
-export async function initMedianizer(loggedInUser) {
+export async function initMedianizer() {
   // pull from mainnet
   let provider = ethers.getDefaultProvider();
   medianizer = new ethers.Contract(process.env.REACT_APP_MEDIANIZER_ADDRESS, medianizerAbi, provider)
@@ -90,16 +90,12 @@ export async function initMedianizer(loggedInUser) {
 }
 
 export async function getMoloch(loggedInUser) {
-  if (!moloch) {
-    await initMoloch(loggedInUser)
-  }
+  await initMoloch(loggedInUser)
   return moloch
 }
 
 export async function getToken(loggedInUser) {
-  if (!token) {
-    await initToken(loggedInUser)
-  }
+  await initToken(loggedInUser)
   return token
 }
 
