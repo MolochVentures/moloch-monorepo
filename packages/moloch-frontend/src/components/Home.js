@@ -38,7 +38,8 @@ export default class HomePage extends React.Component {
   };
 
   async componentDidMount() {
-    const token = await getToken();
+    const { loggedInUser } = this.props
+    const token = await getToken(loggedInUser);
 
     this.setState({
       token
