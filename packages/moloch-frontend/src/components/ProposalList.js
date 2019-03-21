@@ -148,22 +148,6 @@ class ProposalList extends React.Component {
 
     const panes = [
       {
-        menuItem: `Ready For Processing (${loading ? "..." : readyForProcessing.length})`,
-        render: () => (
-          <Tab.Pane attached={false}>
-            {this.state.loading ? (
-              <>Loading proposals...</>
-            ) : (
-              <Grid columns={3}>
-                {readyForProcessing.map((p, index) => (
-                  <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={totalShares} proposal={p} key={index} />
-                ))}
-              </Grid>
-            )}
-          </Tab.Pane>
-        )
-      },
-      {
         menuItem: `Voting Period (${loading ? "..." : votingPeriod.length})`,
         render: () => (
           <Tab.Pane attached={false}>
@@ -172,6 +156,22 @@ class ProposalList extends React.Component {
             ) : (
               <Grid columns={3}>
                 {votingPeriod.map((p, index) => (
+                  <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={totalShares} proposal={p} key={index} />
+                ))}
+              </Grid>
+            )}
+          </Tab.Pane>
+        )
+      },
+      {
+        menuItem: `Ready For Processing (${loading ? "..." : readyForProcessing.length})`,
+        render: () => (
+          <Tab.Pane attached={false}>
+            {this.state.loading ? (
+              <>Loading proposals...</>
+            ) : (
+              <Grid columns={3}>
+                {readyForProcessing.map((p, index) => (
                   <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={totalShares} proposal={p} key={index} />
                 ))}
               </Grid>
