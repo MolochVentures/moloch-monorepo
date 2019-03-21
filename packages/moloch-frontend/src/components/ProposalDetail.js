@@ -57,14 +57,15 @@ class ProposalDetail extends Component {
   }
 
   async componentDidMount() {
-    const moloch = await getMoloch();
+    const { loggedInUser } = this.props;
+    const moloch = await getMoloch(loggedInUser);
     this.setState({
       moloch
     });
   }
 
-  async fetchData(props) {
-    const { client, loggedInUser } = props;
+  async fetchData() {
+    const { client, loggedInUser } = this.props;
 
     const { data: proposalResult } = await client.query({
       query: GET_PROPOSAL_DETAIL,
