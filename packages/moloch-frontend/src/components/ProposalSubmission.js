@@ -20,7 +20,8 @@ export default class ProposalSubmission extends Component {
   };
 
   async componentDidMount() {
-    const moloch = await getMoloch();
+    const { loggedInUser } = this.props
+    const moloch = await getMoloch(loggedInUser);
     this.setState({
       moloch
     });
