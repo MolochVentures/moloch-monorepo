@@ -164,22 +164,6 @@ class ProposalList extends React.Component {
         )
       },
       {
-        menuItem: `Ready For Processing (${loading ? "..." : readyForProcessing.length})`,
-        render: () => (
-          <Tab.Pane attached={false}>
-            {this.state.loading ? (
-              <>Loading proposals...</>
-            ) : (
-              <Grid columns={3}>
-                {readyForProcessing.map((p, index) => (
-                  <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={totalShares} proposal={p} key={index} />
-                ))}
-              </Grid>
-            )}
-          </Tab.Pane>
-        )
-      },
-      {
         menuItem: `Grace Period (${loading ? "..." : gracePeriod.length})`,
         render: () => (
           <Tab.Pane attached={false}>
@@ -216,6 +200,22 @@ class ProposalList extends React.Component {
             ) : (
               <Grid columns={3}>
                 {completed.map((p, index) => (
+                  <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={totalShares} proposal={p} key={index} />
+                ))}
+              </Grid>
+            )}
+          </Tab.Pane>
+        )
+      },
+      {
+        menuItem: `Ready For Processing (${loading ? "..." : readyForProcessing.length})`,
+        render: () => (
+          <Tab.Pane attached={false}>
+            {this.state.loading ? (
+              <>Loading proposals...</>
+            ) : (
+              <Grid columns={3}>
+                {readyForProcessing.map((p, index) => (
                   <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={totalShares} proposal={p} key={index} />
                 ))}
               </Grid>
