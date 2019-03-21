@@ -23,7 +23,7 @@ export function periodsToTime(periods) {
   const hours = Math.floor(((seconds % 31536000) % 86400) / 3600);
   const minutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
 
-  let string
+  let string = ""
   string = days ? `${days} days` : string
   string = hours ? `${string} ${hours} hours` : string
   string = minutes ? `${string} ${minutes} minutes` : string
