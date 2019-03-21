@@ -52,6 +52,40 @@ export const GET_MEMBER_DETAIL = gql`
   }
 `;
 
+export const GET_MEMBER_DETAIL_WITH_VOTES = gql`
+  query Member($address: String!) {
+    member(id: $address) {
+      id
+      shares
+      isActive
+      tokenTribute
+      delegateKey
+      votes {
+        uintVote
+          proposal {
+          id
+          timestamp
+          tokenTribute
+          sharesRequested
+          processed
+          didPass
+          aborted
+          yesVotes
+          noVotes
+          proposalIndex
+          status @client
+          title @client
+          description @client
+          gracePeriod @client
+          votingEnds @client
+          votingStarts @client
+          readyForProcessing @client
+        }
+      }
+    }
+  }
+`;
+
 export const GET_MEMBERS = gql`
   {
     members(first: 100, where: { shares_gt: 0, isActive: true }) {

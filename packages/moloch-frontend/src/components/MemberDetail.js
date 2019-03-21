@@ -1,5 +1,6 @@
 import React from "react";
 import { Divider, Grid, Segment, Image, Icon, Label, Header } from "semantic-ui-react";
+import { Link } from "react-router-dom";
 
 import bull from "assets/bull.png";
 import hood from "assets/hood.png";
@@ -9,21 +10,16 @@ import { Vote } from "./ProposalDetail";
 import { utils } from "ethers";
 import { convertWeiToDollars } from "../helpers/currency";
 import { adopt } from "react-adopt";
-import { GET_METADATA, GET_PROPOSAL_HISTORY, GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
+import { GET_METADATA, GET_MEMBER_DETAIL_WITH_VOTES } from "../helpers/graphQlQueries";
 import { getProposalCountdownText } from "../helpers/proposals";
 
 const Composed = adopt({
   memberDetail: ({ render, name }) => (
-    <Query query={GET_MEMBER_DETAIL} variables={{ address: name }}>
+    <Query query={GET_MEMBER_DETAIL_WITH_VOTES} variables={{ address: name }}>
       {render}
     </Query>
   ),
   metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>,
-  proposalHistory: ({ render, name }) => (
-    <Query query={GET_PROPOSAL_HISTORY} variables={{ id: name }}>
-      {render}
-    </Query>
-  )
 });
 
 const MemberDetail = ({ loggedInUser, member, shareValue, exchangeRate }) => (
@@ -101,32 +97,35 @@ const ProposalDetail = ({ proposals }) => (
       </Grid.Row>
       {proposals && proposals.length > 0 ? (
         proposals.map((p, idx) => {
+          console.log("p: ", p);
           return (
             <React.Fragment key={idx}>
-              <Grid.Row verticalAlign="middle">
-                <Grid.Column textAlign="center">
-                  {p.uintVote === Vote.Yes && <Label className="dot" circular color="green" empty />}
-                  {/* TODO: is this right? */}
-                  {(p.uintVote === Vote.No || p.votes.uintVote === Vote.Null) && <Label className="dot" circular color="red" empty />}
-                  {p.proposal.title}
-                </Grid.Column>
-                <Grid.Column textAlign="center">
-                  <p className="subtext date">{new Date(p.proposal.timestamp * 1000).toISOString().slice(0, 10)}</p>
-                </Grid.Column>
-                <Grid.Column textAlign="center">
-                  <p className="subtext date">{p.proposal.sharesRequested}</p>
-                </Grid.Column>
-                <Grid.Column textAlign="center">
-                  <p className="subtext date">{utils.formatEther(p.proposal.tokenTribute)}</p>
-                </Grid.Column>
-                <Grid.Column textAlign="center">
-                  <Header as="p" color={p.uintVote === Vote.Yes ? "green" : p.uintVote === Vote.No ? "red" : null}>
-                    {p.uintVote === Vote.Yes ? "Y" : p.uintVote === Vote.No ? "N" : ""}
-                  </Header>
-                </Grid.Column>
-                <Grid.Column textAlign="center">
-                  <p className="subtext date">{getProposalCountdownText(p.proposal)}</p>
-                </Grid.Column>
+                <Grid.Row verticalAlign="middle">
+                  <Grid.Column textAlign="center">
+                    <Link to={{ pathname: `/proposals/${p.proposal.id}` }} className="uncolored">
+                    {p.uintVote === Vote.Yes && <Label className="dot" circular color="green" empty />}
+                    {/* TODO: is this right? */}
+                    {(p.uintVote === Vote.No || p.uintVote === Vote.Null) && <Label className="dot" circular color="red" empty />}
+                    {p.proposal.title}
+                    </Link>
+                  </Grid.Column>
+                  <Grid.Column textAlign="center">
+                    <p className="subtext date">{new Date(p.proposal.timestamp * 1000).toISOString().slice(0, 10)}</p>
+                  </Grid.Column>
+                  <Grid.Column textAlign="center">
+                    <p className="subtext date">{p.proposal.sharesRequested}</p>
+                  </Grid.Column>
+                  <Grid.Column textAlign="center">
+                    <p className="subtext date">{utils.formatEther(p.proposal.tokenTribute)}</p>
+                  </Grid.Column>
+                  <Grid.Column textAlign="center">
+                    <Header as="p" color={p.uintVote === Vote.Yes ? "green" : p.uintVote === Vote.No ? "red" : null}>
+                      {p.uintVote === Vote.Yes ? "Y" : p.uintVote === Vote.No ? "N" : ""}
+                    </Header>
+                  </Grid.Column>
+                  <Grid.Column textAlign="center">
+                    <p className="subtext date">{getProposalCountdownText(p.proposal)}</p>
+                  </Grid.Column>
               </Grid.Row>
               <Divider />
             </React.Fragment>
@@ -134,9 +133,7 @@ const ProposalDetail = ({ proposals }) => (
         })
       ) : (
         <Grid.Row verticalAlign="middle">
-          <Grid.Column textAlign="center">
-            This member hasn't voted on any proposals yet.
-          </Grid.Column>
+          <Grid.Column textAlign="center">This member hasn't voted on any proposals yet.</Grid.Column>
         </Grid.Row>
       )}
     </Grid>
@@ -145,13 +142,11 @@ const ProposalDetail = ({ proposals }) => (
 
 const MemberDetailView = props => (
   <Composed name={props.match.params.name}>
-    {({ memberDetail, metadata, proposalHistory }) => {
-      if (memberDetail.loading || metadata.loading || proposalHistory.loading) return <Segment className="blurred box">Loading...</Segment>;
+    {({ memberDetail, metadata }) => {
+      if (memberDetail.loading || metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
       if (memberDetail.error) throw new Error(`Error!: ${memberDetail.error}`);
       if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
-      if (proposalHistory.error) throw new Error(`Error!: ${proposalHistory.error}`);
-
-      console.log("proposalHistory.data: ", proposalHistory.data);
+      console.log('memberDetail.data: ', memberDetail.data.member.votes);
       return (
         <div id="member_detail">
           <p className="title"> {props.match.params.name} </p>
@@ -167,7 +162,7 @@ const MemberDetailView = props => (
                 />
               </Grid.Column>
               <Grid.Column mobile={16} tablet={16} computer={10} className="proposals">
-                <ProposalDetail proposals={proposalHistory.data.votes} />
+                <ProposalDetail proposals={memberDetail.data.member.votes} />
               </Grid.Column>
             </Grid.Row>
           </Grid>
