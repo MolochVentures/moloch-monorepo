@@ -1,5 +1,4 @@
 import {
-  ProposalStatus,
   determineProposalStatus,
   inGracePeriod,
   VOTING_PERIOD_LENGTH,
@@ -9,8 +8,7 @@ import {
   passedVotingAndGrace
 } from "./helpers/proposals";
 import gql from "graphql-tag";
-import { GET_METADATA, GET_PROPOSAL_DETAIL } from "./helpers/graphQlQueries";
-import { computePublicKey } from "ethers/utils";
+import { GET_METADATA } from "./helpers/graphQlQueries";
 
 export const resolvers = {
   Proposal: {
@@ -23,8 +21,8 @@ export const resolvers = {
         const details = JSON.parse(proposal.details);
         return details.title || proposal.details || "";
       } catch (e) {
-        console.log(`Could not parse details from proposal.proposalIndex: ${proposal.proposalIndex} proposal.details: ${proposal.details}`);
-        return "";
+        console.log(`Could not parse title from proposal.proposalIndex: ${proposal.proposalIndex} proposal.details: ${proposal.details}`);
+        return proposal.details || "";
       }
     },
     description: proposal => {
@@ -32,7 +30,7 @@ export const resolvers = {
         const details = JSON.parse(proposal.details);
         return details.description || "";
       } catch (e) {
-        console.log(`Could not parse details from proposal.proposalIndex: ${proposal.proposalIndex} proposal.details: ${proposal.details}`);
+        console.log(`Could not parse description from proposal.proposalIndex: ${proposal.proposalIndex} proposal.details: ${proposal.details}`);
         return "";
       }
     },
