@@ -8,8 +8,6 @@ import Home from "./components/Home";
 import ProposalList from "./components/ProposalList";
 import MemberList from "./components/MemberList";
 import ProposalSubmission from "./components/ProposalSubmission";
-import GuildBank from "./components/GuildBank";
-import Login from "./components/Login";
 import { ApolloProvider, Query } from "react-apollo";
 import gql from "graphql-tag";
 import { resolvers } from "./resolvers";
