@@ -5,7 +5,7 @@ import hood from "assets/hood.png";
 
 import ProgressBar from "./ProgressBar";
 
-import { withApollo, Query } from "react-apollo";
+import { Query } from "react-apollo";
 import { ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import { getMoloch } from "../web3";
 import { GET_PROPOSAL_DETAIL, GET_METADATA, GET_MEMBERS } from "../helpers/graphQlQueries";
@@ -41,7 +41,7 @@ const Composed = adopt({
   members: ({ render }) => <Query query={GET_MEMBERS}>{render}</Query>
 });
 
-class ProposalDetail extends Component {
+export default class ProposalDetail extends Component {
   state = {
     proposal: {
       tokenTribute: 0,
@@ -232,5 +232,3 @@ class ProposalDetail extends Component {
     );
   }
 }
-
-export default withApollo(ProposalDetail);
