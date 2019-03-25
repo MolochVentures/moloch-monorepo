@@ -4,7 +4,6 @@ import { Grid, Icon, Dropdown, Form, Button } from "semantic-ui-react";
 import { Query, withApollo } from "react-apollo";
 import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 import { getMoloch, initMetamask, initGnosisSafe } from "../web3";
-import ProposalDetail from "./ProposalDetail";
 
 const MainMenu = props => (
   <div className="dropdownItems">
