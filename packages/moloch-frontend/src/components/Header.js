@@ -261,7 +261,6 @@ export default class Header extends Component {
         {({ loading, error, data }) => {
           if (loading) return "Loading...";
           if (error) throw new Error(`Error!: ${error}`);
-          console.log('data: ', data);
           return (
             <div id="header">
               <Grid columns="equal" verticalAlign="middle">
