@@ -5,12 +5,13 @@ import hood from "assets/hood.png";
 
 import ProgressBar from "./ProgressBar";
 
-import { withApollo } from "react-apollo";
-import { getProposalDetailsFromOnChain, ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
+import { withApollo, Query } from "react-apollo";
+import { ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import { getMoloch } from "../web3";
-import { SET_PROPOSAL_ATTRIBUTES, GET_PROPOSAL_DETAIL, GET_METADATA, GET_MEMBERS } from "../helpers/graphQlQueries";
+import { GET_PROPOSAL_DETAIL, GET_METADATA, GET_MEMBERS } from "../helpers/graphQlQueries";
 import { convertWeiToDollars } from "../helpers/currency";
 import { utils } from "ethers";
+import { adopt } from "react-adopt";
 
 export const Vote = {
   Null: 0, // default value, counted as abstention
@@ -29,96 +30,44 @@ const MemberAvatar = ({ member }) => {
   );
 };
 
+const Composed = adopt({
+  proposalDetail: ({ render, id }) => (
+    <Query query={GET_PROPOSAL_DETAIL} variables={{ id }}>
+      {render}
+    </Query>
+  ),
+  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>,
+  // TODO: dont query all members
+  members: ({ render }) => <Query query={GET_MEMBERS}>{render}</Query>
+});
+
 class ProposalDetail extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      proposal: {
-        tokenTribute: 0,
-        sharesRequested: 0,
-        votingEnded: true,
-        graceEnded: true,
-        yesVotes: 0,
-        noVotes: 0,
-        status: ProposalStatus.InQueue,
-        votes: []
-      },
-      user: {
-        id: 0,
-        shares: 0,
-        isActive: false
-      },
-      moloch: null,
-      shareValue: "0",
-      exchangeRate: "0"
-    };
-
-    this.fetchData(props);
-  }
+  state = {
+    proposal: {
+      tokenTribute: 0,
+      sharesRequested: 0,
+      votingEnded: true,
+      graceEnded: true,
+      yesVotes: 0,
+      noVotes: 0,
+      status: ProposalStatus.InQueue,
+      votes: []
+    },
+    user: {
+      id: 0,
+      shares: 0,
+      isActive: false
+    },
+    moloch: null,
+    shareValue: "0",
+    exchangeRate: "0"
+  };
 
   async componentDidMount() {
     const { loggedInUser } = this.props;
     const moloch = await getMoloch(loggedInUser);
     this.setState({
       moloch
-    });
-  }
-
-  async fetchData() {
-    const { client, loggedInUser } = this.props;
-
-    const { data: proposalResult } = await client.query({
-      query: GET_PROPOSAL_DETAIL,
-      variables: { id: this.props.match.params.id }
-    });
-
-    const { data: metadata } = await client.query({
-      query: GET_METADATA
-    });
-
-    const userResult = await client.query({
-      query: GET_MEMBERS
-    });
-
-    const member = userResult.data.members.find(m => m.delegateKey === loggedInUser)
-
-    let proposal = proposalResult.proposal;
-    if (proposal.status === ProposalStatus.Unknown) {
-      const fullProp = await getProposalDetailsFromOnChain(proposal, metadata.currentPeriod);
-      const result = await client.mutate({
-        mutation: SET_PROPOSAL_ATTRIBUTES,
-        variables: {
-          id: proposal.id,
-          status: fullProp.status,
-          title: fullProp.title,
-          description: fullProp.description,
-          gracePeriod: fullProp.gracePeriod,
-          votingEnds: `${fullProp.votingEnds}`,
-          votingStarts: `${fullProp.votingStarts}`,
-          readyForProcessing: fullProp.readyForProcessing
-        }
-      });
-      proposal = {
-        ...proposal,
-        status: result.data.setAttributes.status,
-        title: result.data.setAttributes.title,
-        description: result.data.setAttributes.description,
-        gracePeriod: result.data.setAttributes.gracePeriod,
-        votingEnds: result.data.setAttributes.votingEnds,
-        votingStarts: result.data.setAttributes.votingStarts,
-        readyForProcessing: result.data.setAttributes.readyForProcessing
-      };
-    }
-
-    const userHasVoted = proposal.votes.find(vote => vote.member.id === loggedInUser) ? true : false;
-
-    this.setState({
-      proposal,
-      user: member,
-      shareValue: metadata.shareValue,
-      exchangeRate: metadata.exchangeRate,
-      userHasVoted
     });
   }
 
@@ -144,120 +93,142 @@ class ProposalDetail extends Component {
   };
 
   render() {
-    const { shareValue, proposal, user, exchangeRate, userHasVoted } = this.state;
+    const { loggedInUser } = this.props;
 
-     const yesShares = proposal.votes.reduce((totalVotes, vote) => {
-        if (vote.uintVote === Vote.Yes) {
-          return totalVotes += parseInt(vote.member.shares)
-        } else {
-          return totalVotes
-        }
-      }, 0)
-    
-    const noShares = proposal.votes.reduce((totalVotes, vote) => {
-        if (vote.uintVote === Vote.No) {
-          return totalVotes += parseInt(vote.member.shares)
-        } else {
-          return totalVotes
-        }
-      }, 0)
-
-    const cannotVote = userHasVoted || proposal.status !== ProposalStatus.VotingPeriod || (!(user && user.shares) || !(user && user.isActive));
     return (
-      <div id="proposal_detail">
-        <Grid centered columns={16}>
-          <Segment className="transparent box segment" textAlign="center">
-            <Grid centered columns={14}>
-              <Grid.Column mobile={16} tablet={16} computer={12}>
-                <span className="title">{proposal.title ? proposal.title : "N/A"}</span>
-              </Grid.Column>
-            </Grid>
-            <Grid centered columns={14}>
-              <Grid.Column mobile={16} tablet={16} computer={4}>
-                <div className="subtext description">{proposal.description ? proposal.description : "N/A"}</div>
-                <Grid columns="equal" className="tokens">
-                  <Grid.Row>
-                    <Grid.Column className="tributes">
-                      <Segment className="pill" textAlign="center">
-                        <Icon name="ethereum" />
-                        {utils.formatEther(proposal.tokenTribute)} ETH
-                      </Segment>
-                    </Grid.Column>
-                  </Grid.Row>
-                </Grid>
-                <Grid columns="equal">
-                  <Grid.Column>
-                    <p className="subtext voting">Shares</p>
-                    <p className="amount">{proposal.sharesRequested}</p>
-                  </Grid.Column>
-                  <Grid.Column textAlign="right">
-                    <p className="subtext">Total USD Value</p>
-                    <p className="amount">
-                      {convertWeiToDollars(
-                        utils
-                          .bigNumberify(proposal.sharesRequested)
-                          .mul(shareValue)
-                          .toString(),
-                        exchangeRate
-                      )}
-                    </p>
-                  </Grid.Column>
-                </Grid>
-              </Grid.Column>
+      <Composed id={this.props.match.params.id}>
+        {({ proposalDetail, metadata, members }) => {
+          if (proposalDetail.loading || metadata.loading || members.loading) return <Segment className="blurred box">Loading...</Segment>;
+          if (proposalDetail.error) throw new Error(`Error!: ${proposalDetail.error}`);
+          if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
+          if (members.error) throw new Error(`Error!: ${members.error}`);
 
-              <Grid.Column mobile={16} tablet={16} computer={2}>
-                <Divider vertical />
-              </Grid.Column>
+          const { proposal } = proposalDetail.data;
+          const { shareValue, exchangeRate } = metadata.data;
 
-              <Grid.Column mobile={16} tablet={16} computer={6}>
-                <Grid columns={16}>
-                  <Grid.Column textAlign="center" mobile={16} tablet={16} computer={16} className="pill_column">
-                    <span className="pill">{getProposalCountdownText(proposal)}</span>
-                  </Grid.Column>
-                </Grid>
-                <Grid columns={16} className="member_list">
-                  <Grid.Row>
-                    <Grid.Column mobile={16} tablet={16} computer={16} className="pill_column">
-                      {proposal.votes && proposal.votes.length > 0 ? (
-                        <Grid>
-                          <Grid.Row className="members_row">
-                            {/* centered */}
-                            {proposal.votes.map((vote, idx) => (
-                              <MemberAvatar member={vote.member.id} shares={vote.member.shares} key={idx} />
-                            ))}
-                          </Grid.Row>
-                        </Grid>
-                      ) : null}
+          const yesShares = proposal.votes.reduce((totalVotes, vote) => {
+            if (vote.uintVote === Vote.Yes) {
+              return (totalVotes += parseInt(vote.member.shares));
+            } else {
+              return totalVotes;
+            }
+          }, 0);
+
+          const noShares = proposal.votes.reduce((totalVotes, vote) => {
+            if (vote.uintVote === Vote.No) {
+              return (totalVotes += parseInt(vote.member.shares));
+            } else {
+              return totalVotes;
+            }
+          }, 0);
+
+          const user = members.data.members.find(m => m.delegateKey === loggedInUser);
+          const userHasVoted = proposal.votes.find(vote => vote.member.id === loggedInUser) ? true : false;
+          const cannotVote = userHasVoted || proposal.status !== ProposalStatus.VotingPeriod || (!(user && user.shares) || !(user && user.isActive));
+
+          return (
+            <div id="proposal_detail">
+              <Grid centered columns={16}>
+                <Segment className="transparent box segment" textAlign="center">
+                  <Grid centered columns={14}>
+                    <Grid.Column mobile={16} tablet={16} computer={12}>
+                      <span className="title">{proposal.title ? proposal.title : "N/A"}</span>
                     </Grid.Column>
-                  </Grid.Row>
-                </Grid>
-                <Grid>
-                  <Grid.Column>
-                    <ProgressBar yes={yesShares} no={noShares} />
-                  </Grid.Column>
-                </Grid>
-                <Grid columns="equal" centered>
-                  <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                    <Button className="btn" color="grey" disabled={cannotVote} onClick={this.handleNo}>
-                      Vote No
-                    </Button>
-                  </Grid.Column>
-                  <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                    <Button className="btn" color="grey" disabled={cannotVote} onClick={this.handleYes}>
-                      Vote Yes
-                    </Button>
-                  </Grid.Column>
-                  <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                    <Button className="btn" color="grey" onClick={this.handleProcess} disabled={proposal.status !== ProposalStatus.ReadyForProcessing}>
-                      Process Proposal
-                    </Button>
-                  </Grid.Column>
-                </Grid>
-              </Grid.Column>
-            </Grid>
-          </Segment>
-        </Grid>
-      </div>
+                  </Grid>
+                  <Grid centered columns={14}>
+                    <Grid.Column mobile={16} tablet={16} computer={4}>
+                      <div className="subtext description">{proposal.description ? proposal.description : "N/A"}</div>
+                      <Grid columns="equal" className="tokens">
+                        <Grid.Row>
+                          <Grid.Column className="tributes">
+                            <Segment className="pill" textAlign="center">
+                              <Icon name="ethereum" />
+                              {utils.formatEther(proposal.tokenTribute)} ETH
+                            </Segment>
+                          </Grid.Column>
+                        </Grid.Row>
+                      </Grid>
+                      <Grid columns="equal">
+                        <Grid.Column>
+                          <p className="subtext voting">Shares</p>
+                          <p className="amount">{proposal.sharesRequested}</p>
+                        </Grid.Column>
+                        <Grid.Column textAlign="right">
+                          <p className="subtext">Total USD Value</p>
+                          <p className="amount">
+                            {convertWeiToDollars(
+                              utils
+                                .bigNumberify(proposal.sharesRequested)
+                                .mul(shareValue)
+                                .toString(),
+                              exchangeRate
+                            )}
+                          </p>
+                        </Grid.Column>
+                      </Grid>
+                    </Grid.Column>
+
+                    <Grid.Column mobile={16} tablet={16} computer={2}>
+                      <Divider vertical />
+                    </Grid.Column>
+
+                    <Grid.Column mobile={16} tablet={16} computer={6}>
+                      <Grid columns={16}>
+                        <Grid.Column textAlign="center" mobile={16} tablet={16} computer={16} className="pill_column">
+                          <span className="pill">{getProposalCountdownText(proposal)}</span>
+                        </Grid.Column>
+                      </Grid>
+                      <Grid columns={16} className="member_list">
+                        <Grid.Row>
+                          <Grid.Column mobile={16} tablet={16} computer={16} className="pill_column">
+                            {proposal.votes && proposal.votes.length > 0 ? (
+                              <Grid>
+                                <Grid.Row className="members_row">
+                                  {/* centered */}
+                                  {proposal.votes.map((vote, idx) => (
+                                    <MemberAvatar member={vote.member.id} shares={vote.member.shares} key={idx} />
+                                  ))}
+                                </Grid.Row>
+                              </Grid>
+                            ) : null}
+                          </Grid.Column>
+                        </Grid.Row>
+                      </Grid>
+                      <Grid>
+                        <Grid.Column>
+                          <ProgressBar yes={yesShares} no={noShares} />
+                        </Grid.Column>
+                      </Grid>
+                      <Grid columns="equal" centered>
+                        <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
+                          <Button className="btn" color="grey" disabled={cannotVote} onClick={this.handleNo}>
+                            Vote No
+                          </Button>
+                        </Grid.Column>
+                        <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
+                          <Button className="btn" color="grey" disabled={cannotVote} onClick={this.handleYes}>
+                            Vote Yes
+                          </Button>
+                        </Grid.Column>
+                        <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
+                          <Button
+                            className="btn"
+                            color="grey"
+                            onClick={this.handleProcess}
+                            disabled={proposal.status !== ProposalStatus.ReadyForProcessing}
+                          >
+                            Process Proposal
+                          </Button>
+                        </Grid.Column>
+                      </Grid>
+                    </Grid.Column>
+                  </Grid>
+                </Segment>
+              </Grid>
+            </div>
+          );
+        }}
+      </Composed>
     );
   }
 }
