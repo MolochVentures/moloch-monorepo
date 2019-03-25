@@ -126,6 +126,9 @@ export const GET_PROPOSAL_LIST = gql`
         }
         uintVote
       }
+      details
+      startingPeriod
+      processed
       status @client
       title @client
       description @client
@@ -152,6 +155,9 @@ export const GET_PROPOSAL_HISTORY = gql`
         yesVotes
         noVotes
         proposalIndex
+        details
+        startingPeriod
+        processed
         status @client
         title @client
         description @client
@@ -184,6 +190,9 @@ export const GET_PROPOSAL_DETAIL = gql`
         }
         uintVote
       }
+      details
+      startingPeriod
+      processed
       status @client
       title @client
       description @client
