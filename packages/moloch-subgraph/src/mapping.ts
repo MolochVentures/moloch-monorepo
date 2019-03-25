@@ -15,9 +15,31 @@ export function handleSummonComplete(event: SummonComplete): void {
 }
 
 export function handleSubmitProposal(event: SubmitProposal): void {
+  // get information directly from contract
+  // struct Proposal {
+  //     address proposer; // the member who submitted the proposal
+  //     address applicant; // the applicant who wishes to become a member - this key will be used for withdrawals
+  //     uint256 sharesRequested; // the # of shares the applicant is requesting
+  //     uint256 startingPeriod; // the period in which voting can start for this proposal
+  //     uint256 yesVotes; // the total number of YES votes for this proposal
+  //     uint256 noVotes; // the total number of NO votes for this proposal
+  //     bool processed; // true only if the proposal has been processed
+  //     bool didPass; // true only if the proposal passed
+  //     bool aborted; // true only if applicant calls "abort" fn before end of voting period
+  //     uint256 tokenTribute; // amount of tokens offered as tribute
+  //     string details; // proposal details - could be IPFS hash, plaintext, or JSON
+  //     uint256 maxTotalSharesAtYesVote; // the maximum # of total shares encountered at a yes vote on this proposal
+  //     mapping (address => Vote) votesByMember; // the votes on this proposal by each member
+  // }
+  let contract = Contract.bind(event.address)
+  let proposalFromContract = contract.proposalQueue(event.params.proposalIndex)
+  let startingPeriod = proposalFromContract.value3
+  let details = proposalFromContract.value10
+
   let proposal = new Proposal(event.params.proposalIndex.toString())
   proposal.timestamp = event.block.timestamp.toString()
   proposal.proposalIndex = event.params.proposalIndex
+  proposal.startingPeriod = startingPeriod
   proposal.delegateKey = event.params.delegateKey
   proposal.member = event.params.memberAddress.toHex()
   proposal.memberAddress = event.params.memberAddress
@@ -31,6 +53,7 @@ export function handleSubmitProposal(event: SubmitProposal): void {
   proposal.didPass = false
   proposal.aborted = false
   proposal.votes = new Array<string>()
+  proposal.details = details
   proposal.save()
 
   let applicant = new Applicant(event.params.applicant.toHex())
@@ -46,7 +69,6 @@ export function handleSubmitProposal(event: SubmitProposal): void {
   applicant.aborted = false
   applicant.votes = new Array<string>()
   applicant.proposal = event.params.proposalIndex.toString()
-  
   applicant.save()
 
   let member = Member.load(event.params.memberAddress.toHex())

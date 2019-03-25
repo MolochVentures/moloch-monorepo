@@ -151,6 +151,15 @@ export class Proposal extends Entity {
     this.set("proposalIndex", Value.fromBigInt(value));
   }
 
+  get startingPeriod(): BigInt {
+    let value = this.get("startingPeriod");
+    return value.toBigInt();
+  }
+
+  set startingPeriod(value: BigInt) {
+    this.set("startingPeriod", Value.fromBigInt(value));
+  }
+
   get delegateKey(): Bytes {
     let value = this.get("delegateKey");
     return value.toBytes();
