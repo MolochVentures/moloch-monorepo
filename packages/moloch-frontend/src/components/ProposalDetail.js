@@ -71,24 +71,24 @@ export default class ProposalDetail extends Component {
     });
   }
 
-  handleNo = async () => {
-    const { proposal, moloch } = this.state;
+  handleNo = async (proposal) => {
+    const { moloch } = this.state;
     await moloch.submitVote(proposal.proposalIndex, Vote.No);
     this.setState({
       userHasVoted: true
     });
   };
 
-  handleYes = async () => {
-    const { proposal, moloch } = this.state;
+  handleYes = async (proposal) => {
+    const { moloch } = this.state;
     await moloch.submitVote(proposal.proposalIndex, Vote.Yes);
     this.setState({
       userHasVoted: true
     });
   };
 
-  handleProcess = async () => {
-    const { proposal, moloch } = this.state;
+  handleProcess = async (proposal) => {
+    const { moloch } = this.state;
     await moloch.processProposal(proposal.proposalIndex);
   };
 
@@ -201,12 +201,12 @@ export default class ProposalDetail extends Component {
                       </Grid>
                       <Grid columns="equal" centered>
                         <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                          <Button className="btn" color="grey" disabled={cannotVote} onClick={this.handleNo}>
+                          <Button className="btn" color="grey" disabled={cannotVote} onClick={() => this.handleNo(proposal)}>
                             Vote No
                           </Button>
                         </Grid.Column>
                         <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                          <Button className="btn" color="grey" disabled={cannotVote} onClick={this.handleYes}>
+                          <Button className="btn" color="grey" disabled={cannotVote} onClick={() => this.handleYes(proposal)}>
                             Vote Yes
                           </Button>
                         </Grid.Column>
@@ -214,7 +214,7 @@ export default class ProposalDetail extends Component {
                           <Button
                             className="btn"
                             color="grey"
-                            onClick={this.handleProcess}
+                            onClick={() => this.handleProcess(proposal)}
                             disabled={proposal.status !== ProposalStatus.ReadyForProcessing}
                           >
                             Process Proposal
