@@ -97,7 +97,6 @@ const ProposalDetail = ({ proposals }) => (
       </Grid.Row>
       {proposals && proposals.length > 0 ? (
         proposals.map((p, idx) => {
-          console.log("p: ", p);
           return (
             <React.Fragment key={idx}>
                 <Grid.Row verticalAlign="middle">
@@ -146,7 +145,6 @@ const MemberDetailView = props => (
       if (memberDetail.loading || metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
       if (memberDetail.error) throw new Error(`Error!: ${memberDetail.error}`);
       if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
-      console.log('memberDetail.data: ', memberDetail.data.member.votes);
       return (
         <div id="member_detail">
           <p className="title"> {props.match.params.name} </p>

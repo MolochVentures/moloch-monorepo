@@ -73,6 +73,7 @@ export const GET_MEMBER_DETAIL_WITH_VOTES = gql`
           yesVotes
           noVotes
           proposalIndex
+          details
           status @client
           title @client
           description @client
