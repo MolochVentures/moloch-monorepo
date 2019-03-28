@@ -48,9 +48,11 @@ export default class HomePage extends React.Component {
 
   handleChange = e => this.setState({ approval: e.target.value });
 
-  handleSubmit = () => {
+  handleSubmit = async () => {
     const { approval, token } = this.state;
-    token.approve(process.env.REACT_APP_MOLOCH_ADDRESS, approval);
+    console.log("Approving wETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval).toString())
+    const tx = await token.approve(process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval));
+    console.log('tx: ', tx);
   };
 
   render() {
@@ -90,7 +92,7 @@ export default class HomePage extends React.Component {
                       <Form onSubmit={this.handleSubmit}>
                         <Form.Field>
                           <label>Amount to Approve</label>
-                          <input placeholder="Amount in Wei" name="amount" value={approval} onChange={this.handleChange} className="asset_amount" />
+                          <input placeholder="Amount in ETH" name="amount" value={approval} onChange={this.handleChange} className="asset_amount" />
                         </Form.Field>
                         <Button type="submit" color="grey" className="btn_link">
                           Submit

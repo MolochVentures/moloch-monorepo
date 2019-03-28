@@ -85,9 +85,10 @@ export default class ProposalSubmission extends Component {
   handleSubmit = async () => {
     const { moloch, formValid, address, title, description, shares, tribute } = this.state
 
-    if (formValid || true) {
+    if (formValid) {
       try {
-        const tx = await moloch.submitProposal(address, tribute, shares, JSON.stringify({ title, description }))
+        console.log("Submitting proposal: ", address, utils.parseEther(tribute).toString(), shares, JSON.stringify({ title, description }))
+        const tx = await moloch.submitProposal(address, utils.parseEther(tribute), shares, JSON.stringify({ title, description }))
         console.log('tx: ', tx);
       } catch (e) {
         console.error(e);
