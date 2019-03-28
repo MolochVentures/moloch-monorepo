@@ -52,6 +52,18 @@ export const GET_MEMBER_DETAIL = gql`
   }
 `;
 
+export const GET_MEMBER_BY_DELEGATE_KEY = gql`
+  query Member($delegateKey: String!) {
+    members(where: { delegateKey: $delegateKey }) {
+      id
+      shares
+      isActive
+      tokenTribute
+      delegateKey
+    }
+  }
+`;
+
 export const GET_MEMBER_DETAIL_WITH_VOTES = gql`
   query Member($address: String!) {
     member(id: $address) {
@@ -108,9 +120,42 @@ export const GET_PROPOSALS = gql`
   }
 `;
 
-export const GET_PROPOSAL_LIST = gql`
+export const GET_ACTIVE_PROPOSAL_LIST = gql`
   {
-    proposals(first: 100, orderBy: proposalIndex, orderDirection: desc) {
+    proposals(first: 100, orderBy: proposalIndex, orderDirection: desc, where: { processed: false }) {
+      id
+      timestamp
+      tokenTribute
+      sharesRequested
+      processed
+      didPass
+      aborted
+      yesVotes
+      noVotes
+      proposalIndex
+      votes(first: 100) {
+        member {
+          shares
+        }
+        uintVote
+      }
+      details
+      startingPeriod
+      processed
+      status @client
+      title @client
+      description @client
+      gracePeriod @client
+      votingEnds @client
+      votingStarts @client
+      readyForProcessing @client
+    }
+  }
+`;
+
+export const GET_COMPLETED_PROPOSAL_LIST = gql`
+  {
+    proposals(first: 100, orderBy: proposalIndex, orderDirection: desc, where: { processed: true } ) {
       id
       timestamp
       tokenTribute
