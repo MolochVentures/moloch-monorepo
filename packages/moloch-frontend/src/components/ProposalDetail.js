@@ -8,7 +8,7 @@ import ProgressBar from "./ProgressBar";
 import { Query } from "react-apollo";
 import { ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import { getMoloch } from "../web3";
-import { GET_PROPOSAL_DETAIL, GET_METADATA, GET_MEMBERS } from "../helpers/graphQlQueries";
+import { GET_PROPOSAL_DETAIL, GET_METADATA, GET_MEMBERS, GET_MEMBER_BY_DELEGATE_KEY } from "../helpers/graphQlQueries";
 import { convertWeiToDollars } from "../helpers/currency";
 import { utils } from "ethers";
 import { adopt } from "react-adopt";
@@ -37,8 +37,7 @@ const Composed = adopt({
     </Query>
   ),
   metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>,
-  // TODO: dont query all members
-  members: ({ render }) => <Query query={GET_MEMBERS}>{render}</Query>
+  member: ({ render, delegateKey }) => <Query query={GET_MEMBER_BY_DELEGATE_KEY} variables={{ delegateKey }}>{render}</Query>
 });
 
 export default class ProposalDetail extends Component {
@@ -96,12 +95,12 @@ export default class ProposalDetail extends Component {
     const { loggedInUser } = this.props;
 
     return (
-      <Composed id={this.props.match.params.id}>
-        {({ proposalDetail, metadata, members }) => {
-          if (proposalDetail.loading || metadata.loading || members.loading) return <Segment className="blurred box">Loading...</Segment>;
+      <Composed id={this.props.match.params.id} delegateKey={loggedInUser}>
+        {({ proposalDetail, metadata, member }) => {
+          if (proposalDetail.loading || metadata.loading || member.loading) return <Segment className="blurred box">Loading...</Segment>;
           if (proposalDetail.error) throw new Error(`Error!: ${proposalDetail.error}`);
           if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
-          if (members.error) throw new Error(`Error!: ${members.error}`);
+          if (member.error) throw new Error(`Error!: ${member.error}`);
 
           const { proposal } = proposalDetail.data;
           const { shareValue, exchangeRate } = metadata.data;
@@ -122,9 +121,9 @@ export default class ProposalDetail extends Component {
             }
           }, 0);
 
-          const user = members.data.members.find(m => m.delegateKey === loggedInUser);
+          const user = member.data.members.length > 0 ? member.data.members[0] : null
           const userHasVoted = proposal.votes.find(vote => vote.member.id === loggedInUser) ? true : false;
-          const cannotVote = userHasVoted || proposal.status !== ProposalStatus.VotingPeriod || (!(user && user.shares) || !(user && user.isActive));
+          const cannotVote = proposal.aborted || userHasVoted || proposal.status !== ProposalStatus.VotingPeriod || (!(user && user.shares) || !(user && user.isActive));
 
           return (
             <div id="proposal_detail">
