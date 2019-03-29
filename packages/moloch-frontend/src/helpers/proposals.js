@@ -80,7 +80,7 @@ export function determineProposalStatus(proposal, currentPeriod) {
   proposal.startingPeriod = +proposal.startingPeriod
 
   let status;
-  if (proposal.aborted) {
+  if (proposal.processed && proposal.aborted) {
     status = ProposalStatus.Aborted;
   } else if (proposal.processed && proposal.didPass) {
     status = ProposalStatus.Passed;
