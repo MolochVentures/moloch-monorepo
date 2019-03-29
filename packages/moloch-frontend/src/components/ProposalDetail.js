@@ -37,7 +37,11 @@ const Composed = adopt({
     </Query>
   ),
   metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>,
-  member: ({ render, delegateKey }) => <Query query={GET_MEMBER_BY_DELEGATE_KEY} variables={{ delegateKey }}>{render}</Query>
+  member: ({ render, delegateKey }) => (
+    <Query query={GET_MEMBER_BY_DELEGATE_KEY} variables={{ delegateKey }}>
+      {render}
+    </Query>
+  )
 });
 
 export default class ProposalDetail extends Component {
@@ -70,7 +74,7 @@ export default class ProposalDetail extends Component {
     });
   }
 
-  handleNo = async (proposal) => {
+  handleNo = async proposal => {
     const { moloch } = this.state;
     await moloch.submitVote(proposal.proposalIndex, Vote.No);
     this.setState({
@@ -78,7 +82,7 @@ export default class ProposalDetail extends Component {
     });
   };
 
-  handleYes = async (proposal) => {
+  handleYes = async proposal => {
     const { moloch } = this.state;
     await moloch.submitVote(proposal.proposalIndex, Vote.Yes);
     this.setState({
@@ -86,7 +90,7 @@ export default class ProposalDetail extends Component {
     });
   };
 
-  handleProcess = async (proposal) => {
+  handleProcess = async proposal => {
     const { moloch } = this.state;
     await moloch.processProposal(proposal.proposalIndex);
   };
@@ -121,9 +125,13 @@ export default class ProposalDetail extends Component {
             }
           }, 0);
 
-          const user = member.data.members.length > 0 ? member.data.members[0] : null
+          const user = member.data.members.length > 0 ? member.data.members[0] : null;
           const userHasVoted = proposal.votes.find(vote => vote.member.id === loggedInUser) ? true : false;
-          const cannotVote = proposal.aborted || userHasVoted || proposal.status !== ProposalStatus.VotingPeriod || (!(user && user.shares) || !(user && user.isActive));
+          const cannotVote =
+            proposal.aborted ||
+            userHasVoted ||
+            proposal.status !== ProposalStatus.VotingPeriod ||
+            (!(user && user.shares) || !(user && user.isActive));
 
           return (
             <div id="proposal_detail">
@@ -180,7 +188,7 @@ export default class ProposalDetail extends Component {
                       <Grid columns={16} className="member_list">
                         <Grid.Row>
                           <Grid.Column mobile={16} tablet={16} computer={16} className="pill_column">
-                            {proposal.votes && proposal.votes.length > 0 ? (
+                            {proposal.votes.length > 0 ? (
                               <Grid>
                                 <Grid.Row className="members_row">
                                   {/* centered */}
@@ -194,8 +202,8 @@ export default class ProposalDetail extends Component {
                         </Grid.Row>
                       </Grid>
                       <Grid>
-                        <Grid.Column>
-                          <ProgressBar yes={yesShares} no={noShares} />
+                        <Grid.Column textAlign={proposal.aborted ? "center" : ""}>
+                          {proposal.aborted ? <p className="amount">Aborted</p> : <ProgressBar yes={yesShares} no={noShares} />}
                         </Grid.Column>
                       </Grid>
                       <Grid columns="equal" centered>

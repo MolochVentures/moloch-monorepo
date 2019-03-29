@@ -37,24 +37,16 @@ const ProposalCard = ({ proposal }) => {
           <p className="subtext description">{proposal.description ? proposal.description : "N/A"}</p>
           <Grid columns="equal" className="value_shares">
             <Grid.Row>
-              {proposal.aborted ? (
-                <Grid.Column textAlign="center">
-                  <p className="amount">Aborted</p>
-                </Grid.Column>
-              ) : (
-                <>
-                  <Grid.Column textAlign="center">
-                    <p className="subtext">Shares Requested</p>
-                    <p className="amount">{proposal.sharesRequested}</p>
-                  </Grid.Column>
-                  <Grid.Column textAlign="center">
-                    <p className="subtext">
-                      Tribute <Icon name="ethereum" />
-                    </p>
-                    <p className="amount">{utils.formatEther(proposal.tokenTribute)}</p>
-                  </Grid.Column>
-                </>
-              )}
+              <Grid.Column textAlign="center">
+                <p className="subtext">Shares Requested</p>
+                <p className="amount">{proposal.sharesRequested}</p>
+              </Grid.Column>
+              <Grid.Column textAlign="center">
+                <p className="subtext">
+                  Tribute <Icon name="ethereum" />
+                </p>
+                <p className="amount">{parseFloat(utils.formatEther(proposal.tokenTribute)).toFixed(2)}</p>
+              </Grid.Column>
             </Grid.Row>
           </Grid>
           <Grid columns="equal" className="deadlines">
@@ -66,7 +58,17 @@ const ProposalCard = ({ proposal }) => {
               </Grid.Column>
             </Grid.Row>
           </Grid>
-          <ProgressBar yes={yesShares} no={noShares} />
+          {proposal.aborted ? (
+             <Grid columns="equal" className="deadlines">
+            <Grid.Row>
+              <Grid.Column textAlign="center">
+                <p className="amount">Aborted</p>
+              </Grid.Column>
+            </Grid.Row>
+            </Grid>
+          ) : (
+            <ProgressBar yes={yesShares} no={noShares} />
+          )}
         </Segment>
       </Link>
     </Grid.Column>
