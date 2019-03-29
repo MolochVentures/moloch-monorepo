@@ -49,6 +49,7 @@ const MainMenu = props => (
           window.localStorage.setItem("loggedInUser", "");
           await props.client.resetStore();
           await props.populateData(true);
+          window.location.reload();
         }}
       >
         <p>
