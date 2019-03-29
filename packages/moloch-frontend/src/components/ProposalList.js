@@ -6,12 +6,7 @@ import ProposalDetail, { Vote } from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
 import { Query } from "react-apollo";
 import { ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
-import {
-  GET_METADATA,
-  GET_MEMBER_BY_DELEGATE_KEY,
-  GET_COMPLETED_PROPOSAL_LIST,
-  GET_ACTIVE_PROPOSAL_LIST
-} from "../helpers/graphQlQueries";
+import { GET_METADATA, GET_MEMBER_BY_DELEGATE_KEY, GET_COMPLETED_PROPOSAL_LIST, GET_ACTIVE_PROPOSAL_LIST } from "../helpers/graphQlQueries";
 import { utils } from "ethers";
 import { adopt } from "react-adopt";
 
@@ -42,16 +37,24 @@ const ProposalCard = ({ proposal }) => {
           <p className="subtext description">{proposal.description ? proposal.description : "N/A"}</p>
           <Grid columns="equal" className="value_shares">
             <Grid.Row>
-              <Grid.Column textAlign="center">
-                <p className="subtext">Shares Requested</p>
-                <p className="amount">{proposal.sharesRequested}</p>
-              </Grid.Column>
-              <Grid.Column textAlign="center">
-                <p className="subtext">
-                  Tribute <Icon name="ethereum" />
-                </p>
-                <p className="amount">{utils.formatEther(proposal.tokenTribute)}</p>
-              </Grid.Column>
+              {proposal.aborted ? (
+                <Grid.Column textAlign="center">
+                  <p className="amount">Aborted</p>
+                </Grid.Column>
+              ) : (
+                <>
+                  <Grid.Column textAlign="center">
+                    <p className="subtext">Shares Requested</p>
+                    <p className="amount">{proposal.sharesRequested}</p>
+                  </Grid.Column>
+                  <Grid.Column textAlign="center">
+                    <p className="subtext">
+                      Tribute <Icon name="ethereum" />
+                    </p>
+                    <p className="amount">{utils.formatEther(proposal.tokenTribute)}</p>
+                  </Grid.Column>
+                </>
+              )}
             </Grid.Row>
           </Grid>
           <Grid columns="equal" className="deadlines">
@@ -76,7 +79,7 @@ const Composed = adopt({
   metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>
 });
 
-const ProposalList = ({ isActive}) => (
+const ProposalList = ({ isActive }) => (
   <Composed>
     {({ activeProposalsResult, completedProposalsResult, metadata }) => {
       if (metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
