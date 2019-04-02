@@ -8,7 +8,7 @@ import ProgressBar from "./ProgressBar";
 import { Query } from "react-apollo";
 import { ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import { getMoloch } from "../web3";
-import { GET_PROPOSAL_DETAIL, GET_METADATA, GET_MEMBERS, GET_MEMBER_BY_DELEGATE_KEY } from "../helpers/graphQlQueries";
+import { GET_PROPOSAL_DETAIL, GET_METADATA, GET_MEMBER_BY_DELEGATE_KEY } from "../helpers/graphQlQueries";
 import { convertWeiToDollars } from "../helpers/currency";
 import { utils } from "ethers";
 import { adopt } from "react-adopt";
