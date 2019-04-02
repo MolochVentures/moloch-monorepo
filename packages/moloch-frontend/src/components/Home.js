@@ -14,18 +14,18 @@ const Composed = adopt({
   metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>
 });
 
-const NumMembers = ({ members }) => (
+const NumMembers = ({ members, loading }) => (
   <Link to="/members" className="link">
     <Button size="large" color="grey" className="btn_link">
-      {members.length} Members
+      {loading ? '...' : members.length} Members
     </Button>
   </Link>
 );
 
-const NumProposals = ({ proposals }) => (
+const NumProposals = ({ proposals, loading }) => (
   <Link to="/proposals" className="link">
     <Button size="large" color="grey" className="btn_link">
-      {proposals.length} Proposals
+      {loading ? '...' : proposals.length} Proposals
     </Button>
   </Link>
 );
@@ -60,7 +60,18 @@ export default class HomePage extends React.Component {
     return (
       <Composed>
         {({ members, proposals, metadata }) => {
-          if (members.loading || proposals.loading || metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
+          if (metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
+
+          let membersLoading = false
+          if (members.loading) {
+            membersLoading = true
+          }
+
+          let proposalsLoading = false
+          if (proposals.loading) {
+            proposalsLoading = true
+          }
+
           if (members.error) throw new Error(`Error!: ${members.error}`);
           if (proposals.error) throw new Error(`Error!: ${proposals.error}`);
           if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
@@ -74,8 +85,8 @@ export default class HomePage extends React.Component {
                   {/* </Link> */}
                 </Grid.Column>
                 <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons">
-                  <NumMembers members={members.data.members} />
-                  <NumProposals proposals={proposals.data.proposals} />
+                  <NumMembers members={members.data.members} loading={membersLoading} />
+                  <NumProposals proposals={proposals.data.proposals} loading={proposalsLoading} />
                 </Grid.Column>
                 <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
                   <Modal
