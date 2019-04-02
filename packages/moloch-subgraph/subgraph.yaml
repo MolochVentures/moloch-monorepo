@@ -1,5 +1,5 @@
 specVersion: 0.0.1
-description: Moloch subgraph
+description: A community DAO focused on funding Ethereum development, in the name of Moloch the God of Coordination Failure.
 repository: https://github.com/MolochVentures/moloch-monorepo/
 schema:
   file: ./schema.graphql
