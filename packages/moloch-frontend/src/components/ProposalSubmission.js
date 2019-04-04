@@ -50,7 +50,7 @@ export default class ProposalSubmission extends Component {
         fieldValidationErrors.shares = sharesValid ? "" : "Shares is invalid";
         break;
       case "tribute":
-        tributeValid = value > 0;
+        tributeValid = value >= 0;
         fieldValidationErrors.tribute = tributeValid ? "" : "Tribute is invalid";
         break;
       default:
