@@ -2,9 +2,7 @@ import React, { Component } from "react";
 import { Divider, Grid, Icon, Segment, Button, Image } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import hood from "assets/hood.png";
-
 import ProgressBar from "./ProgressBar";
-
 import { Query } from "react-apollo";
 import { ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import { getMoloch } from "../web3";
@@ -12,6 +10,7 @@ import { GET_PROPOSAL_DETAIL, GET_METADATA, GET_MEMBER_BY_DELEGATE_KEY } from ".
 import { convertWeiToDollars } from "../helpers/currency";
 import { utils } from "ethers";
 import { adopt } from "react-adopt";
+import Linkify from 'react-linkify';
 
 export const Vote = {
   Null: 0, // default value, counted as abstention
@@ -144,7 +143,9 @@ export default class ProposalDetail extends Component {
                   </Grid>
                   <Grid centered columns={14}>
                     <Grid.Column mobile={16} tablet={16} computer={4}>
-                      <div className="subtext description">{proposal.description ? proposal.description : "N/A"}</div>
+                      <Linkify properties={{target: '_blank'}}>
+                        <div className="subtext description wordwrap">{proposal.description ? proposal.description : "N/A"}</div>
+                      </Linkify>
                       <Grid columns="equal" className="tokens">
                         <Grid.Row>
                           <Grid.Column className="tributes">
