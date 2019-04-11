@@ -20,6 +20,7 @@
     "react-adopt": "^0.6.0",
     "react-apollo": "^2.5.2",
     "react-dom": "^16.8.4",
+    "react-linkify": "^0.2.2",
     "react-redux": "^6.0.1",
     "react-router-dom": "^5.0.0",
     "react-scripts": "^2.1.8",
