@@ -184,7 +184,7 @@ const ProposalList = ({ isActive }) => (
                 </Link>
               </Grid.Column>
             </Grid>
-            <Tab menu={{ secondary: true, pointing: true, vertical: true }} panes={panes} />
+            <Tab menu={{ secondary: true, pointing: true }} panes={panes} />
           </>
         </div>
       );

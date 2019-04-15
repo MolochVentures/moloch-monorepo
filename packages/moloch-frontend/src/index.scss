@@ -1,7 +1,7 @@
 body {
   color: white;
   font-weight: bold;
-  font-family: "GT Haptik", sans-serif;
+  font-family: "GT Haptik", sans-serif !important;
 }
 
 .amount {
@@ -357,6 +357,12 @@ body {
 #proposal_list {
   .name {
     font-size: 15px;
+    overflow-y: auto;
+    -ms-overflow-style: none;  // IE 10+
+    scrollbar-width: none;  // Firefox
+  }
+  .name::-webkit-scrollbar { 
+    display: none;  // Safari and Chrome
   }
   .description {
     padding-top: 10px;
@@ -385,7 +391,11 @@ body {
     border-radius: 20px;
   }
 
-  .ui.pointing.secondary.menu {
+  .ui.secondary.menu {
+    overflow: scroll;
+    -ms-overflow-style: none;  // IE 10+
+    scrollbar-width: none;  // Firefox
+
     a {
       font-size: 20px;
     }
@@ -397,6 +407,10 @@ body {
     .active.item {
       border-color: #fff;
     }
+  }
+
+  .ui.secondary.menu::-webkit-scrollbar { 
+    display: none;  // Safari and Chrome
   }
 
   .ui.segment.active.tab {
