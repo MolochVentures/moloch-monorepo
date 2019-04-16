@@ -16,7 +16,7 @@ import { ApolloClient } from "apollo-client";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { HttpLink } from "apollo-link-http";
 import { GET_METADATA } from "./helpers/graphQlQueries";
-import { getMedianizer, getMoloch, getToken } from "./web3";
+import { getMedianizer, getMoloch, getToken, initWeb3 } from "./web3";
 import { utils } from "ethers";
 import { adopt } from "react-adopt";
 
@@ -81,6 +81,11 @@ class App extends React.Component {
       query: IS_LOGGED_IN
     });
 
+    // make sure logged in metamask user is the one that's saved to storage
+    if (loggedInUser) {
+      await initWeb3(client)
+    }
+
     let {
       data: { exchangeRate, totalShares, currentPeriod, guildBankValue, shareValue }
     } = await client.query({
@@ -116,7 +121,6 @@ class App extends React.Component {
       currentPeriod: currentPeriod.toString(),
       exchangeRate: exchangeRate.toString()
     };
-    console.log("dataToWrite: ", dataToWrite);
 
     client.writeData({
       data: dataToWrite

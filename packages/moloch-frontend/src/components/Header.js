@@ -162,28 +162,14 @@ export default class Header extends Component {
     const { client } = this.props
     let eth
     if (method === 'metamask') {
-      eth = await initMetamask();
+      eth = await initMetamask(client);
     } else if (method === 'gnosis') {
-      eth = await initGnosisSafe()
+      eth = await initGnosisSafe(client)
     } else {
       throw new Error('Unsupported Web3 login method')
     }
     if (!eth) {
       return
-    }
-
-    const coinbase = (await eth.listAccounts())[0];
-
-    if (!coinbase) {
-      alert("Could not retrieve address from Gnosis Safe/MetaMask, is it configured and this domain whitelisted?");
-    } else {
-      // Try getting a user by their public address.
-      client.writeData({
-        data: {
-          loggedInUser: coinbase.toLowerCase()
-        }
-      });
-      window.localStorage.setItem("loggedInUser", coinbase.toLowerCase())
     }
     
     const moloch = await getMoloch(loggedInUser);

@@ -10,26 +10,51 @@ let token
 let medianizer
 let eth
 
-export async function initMetamask() {
+export async function initWeb3(client) {
+  const loginMethod = localStorage.getItem("loginType")
+  if (loginMethod === "gnosis") {
+    await initGnosisSafe(client)
+  } else {
+    await initMetamask(client)
+  }
+}
+
+async function checkNetwork(eth) {
+  const network = await eth.getNetwork()
+  console.log('network: ', network);
+  if (network.chainId !== 1) {
+    alert('Please set Web3 provider to Mainnet and try again.')
+    return false
+  }
+  return true
+}
+
+export async function initMetamask(client) {
   if (!window.ethereum && !window.web3) {
     // Non-DApp browsers won't work.
     alert("Web3 not detected.");
   }
+  let coinbase = ""
   if (window.ethereum) {
     // Modern DApp browsers need to enable Metamask access.
-    try {
-      await window.ethereum.enable()
-      let web3Provider = window['ethereum'] || window.web3.currentProvider
-      eth = new ethers.providers.Web3Provider(web3Provider);
+    await window.ethereum.enable()
+    let web3Provider = window['ethereum'] || window.web3.currentProvider
+    eth = new ethers.providers.Web3Provider(web3Provider);
+    if (await checkNetwork(eth)) {
       localStorage.setItem("loginType", "metamask");
-    } catch (error) {
-      alert("Metamask needs to be enabled.")
+      coinbase = (await eth.listAccounts())[0].toLowerCase();
     }
   }
+  client.writeData({
+    data: {
+      loggedInUser: coinbase
+    }
+  });
+  window.localStorage.setItem("loggedInUser", coinbase)
   return eth
 }
 
-export function initGnosisSafe() {
+export async function initGnosisSafe(client) {
   /**
    *  Create Safe Provider
    */
@@ -41,9 +66,18 @@ export function initGnosisSafe() {
   /**
    *  Create Web3
    */
+  let coinbase = ""
   eth = new ethers.providers.Web3Provider(provider);
-  localStorage.setItem("loginType", "gnosis");
-  return eth
+  if (await checkNetwork(eth)) {
+    localStorage.setItem("loginType", "gnosis");
+    coinbase = (await eth.listAccounts())[0].toLowerCase();
+  }
+  client.writeData({
+    data: {
+      loggedInUser: coinbase
+    }
+  });
+  window.localStorage.setItem("loggedInUser", coinbase)
 }
 
 export async function getEthSigner() {
