@@ -17,7 +17,7 @@ const Composed = adopt({
 const NumMembers = ({ members, loading }) => (
   <Link to="/members" className="link">
     <Button size="large" color="grey" className="btn_link">
-      {loading ? '...' : members.length} Members
+      {loading ? "..." : members.length} Members
     </Button>
   </Link>
 );
@@ -25,7 +25,7 @@ const NumMembers = ({ members, loading }) => (
 const NumProposals = ({ proposals, loading }) => (
   <Link to="/proposals" className="link">
     <Button size="large" color="grey" className="btn_link">
-      {loading ? '...' : proposals.length} Proposals
+      {loading ? "..." : proposals.length} Proposals
     </Button>
   </Link>
 );
@@ -38,7 +38,7 @@ export default class HomePage extends React.Component {
   };
 
   async componentDidMount() {
-    const { loggedInUser } = this.props
+    const { loggedInUser } = this.props;
     const token = await getToken(loggedInUser);
 
     this.setState({
@@ -50,9 +50,9 @@ export default class HomePage extends React.Component {
 
   handleSubmit = async () => {
     const { approval, token } = this.state;
-    console.log("Approving wETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval).toString())
+    console.log("Approving wETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval).toString());
     const tx = await token.approve(process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval));
-    console.log('tx: ', tx);
+    console.log("tx: ", tx);
   };
 
   render() {
@@ -62,14 +62,14 @@ export default class HomePage extends React.Component {
         {({ members, proposals, metadata }) => {
           if (metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
 
-          let membersLoading = false
+          let membersLoading = false;
           if (members.loading) {
-            membersLoading = true
+            membersLoading = true;
           }
 
-          let proposalsLoading = false
+          let proposalsLoading = false;
           if (proposals.loading) {
-            proposalsLoading = true
+            proposalsLoading = true;
           }
 
           if (members.error) throw new Error(`Error!: ${members.error}`);
@@ -115,16 +115,18 @@ export default class HomePage extends React.Component {
 
                 <Grid.Column width={16}>
                   <Segment className="blurred box">
-                    <Grid columns="equal" className="graph_values">
-                      <Grid.Column textAlign="left">
-                        <Statistic inverted label="Total Shares" value={totalShares} />
-                      </Grid.Column>
-                      <Grid.Column textAlign="center">
-                        <Statistic inverted label="Total ETH" value={utils.formatEther(guildBankValue)} />
-                      </Grid.Column>
-                      <Grid.Column textAlign="right">
-                        <Statistic inverted label="Share Value" value={convertWeiToDollars(shareValue, exchangeRate)} />
-                      </Grid.Column>
+                    <Grid columns="3" className="graph_values">
+                      <Grid.Row>
+                        <Grid.Column textAlign="center" floated="left" mobile={16} tablet={4} computer={4}>
+                          <Statistic inverted label="Total Shares" value={totalShares} />
+                        </Grid.Column>
+                        <Grid.Column textAlign="center" mobile={16} tablet={4} computer={4}>
+                          <Statistic inverted label="Total ETH" value={utils.formatEther(guildBankValue)} />
+                        </Grid.Column>
+                        <Grid.Column textAlign="center" floated="right" mobile={16} tablet={4} computer={4}>
+                          <Statistic inverted label="Share Value" value={convertWeiToDollars(shareValue, exchangeRate)} />
+                        </Grid.Column>
+                      </Grid.Row>
                     </Grid>
                   </Segment>
                 </Grid.Column>
