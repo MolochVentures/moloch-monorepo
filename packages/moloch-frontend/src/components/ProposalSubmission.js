@@ -1,7 +1,98 @@
 import React, { Component } from "react";
-import { Button, Divider, Form, Grid, Input, Segment, GridColumn } from "semantic-ui-react";
-import { getMoloch } from "../web3";
+import { Button, Divider, Form, Grid, Input, Segment, Modal, Header, Icon, List } from "semantic-ui-react";
+import { getMoloch, getToken } from "../web3";
 import { utils } from "ethers";
+
+const DEPOSIT_WETH = "10";
+
+class SubmitModal extends Component {
+  state = {
+    loading: true,
+    beneficiaryApproved: false,
+    depositApproved: false,
+    open: false
+  };
+
+  handleOpen = async () => {
+    const { token, address, tribute, moloch, loggedInUser, valid } = this.props;
+    if (!valid) {
+      alert("Please fill any missing fields.");
+    }
+    this.setState({
+      open: true
+    });
+
+    const beneficiaryAllowance = await token.allowance(address, moloch.address);
+    let beneficiaryApproved = false;
+    if (beneficiaryAllowance.gte(utils.parseEther(tribute))) {
+      beneficiaryApproved = true;
+    }
+
+    const depositAllowance = await token.allowance(loggedInUser, moloch.address);
+    let depositApproved = false;
+    if (depositAllowance.gte(utils.parseEther(DEPOSIT_WETH))) {
+      depositApproved = true;
+    }
+
+    this.setState({
+      beneficiaryApproved,
+      depositApproved,
+      loading: false
+    });
+  };
+
+  handleClose = () => {
+    this.setState({
+      open: false
+    });
+  };
+
+  render() {
+    const { loading, beneficiaryApproved, depositApproved, open } = this.state;
+    const { handleSubmit, submittedTx } = this.props;
+    console.log("open: ", open);
+    return (
+      <Modal
+        trigger={
+          <Button size="large" color="red" onClick={this.handleOpen}>
+            Submit Proposal
+          </Button>
+        }
+        basic
+        size="small"
+        open={open}
+      >
+        <Header icon="archive" content="Submit Proposal" />
+        <Modal.Content>
+          <List>
+            <List.Item>
+              {loading ? <List.Icon name="time" /> : depositApproved ? <List.Icon name="check circle" /> : <List.Icon name="x" />}
+              <List.Content>10 wETH Deposit Approved</List.Content>
+            </List.Item>
+            <List.Item>
+              {loading ? <List.Icon name="time" /> : beneficiaryApproved ? <List.Icon name="check circle" /> : <List.Icon name="x" />}
+              <List.Content>Tribute Approved</List.Content>
+            </List.Item>
+            <List.Item>
+              {submittedTx ? <List.Icon name="code" /> : <></>}
+              <List.Content>
+                {submittedTx ? <a href={`https://etherscan.io/tx/${submittedTx.hash}`}>View Transaction on Etherscan</a> : <></>}
+              </List.Content>
+            </List.Item>
+          </List>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button basic color="green" inverted onSubmit={handleSubmit} disabled={submittedTx || !depositApproved || !beneficiaryApproved}>
+            <Icon name="remove" /> Submit
+          </Button>
+          <Button basic color="red" inverted onClick={this.handleClose}>
+            <Icon name="remove" /> Close
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    );
+  }
+}
 
 export default class ProposalSubmission extends Component {
   state = {
@@ -20,15 +111,17 @@ export default class ProposalSubmission extends Component {
   };
 
   async componentDidMount() {
-    const { loggedInUser } = this.props
+    const { loggedInUser } = this.props;
     const moloch = await getMoloch(loggedInUser);
+    const token = await getToken(loggedInUser);
     this.setState({
-      moloch
+      moloch,
+      token
     });
   }
 
   validateField = (fieldName, value) => {
-    let { fieldValidationErrors, titleValid, descriptionValid, tributeValid, sharesValid, addressValid } = this.state
+    let { fieldValidationErrors, titleValid, descriptionValid, tributeValid, sharesValid, addressValid } = this.state;
 
     switch (fieldName) {
       case "title":
@@ -36,11 +129,11 @@ export default class ProposalSubmission extends Component {
         fieldValidationErrors.title = titleValid ? "" : "Title is invalid";
         break;
       case "address":
-        addressValid = utils.isHexString(value)
-        console.log('utils.isHexString(value): ', utils.isHexString(value));
-        console.log('value: ', value);
+        addressValid = utils.isHexString(value);
+        console.log("utils.isHexString(value): ", utils.isHexString(value));
+        console.log("value: ", value);
         fieldValidationErrors.address = addressValid ? "" : "Address is invalid";
-        break
+        break;
       case "description":
         descriptionValid = value !== "";
         fieldValidationErrors.description = descriptionValid ? "" : "Description is invalid";
@@ -67,40 +160,57 @@ export default class ProposalSubmission extends Component {
       },
       this.validateForm
     );
-  }
+  };
 
   validateForm = () => {
-    const { titleValid, descriptionValid, sharesValid, tributeValid, addressValid } = this.state
-    this.setState({ formValid: titleValid && descriptionValid && sharesValid && tributeValid && addressValid});
-  }
+    const { titleValid, descriptionValid, sharesValid, tributeValid, addressValid } = this.state;
+    this.setState({ formValid: titleValid && descriptionValid && sharesValid && tributeValid && addressValid });
+  };
 
-  handleInput = (event) => {
+  handleInput = event => {
     let name = event.target.name;
     let value = event.target.value;
     this.setState({ [event.target.name]: event.target.value }, () => {
       this.validateField(name, value);
     });
-  }
+  };
 
   handleSubmit = async () => {
-    const { moloch, formValid, address, title, description, shares, tribute } = this.state
+    const { moloch, address, title, description, shares, tribute } = this.state;
 
-    if (formValid) {
-      try {
-        console.log("Submitting proposal: ", address, utils.parseEther(tribute).toString(), shares, JSON.stringify({ title, description }))
-        const tx = await moloch.submitProposal(address, utils.parseEther(tribute), shares, JSON.stringify({ title, description }))
-        console.log('tx: ', tx);
-      } catch (e) {
-        console.error(e);
-        alert("Error processing proposal");
-      }
-    } else {
-      alert("Please fill any missing fields.");
+    let submittedTx;
+    try {
+      console.log("Submitting proposal: ", address, utils.parseEther(tribute).toString(), shares, JSON.stringify({ title, description }));
+      submittedTx = await moloch.submitProposal(address, utils.parseEther(tribute), shares, JSON.stringify({ title, description }));
+      console.log("submittedTx: ", submittedTx);
+    } catch (e) {
+      console.error(e);
+      alert("Error processing proposal");
     }
-  }
+
+    this.setState({
+      submittedTx
+    });
+  };
 
   render() {
-    const { shares, tribute, title, description, address } = this.state
+    const {
+      shares,
+      tribute,
+      title,
+      description,
+      address,
+      token,
+      formValid,
+      moloch,
+      titleValid,
+      descriptionValid,
+      sharesValid,
+      tributeValid,
+      addressValid,
+      submittedTx
+    } = this.state;
+    const { loggedInUser } = this.props;
     return (
       <div id="proposal_submission">
         <Form>
@@ -115,6 +225,7 @@ export default class ProposalSubmission extends Component {
                   placeholder="Proposal Title"
                   onChange={this.handleInput}
                   value={title}
+                  error={!titleValid}
                 />
                 <Divider />
               </Grid.Column>
@@ -129,6 +240,7 @@ export default class ProposalSubmission extends Component {
                     fluid
                     onChange={this.handleInput}
                     value={address}
+                    error={!addressValid}
                   />
                   <Form.Input
                     name="shares"
@@ -138,6 +250,7 @@ export default class ProposalSubmission extends Component {
                     type="number"
                     onChange={this.handleInput}
                     value={shares}
+                    error={!sharesValid}
                   />
                   <Form.Input
                     name="tribute"
@@ -147,6 +260,7 @@ export default class ProposalSubmission extends Component {
                     type="number"
                     onChange={this.handleInput}
                     value={tribute}
+                    error={!tributeValid}
                   />
                 </Segment>
               </Grid.Column>
@@ -163,6 +277,7 @@ export default class ProposalSubmission extends Component {
                         rows={15}
                         onChange={this.handleInput}
                         value={description}
+                        error={!descriptionValid}
                       />
                     </Segment>
                   </Grid.Column>
@@ -170,11 +285,21 @@ export default class ProposalSubmission extends Component {
               </Grid.Column>
             </Grid.Row>
             <Grid.Row>
-              <GridColumn mobile={16} tablet={8} computer={8} className="submit_button">
-                <Button size="large" color="red" onClick={this.handleSubmit}>
+              <Grid.Column mobile={16} tablet={8} computer={8} className="submit_button">
+                {/* <Button size="large" color="red" onClick={this.handleSubmit}>
                   Submit Proposal
-                </Button>
-              </GridColumn>
+                </Button> */}
+                <SubmitModal
+                  valid={formValid}
+                  tribute={tribute}
+                  address={address}
+                  token={token}
+                  moloch={moloch}
+                  loggedInUser={loggedInUser}
+                  handleSubmit={this.handleSubmit}
+                  submittedTx={submittedTx}
+                />
+              </Grid.Column>
             </Grid.Row>
           </Grid>
         </Form>
