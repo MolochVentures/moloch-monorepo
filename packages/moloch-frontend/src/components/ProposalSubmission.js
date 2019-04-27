@@ -71,7 +71,7 @@ class SubmitModal extends Component {
             </List.Item>
             <List.Item>
               {loading ? <List.Icon name="time" /> : beneficiaryApproved ? <List.Icon name="check circle" /> : <List.Icon name="x" />}
-              <List.Content>Tribute Approved</List.Content>
+              <List.Content>Tribute Approved By Beneficiary</List.Content>
             </List.Item>
             <List.Item>
               {submittedTx ? <List.Icon name="code" /> : <></>}
