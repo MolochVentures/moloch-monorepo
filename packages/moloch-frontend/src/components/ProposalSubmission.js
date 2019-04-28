@@ -82,7 +82,7 @@ class SubmitModal extends Component {
           </List>
         </Modal.Content>
         <Modal.Actions>
-          <Button basic color="green" inverted onSubmit={handleSubmit} disabled={submittedTx || !depositApproved || !beneficiaryApproved}>
+          <Button basic color="green" inverted onClick={handleSubmit} disabled={submittedTx || !depositApproved || !beneficiaryApproved}>
             <Icon name="remove" /> Submit
           </Button>
           <Button basic color="red" inverted onClick={this.handleClose}>
