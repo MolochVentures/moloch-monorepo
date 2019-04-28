@@ -203,7 +203,7 @@ export default class ProposalDetail extends Component {
                         </Grid.Row>
                       </Grid>
                       <Grid>
-                        <Grid.Column textAlign={proposal.aborted ? "center" : ""}>
+                        <Grid.Column textAlign="center">
                           {proposal.aborted ? <p className="amount">Aborted</p> : <ProgressBar yes={yesShares} no={noShares} />}
                         </Grid.Column>
                       </Grid>
