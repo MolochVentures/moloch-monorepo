@@ -21,6 +21,13 @@ export const resolvers = {
         const details = JSON.parse(proposal.details);
         return details.title || proposal.details || "";
       } catch (e) {
+        // special cases for malformed proposals, remove this once proposal is stale
+        if (proposal.details === '{	itle:Member Proposal: DCInvestor,description:https://paper.dropbox.com/doc/MGP3-ETH2.0-Test-Runner--AcFiUF_av4SF5CHOuS4qSH0WAg-DZu4VRgbP1LZeUimS1k3L}') {
+          return "Member Proposal: DCInvestor"
+        }
+        if (proposal.details === '{title:Member Proposal: Anon,description:https://etherpad.net/p/anon_moloch_proposal}') {
+          return "Member Proposal: Anon"
+        }
         console.log(`Could not parse title from proposal.proposalIndex: ${proposal.proposalIndex} proposal.details: ${proposal.details}`);
         return proposal.details || "";
       }
@@ -30,6 +37,12 @@ export const resolvers = {
         const details = JSON.parse(proposal.details);
         return details.description || "";
       } catch (e) {
+        if (proposal.details === '{	itle:Member Proposal: DCInvestor,description:https://paper.dropbox.com/doc/MGP3-ETH2.0-Test-Runner--AcFiUF_av4SF5CHOuS4qSH0WAg-DZu4VRgbP1LZeUimS1k3L}') {
+          return "https://paper.dropbox.com/doc/MGP3-ETH2.0-Test-Runner--AcFiUF_av4SF5CHOuS4qSH0WAg-DZu4VRgbP1LZeUimS1k3L"
+        }
+        if (proposal.details === '{title:Member Proposal: Anon,description:https://etherpad.net/p/anon_moloch_proposal}') {
+          return "https://etherpad.net/p/anon_moloch_proposal"
+        }
         console.log(`Could not parse description from proposal.proposalIndex: ${proposal.proposalIndex} proposal.details: ${proposal.details}`);
         return "";
       }
