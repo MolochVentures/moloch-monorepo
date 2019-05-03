@@ -62,7 +62,7 @@ class SubmitModal extends Component {
         size="small"
         open={open}
       >
-        <Header icon="archive" content="Submit Proposal" />
+        <Header icon="send" content="Submit Proposal" />
         <Modal.Content>
           <List>
             <List.Item>
@@ -83,7 +83,7 @@ class SubmitModal extends Component {
         </Modal.Content>
         <Modal.Actions>
           <Button basic color="green" inverted onClick={handleSubmit} disabled={submittedTx || !depositApproved || !beneficiaryApproved}>
-            <Icon name="remove" /> Submit
+            <Icon name="check" /> Submit
           </Button>
           <Button basic color="red" inverted onClick={this.handleClose}>
             <Icon name="remove" /> Close
