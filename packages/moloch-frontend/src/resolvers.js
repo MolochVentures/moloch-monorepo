@@ -19,6 +19,9 @@ export const resolvers = {
     title: proposal => {
       try {
         const details = JSON.parse(proposal.details);
+        if (details.title === "") {
+          return "N/A"
+        }
         return details.title || proposal.details || "";
       } catch (e) {
         // special cases for malformed proposals, remove this once proposal is stale
