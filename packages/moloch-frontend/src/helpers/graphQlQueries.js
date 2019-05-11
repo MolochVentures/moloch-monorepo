@@ -220,6 +220,7 @@ export const GET_PROPOSAL_DETAIL = gql`
   query Proposal($id: String!) {
     proposal(id: $id) {
       id
+      applicantAddress
       timestamp
       tokenTribute
       sharesRequested
