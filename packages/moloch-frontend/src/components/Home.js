@@ -121,7 +121,7 @@ export default class HomePage extends React.Component {
                           <Statistic inverted label="Total Shares" value={totalShares} />
                         </Grid.Column>
                         <Grid.Column textAlign="center" mobile={16} tablet={4} computer={4}>
-                          <Statistic inverted label="Total ETH" value={utils.formatEther(guildBankValue)} />
+                          <Statistic inverted label="Total ETH" value={parseFloat(utils.formatEther(guildBankValue)).toFixed(2)} />
                         </Grid.Column>
                         <Grid.Column textAlign="center" floated="right" mobile={16} tablet={4} computer={4}>
                           <Statistic inverted label="Share Value" value={convertWeiToDollars(shareValue, exchangeRate)} />
