@@ -76,7 +76,13 @@ class SubmitModal extends Component {
             <List.Item>
               {submittedTx ? <List.Icon name="code" /> : <></>}
               <List.Content>
-                {submittedTx ? <a href={`https://etherscan.io/tx/${submittedTx.hash}`}>View Transaction on Etherscan</a> : <></>}
+                {submittedTx ? (
+                  <a href={`https://etherscan.io/tx/${submittedTx.hash}`} target="_blank" rel="noopener noreferrer">
+                    View Transaction on Etherscan
+                  </a>
+                ) : (
+                  <></>
+                )}
               </List.Content>
             </List.Item>
           </List>
