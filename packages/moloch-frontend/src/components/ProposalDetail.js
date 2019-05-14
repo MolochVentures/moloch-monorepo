@@ -154,7 +154,6 @@ export default class ProposalDetail extends Component {
 
   render() {
     const { loggedInUser } = this.props;
-    const { showToast } = this.state;
 
     return (
       <Composed id={this.props.match.params.id} delegateKey={loggedInUser}>
