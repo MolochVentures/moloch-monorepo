@@ -155,7 +155,9 @@ export function handleProcessProposal(event: ProcessProposal): void {
 export function handleRagequit(event: Ragequit): void {
   let member = Member.load(event.params.memberAddress.toHex())
   member.shares = member.shares.minus(event.params.sharesToBurn)
-  // TODO: delete member
+  if(member.shares.equals(new BigInt(0))) {
+    member.isActive = false
+  }
   member.save()
 }
 
