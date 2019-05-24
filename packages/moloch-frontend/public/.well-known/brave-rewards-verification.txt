@@ -1,0 +1,4 @@
+This is a Brave Rewards publisher verification file.
+
+Domain: molochdao.com
+Token: d4f831d14aa92f5fc519721099028a3236d9662d26bd7f7538611fd3e1066338
