@@ -1,2 +1,3 @@
 packages/moloch-subgraph/dist/
 packages/moloch-backend/data/db.json
+packages/moloch-subgraph/build/
