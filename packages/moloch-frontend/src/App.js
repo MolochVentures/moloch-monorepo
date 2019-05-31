@@ -110,7 +110,7 @@ class App extends React.Component {
     }
 
     if (guildBankValue && totalShares) {
-      const ethPerShare = guildBankValue.gt(0) ? totalShares.toNumber() / parseFloat(utils.formatEther(guildBankValue)) : 0; // in eth
+      const ethPerShare = totalShares.toNumber() > 0 ? parseFloat(utils.formatEther(guildBankValue)) / totalShares.toNumber() : 0; // in eth
       shareValue = utils.parseEther(ethPerShare.toString()); // in wei
     }
 
