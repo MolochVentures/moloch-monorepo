@@ -215,11 +215,25 @@ export default class ProposalDetail extends Component {
                           </Grid.Column>
                         </Grid.Row>
                         <Grid.Row>
-                          <Grid.Column>
+                          <Grid.Column mobile={8} textAlign="right">
                             <p className="subtext">Applicant</p>
+                          </Grid.Column>
+                          <Grid.Column mobile={8}>
                             <p className="address">
                               <a href={`https://etherscan.io/address/${proposal.applicantAddress}`} target="_blank" rel="noopener noreferrer">
-                                {proposal.applicantAddress}
+                                {proposal.applicantAddress.substring(0, 10) + "..."}
+                              </a>
+                            </p>
+                          </Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row>
+                          <Grid.Column mobile={8} textAlign="right">
+                            <p className="subtext">Proposer</p>
+                          </Grid.Column>
+                          <Grid.Column mobile={8}>
+                            <p className="address">
+                              <a href={`https://etherscan.io/address/${proposal.memberAddress}`} target="_blank" rel="noopener noreferrer">
+                                {proposal.memberAddress.substring(0, 10) + "..."}
                               </a>
                             </p>
                           </Grid.Column>
