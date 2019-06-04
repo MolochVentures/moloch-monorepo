@@ -30,8 +30,7 @@
     "safe-web3-provider": "github:gnosis/safe-web3-provider#v1.0.0",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^0.86.0",
-    "styled-components": "^4.2.0",
-    "web3": "^1.0.0-beta.49"
+    "styled-components": "^4.2.0"
   },
   "scripts": {
     "start": "react-scripts start",
