@@ -221,6 +221,7 @@ export const GET_PROPOSAL_DETAIL = gql`
     proposal(id: $id) {
       id
       applicantAddress
+      memberAddress
       timestamp
       tokenTribute
       sharesRequested
