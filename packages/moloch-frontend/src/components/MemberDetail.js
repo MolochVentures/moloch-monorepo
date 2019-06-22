@@ -1,6 +1,7 @@
 import React from "react";
 import { Divider, Grid, Segment, Image, Icon, Label, Header } from "semantic-ui-react";
 import { Link } from "react-router-dom";
+import ProfileHover from "profile-hover";
 
 import bull from "assets/bull.png";
 import hood from "assets/hood.png";
@@ -19,36 +20,40 @@ const Composed = adopt({
       {render}
     </Query>
   ),
-  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>,
+  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>
 });
 
 const MemberDetail = ({ loggedInUser, member, shareValue, exchangeRate }) => (
   <Segment className="blurred box">
     <Grid columns="equal">
-      <Grid.Column>
-        <p className="subtext">Shares</p>
-        <p className="amount">{member.shares}</p>
-      </Grid.Column>
-      <Grid.Column textAlign="right">
-        <p className="subtext">Total Value</p>
-        <p className="amount">
-          {convertWeiToDollars(
-            utils
-              .bigNumberify(member.shares)
-              .mul(shareValue)
-              .toString(),
-            exchangeRate
-          )}
-        </p>
-      </Grid.Column>
-    </Grid>
-    <Grid>
-      <Grid.Column textAlign="center" className="avatar">
-        <Image centered src={loggedInUser === member.id || loggedInUser === member.delegateKey ? bull : hood} size="tiny" />
-      </Grid.Column>
-    </Grid>
-    <p className="subtext">Tribute</p>
-    <Grid columns="equal">
+      <Grid.Row>
+        <Grid.Column>
+          <p className="subtitle">Shares</p>
+          <p className="amount">{member.shares}</p>
+        </Grid.Column>
+        <Grid.Column textAlign="right">
+          <p className="subtitle">Total Value</p>
+          <p className="amount">
+            {convertWeiToDollars(
+              utils
+                .bigNumberify(member.shares)
+                .mul(shareValue)
+                .toString(),
+              exchangeRate
+            )}
+          </p>
+        </Grid.Column>
+      </Grid.Row>
+      <Grid.Row>
+        <Grid.Column textAlign="center" className="avatar">
+          <Image centered src={loggedInUser === member.id || loggedInUser === member.delegateKey ? bull : hood} size="tiny" />
+        </Grid.Column>
+      </Grid.Row>
+      <Grid.Row>
+        <Grid.Column>
+          <p className="subtitle">Tribute</p>
+        </Grid.Column>
+      </Grid.Row>
       <Grid.Row>
         <Grid.Column>
           <Segment className="pill" textAlign="center">
@@ -57,10 +62,12 @@ const MemberDetail = ({ loggedInUser, member, shareValue, exchangeRate }) => (
           </Segment>
         </Grid.Column>
       </Grid.Row>
-      <p className="subtext">Delegate Key</p>
       <Grid.Row>
-        <Grid.Column>
-          <p className="subtext">{member.delegateKey}</p>
+        <Grid.Column mobile={16} tablet={4}>
+          <p className="subtitle">Delegate Key</p>
+        </Grid.Column>
+        <Grid.Column tablet={8}>
+          <p className="subtitle">{member.delegateKey}</p>
         </Grid.Column>
       </Grid.Row>
     </Grid>
@@ -99,32 +106,32 @@ const ProposalDetail = ({ proposals }) => (
         proposals.map((p, idx) => {
           return (
             <React.Fragment key={idx}>
-                <Grid.Row verticalAlign="middle">
-                  <Grid.Column textAlign="center">
-                    <Link to={{ pathname: `/proposals/${p.proposal.id}` }} className="uncolored">
+              <Grid.Row verticalAlign="middle">
+                <Grid.Column textAlign="center">
+                  <Link to={{ pathname: `/proposals/${p.proposal.id}` }} className="uncolored">
                     {p.uintVote === Vote.Yes && <Label className="dot" circular color="green" empty />}
                     {/* TODO: is this right? */}
                     {(p.uintVote === Vote.No || p.uintVote === Vote.Null) && <Label className="dot" circular color="red" empty />}
                     {p.proposal.title}
-                    </Link>
-                  </Grid.Column>
-                  <Grid.Column textAlign="center">
-                    <p className="subtext date">{new Date(p.proposal.timestamp * 1000).toISOString().slice(0, 10)}</p>
-                  </Grid.Column>
-                  <Grid.Column textAlign="center">
-                    <p className="subtext date">{p.proposal.sharesRequested}</p>
-                  </Grid.Column>
-                  <Grid.Column textAlign="center">
-                    <p className="subtext date">{utils.formatEther(p.proposal.tokenTribute)}</p>
-                  </Grid.Column>
-                  <Grid.Column textAlign="center">
-                    <Header as="p" color={p.uintVote === Vote.Yes ? "green" : p.uintVote === Vote.No ? "red" : null}>
-                      {p.uintVote === Vote.Yes ? "Y" : p.uintVote === Vote.No ? "N" : ""}
-                    </Header>
-                  </Grid.Column>
-                  <Grid.Column textAlign="center">
-                    <p className="subtext date">{getProposalCountdownText(p.proposal)}</p>
-                  </Grid.Column>
+                  </Link>
+                </Grid.Column>
+                <Grid.Column textAlign="center">
+                  <p className="subtext date">{new Date(p.proposal.timestamp * 1000).toISOString().slice(0, 10)}</p>
+                </Grid.Column>
+                <Grid.Column textAlign="center">
+                  <p className="subtext date">{p.proposal.sharesRequested}</p>
+                </Grid.Column>
+                <Grid.Column textAlign="center">
+                  <p className="subtext date">{utils.formatEther(p.proposal.tokenTribute)}</p>
+                </Grid.Column>
+                <Grid.Column textAlign="center">
+                  <Header as="p" color={p.uintVote === Vote.Yes ? "green" : p.uintVote === Vote.No ? "red" : null}>
+                    {p.uintVote === Vote.Yes ? "Y" : p.uintVote === Vote.No ? "N" : ""}
+                  </Header>
+                </Grid.Column>
+                <Grid.Column textAlign="center">
+                  <p className="subtext date">{getProposalCountdownText(p.proposal)}</p>
+                </Grid.Column>
               </Grid.Row>
               <Divider />
             </React.Fragment>
@@ -147,9 +154,15 @@ const MemberDetailView = props => (
       if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
       return (
         <div id="member_detail">
-          <p className="title"> {props.match.params.name} </p>
           <Divider />
           <Grid columns={16}>
+            <Grid.Row>
+              <Grid.Column mobile={16} tablet={16} computer={6}>
+                <ProfileHover address={props.match.params.name} displayFull="true">
+                  <p className="title">{props.match.params.name}</p>
+                </ProfileHover>
+              </Grid.Column>
+            </Grid.Row>
             <Grid.Row className="details">
               <Grid.Column mobile={16} tablet={16} computer={6} className="user">
                 <MemberDetail

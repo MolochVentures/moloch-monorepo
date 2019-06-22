@@ -16,6 +16,7 @@
     "graphql": "^14.1.1",
     "moment": "^2.24.0",
     "node-sass": "^4.11.0",
+    "profile-hover": "^1.0.2",
     "react": "^16.8.4",
     "react-adopt": "^0.6.0",
     "react-apollo": "^2.5.2",
