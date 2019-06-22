@@ -228,7 +228,11 @@ export default class ProposalDetail extends Component {
                     </Grid.Row>
                     <Grid.Row>
                       <Grid.Column>
-                        <ProfileHover address={proposal.memberAddress} displayFull="true" />
+                        <ProfileHover
+                          address={proposal.memberAddress}
+                          displayFull="true"
+                          url={`https://molochdao.com/members/${proposal.memberAddress}}`}
+                        />
                       </Grid.Column>
                     </Grid.Row>
                   </Grid.Column>
@@ -315,9 +319,9 @@ export default class ProposalDetail extends Component {
                   </Grid.Column>
                 </Grid.Row>
                 <Grid.Row>
-                <Grid.Column mobile={16} tablet={16} computer={12}>
-                  <ToastMessage.Provider ref={node => (window.toastProvider = node)} />
-                </Grid.Column>
+                  <Grid.Column mobile={16} tablet={16} computer={12}>
+                    <ToastMessage.Provider ref={node => (window.toastProvider = node)} />
+                  </Grid.Column>
                 </Grid.Row>
               </Grid>
             </div>
