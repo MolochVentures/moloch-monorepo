@@ -16,7 +16,7 @@ const Composed = adopt({
 
 const NumMembers = ({ members, loading }) => (
   <Link to="/members" className="link">
-    <Button size="large" color="grey" className="btn_link">
+    <Button size="large" color="grey" className="browse_buttons">
       {loading ? "..." : members.length} Members
     </Button>
   </Link>
@@ -24,7 +24,7 @@ const NumMembers = ({ members, loading }) => (
 
 const NumProposals = ({ proposals, loading }) => (
   <Link to="/proposals" className="link">
-    <Button size="large" color="grey" className="btn_link">
+    <Button size="large" color="grey" className="browse_buttons">
       {loading ? "..." : proposals.length} Proposals
     </Button>
   </Link>
@@ -35,24 +35,6 @@ export default class HomePage extends React.Component {
     approval: "",
     token: null,
     userAddress: null
-  };
-
-  async componentDidMount() {
-    const { loggedInUser } = this.props;
-    const token = await getToken(loggedInUser);
-
-    this.setState({
-      token
-    });
-  }
-
-  handleChange = e => this.setState({ approval: e.target.value });
-
-  handleSubmit = async () => {
-    const { approval, token } = this.state;
-    console.log("Approving wETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval).toString());
-    const tx = await token.approve(process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval));
-    console.log("tx: ", tx);
   };
 
   render() {
@@ -78,40 +60,18 @@ export default class HomePage extends React.Component {
           const { guildBankValue, exchangeRate, totalShares, shareValue } = metadata.data;
           return (
             <div id="homepage">
-              <Grid columns={16} verticalAlign="middle">
-                <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
-                  {/* <Link to="/guildbank" className="text_link"> */}
-                  <Statistic inverted label="Guild Bank Value" value={convertWeiToDollars(guildBankValue, exchangeRate)} />
-                  {/* </Link> */}
-                </Grid.Column>
-                <Grid.Column mobile={16} tablet={10} computer={8} textAlign="center" className="browse_buttons">
-                  <NumMembers members={members.data.members} loading={membersLoading} />
-                  <NumProposals proposals={proposals.data.proposals} loading={proposalsLoading} />
-                </Grid.Column>
-                <Grid.Column mobile={16} tablet={6} computer={4} className="guild_value">
-                  <Modal
-                    basic
-                    size="small"
-                    trigger={
-                      <Button size="large" color="grey" className="browse_buttons">
-                        Approve wETH
-                      </Button>
-                    }
-                  >
-                    <Modal.Header>Approve wETH</Modal.Header>
-                    <Modal.Content>
-                      <Form onSubmit={this.handleSubmit}>
-                        <Form.Field>
-                          <label>Amount to Approve</label>
-                          <input placeholder="Amount in ETH" name="amount" value={approval} onChange={this.handleChange} className="asset_amount" />
-                        </Form.Field>
-                        <Button type="submit" color="grey" className="btn_link">
-                          Submit
-                        </Button>
-                      </Form>
-                    </Modal.Content>
-                  </Modal>
-                </Grid.Column>
+              <Grid columns="equal" verticalAlign="middle">
+                <Grid.Row>
+                  <Grid.Column className="guild_value" computer={8} tablet={16}>
+                    <Statistic inverted label="Guild Bank Value" value={convertWeiToDollars(guildBankValue, exchangeRate)} />
+                  </Grid.Column>
+                  <Grid.Column mobile={16} tablet={8} computer={4}>
+                    <NumMembers members={members.data.members} loading={membersLoading} />
+                  </Grid.Column >
+                  <Grid.Column mobile={16} tablet={8} computer={4}>
+                    <NumProposals proposals={proposals.data.proposals} loading={proposalsLoading} />
+                  </Grid.Column>
+                </Grid.Row>
 
                 <Grid.Column width={16}>
                   <Segment className="blurred box">

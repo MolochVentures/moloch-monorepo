@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import { Grid, Icon, Dropdown, Form, Button } from "semantic-ui-react";
+import { Grid, Icon, Dropdown, Form, Button, Modal } from "semantic-ui-react";
 import { Query, withApollo } from "react-apollo";
 import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
-import { getMoloch, initMetamask, initGnosisSafe } from "../web3";
+import { getMoloch, initMetamask, initGnosisSafe, getToken } from "../web3";
+import { utils } from "ethers";
 
 const MainMenu = props => (
   <div className="dropdownItems">
@@ -65,11 +66,11 @@ const MainMenuWrapped = withApollo(MainMenu);
 class ChangeDelegateKeyMenu extends React.Component {
   state = {
     newDelegateKey: ""
-  }
+  };
 
   submitChangeDelegateKey = async () => {
     const { newDelegateKey } = this.state;
-    const { moloch } = this.props
+    const { moloch } = this.props;
 
     console.log(`Sending moloch.updateDelegateKey(${newDelegateKey})`);
 
@@ -79,7 +80,7 @@ class ChangeDelegateKeyMenu extends React.Component {
 
   render() {
     const { newDelegateKey } = this.state;
-    const { onLoadMain } = this.props
+    const { onLoadMain } = this.props;
     return (
       <div>
         <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => onLoadMain()} />
@@ -89,7 +90,11 @@ class ChangeDelegateKeyMenu extends React.Component {
             <Icon name="key" />
             Change Delegate Key
           </p>
-          <Form.Input placeholder="Enter new key address" onChange={event => this.setState({ newDelegateKey: event.target.value })} value={newDelegateKey} />
+          <Form.Input
+            placeholder="Enter new key address"
+            onChange={event => this.setState({ newDelegateKey: event.target.value })}
+            value={newDelegateKey}
+          />
           <Button onClick={this.submitChangeDelegateKey}>Save</Button>
         </Dropdown.Item>
       </div>
@@ -114,7 +119,7 @@ class WithdrawLootTokenMenu extends React.Component {
 
   render() {
     const { ragequitAmount } = this.state;
-    const { onLoadMain } = this.props
+    const { onLoadMain } = this.props;
     return (
       <div>
         <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => onLoadMain()} />
@@ -141,12 +146,18 @@ export default class Header extends Component {
     visibleMenu: "main",
     visibleRightMenu: false,
     moloch: {},
+    approval: "0"
   };
 
   async componentDidMount() {
     const { loggedInUser } = this.props;
     const moloch = await getMoloch(loggedInUser);
     this.setState({ moloch });
+
+    const token = await getToken(loggedInUser);
+    this.setState({
+      token
+    });
   }
 
   _handleOpenDropdown() {
@@ -157,24 +168,24 @@ export default class Header extends Component {
     this.setState({ visibleRightMenu: false });
   }
 
-  logIn = async (method) => {
+  logIn = async method => {
     const { loggedInUser } = this.props;
-    const { client } = this.props
-    let eth
-    if (method === 'metamask') {
+    const { client } = this.props;
+    let eth;
+    if (method === "metamask") {
       eth = await initMetamask(client);
-    } else if (method === 'gnosis') {
-      eth = await initGnosisSafe(client)
+    } else if (method === "gnosis") {
+      eth = await initGnosisSafe(client);
     } else {
-      throw new Error('Unsupported Web3 login method')
+      throw new Error("Unsupported Web3 login method");
     }
     if (!eth) {
-      return
+      return;
     }
-    
+
     const moloch = await getMoloch(loggedInUser);
     this.setState({ moloch });
-  }
+  };
 
   getTopRightMenuContent(member) {
     const { loggedInUser } = this.props;
@@ -221,27 +232,27 @@ export default class Header extends Component {
     } else {
       topRightMenuContent = (
         <>
-          <Dropdown.Item
-            icon="user"
-            className="item"
-            content="Log In With Metamask"
-            onClick={() => this.logIn('metamask')}
-          />
+          <Dropdown.Item icon="user" className="item" content="Log In With Metamask" onClick={() => this.logIn("metamask")} />
           <Dropdown.Divider />
-          <Dropdown.Item
-            icon="user"
-            className="item"
-            content="Log In With Gnosis Safe"
-            onClick={() => this.logIn('gnosis')}
-          />
+          <Dropdown.Item icon="user" className="item" content="Log In With Gnosis Safe" onClick={() => this.logIn("gnosis")} />
         </>
       );
     }
     return topRightMenuContent;
   }
 
+  handleChange = e => this.setState({ approval: e.target.value });
+
+  handleSubmit = async () => {
+    const { approval, token } = this.state;
+    console.log("Approving wETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval).toString());
+    const tx = await token.approve(process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval));
+    console.log("tx: ", tx);
+  };
+
   render() {
     const { loggedInUser } = this.props;
+    const { approval } = this.state;
     return (
       <Query query={GET_MEMBER_DETAIL} variables={{ address: loggedInUser }}>
         {({ loading, error, data }) => {
@@ -250,23 +261,48 @@ export default class Header extends Component {
           return (
             <div id="header">
               <Grid columns="equal" verticalAlign="middle">
-                <Grid.Column />
-                <Grid.Column textAlign="center" className="logo">
-                  <Link to="/">MOLOCH</Link>
-                </Grid.Column>
+                <Grid.Row>
+                  <Grid.Column>
+                    <Modal
+                      basic
+                      size="small"
+                      trigger={
+                      <Button inverted>
+                          Approve wETH
+                        </Button>
+                      }
+                    >
+                      <Modal.Header>Approve wETH</Modal.Header>
+                      <Modal.Content>
+                        <Form onSubmit={this.handleSubmit}>
+                          <Form.Field>
+                            <label>Amount to Approve</label>
+                            <input placeholder="Amount in ETH" name="amount" value={approval} onChange={this.handleChange} className="asset_amount" />
+                          </Form.Field>
+                          <Button type="submit" color="grey" className="btn_link">
+                            Submit
+                          </Button>
+                        </Form>
+                      </Modal.Content>
+                    </Modal>
+                  </Grid.Column>
+                  <Grid.Column textAlign="center" className="logo">
+                    <Link to="/">MOLOCH</Link>
+                  </Grid.Column>
                   <Grid.Column textAlign="right" className="dropdown">
                     <Dropdown
                       className="right_dropdown"
                       open={this.state.visibleRightMenu}
                       onBlur={() => this._handleCloseDropdown()}
                       onFocus={() => this._handleOpenDropdown()}
-                      text={loggedInUser ? `${loggedInUser.substring(0, 6)}...` : 'Web3 Login'}
+                      text={loggedInUser ? `${loggedInUser.substring(0, 6)}...` : "Web3 Login"}
                     >
                       <Dropdown.Menu className="menu blurred" direction="left">
                         {this.getTopRightMenuContent(data.member)}
                       </Dropdown.Menu>
                     </Dropdown>
                   </Grid.Column>
+                </Grid.Row>
               </Grid>
             </div>
           );
