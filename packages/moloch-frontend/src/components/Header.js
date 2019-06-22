@@ -250,25 +250,7 @@ export default class Header extends Component {
           return (
             <div id="header">
               <Grid columns="equal" verticalAlign="middle">
-                {loggedInUser ? (
-                  <Grid.Column textAlign="left" className="menu">
-                    {/* <Dropdown icon="bars">
-                <Dropdown.Menu className="menu blurred" direction="right">
-                  <Link to="guildbank" className="item">
-                    <p>Guild Bank</p>
-                  </Link>
-                  <Dropdown.Divider />
-                  <Link to="/members" className="item">
-                    <p>Members</p>
-                  </Link>
-                  <Dropdown.Divider />
-                  <Link to="/proposals" className="item">
-                    <p>Proposals</p>
-                  </Link>
-                </Dropdown.Menu>
-              </Dropdown> */}
-                  </Grid.Column>
-                ) : null}
+                <Grid.Column />
                 <Grid.Column textAlign="center" className="logo">
                   <Link to="/">MOLOCH</Link>
                 </Grid.Column>
