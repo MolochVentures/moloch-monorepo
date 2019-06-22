@@ -12,6 +12,7 @@ import { utils } from "ethers";
 import { adopt } from "react-adopt";
 import Linkify from "react-linkify";
 import { ToastMessage } from "rimble-ui";
+import ProfileHover from "profile-hover";
 
 export const Vote = {
   Null: 0, // default value, counted as abstention
@@ -193,131 +194,131 @@ export default class ProposalDetail extends Component {
 
           return (
             <div id="proposal_detail">
-              <Grid centered columns={16}>
-                <Segment className="transparent box segment" textAlign="center">
-                  <Grid centered columns={14}>
-                    <Grid.Column mobile={16} tablet={16} computer={12}>
-                      <span className="title">{proposal.title ? proposal.title : "N/A"}</span>
-                    </Grid.Column>
-                  </Grid>
-                  <Grid centered columns={14}>
-                    <Grid.Column mobile={16} tablet={16} computer={4}>
-                      <Linkify properties={{ target: "_blank" }}>
-                        <div className="subtext description wordwrap">{proposal.description ? proposal.description : "N/A"}</div>
-                      </Linkify>
-                      <Grid columns="equal" className="tokens">
-                        <Grid.Row>
-                          <Grid.Column className="tributes">
-                            <Segment className="pill" textAlign="center">
-                              <Icon name="ethereum" />
-                              {utils.formatEther(proposal.tokenTribute)} ETH
-                            </Segment>
-                          </Grid.Column>
-                        </Grid.Row>
-                        <Grid.Row>
-                          <Grid.Column mobile={8} textAlign="right">
-                            <p className="subtext">Applicant</p>
-                          </Grid.Column>
-                          <Grid.Column mobile={8}>
-                            <p className="address">
-                              <a href={`https://etherscan.io/address/${proposal.applicantAddress}`} target="_blank" rel="noopener noreferrer">
-                                {proposal.applicantAddress.substring(0, 10) + "..."}
-                              </a>
-                            </p>
-                          </Grid.Column>
-                        </Grid.Row>
-                        <Grid.Row>
-                          <Grid.Column mobile={8} textAlign="right">
-                            <p className="subtext">Proposer</p>
-                          </Grid.Column>
-                          <Grid.Column mobile={8}>
-                            <p className="address">
-                              <a href={`https://etherscan.io/address/${proposal.memberAddress}`} target="_blank" rel="noopener noreferrer">
-                                {proposal.memberAddress.substring(0, 10) + "..."}
-                              </a>
-                            </p>
-                          </Grid.Column>
-                        </Grid.Row>
-                      </Grid>
-                      <Grid columns="equal">
-                        <Grid.Column>
-                          <p className="subtext voting">Shares</p>
-                          <p className="amount">{proposal.sharesRequested}</p>
-                        </Grid.Column>
-                        <Grid.Column textAlign="right">
-                          <p className="subtext">Total USD Value</p>
-                          <p className="amount">
-                            {convertWeiToDollars(
-                              utils
-                                .bigNumberify(proposal.sharesRequested)
-                                .mul(shareValue)
-                                .toString(),
-                              exchangeRate
-                            )}
-                          </p>
-                        </Grid.Column>
-                      </Grid>
-                    </Grid.Column>
-
-                    <Grid.Column mobile={16} tablet={16} computer={2}>
-                      <Divider vertical />
-                    </Grid.Column>
-
-                    <Grid.Column mobile={16} tablet={16} computer={6}>
-                      <Grid columns={16}>
-                        <Grid.Column textAlign="center" mobile={16} tablet={16} computer={16} className="pill_column">
-                          <span className="pill">{getProposalCountdownText(proposal)}</span>
-                        </Grid.Column>
-                      </Grid>
-                      <Grid columns={16} className="member_list">
-                        <Grid.Row>
-                          <Grid.Column mobile={16} tablet={16} computer={16} className="pill_column">
-                            {proposal.votes.length > 0 ? (
-                              <Grid>
-                                <Grid.Row className="members_row">
-                                  {/* centered */}
-                                  {proposal.votes.map((vote, idx) => (
-                                    <MemberAvatar member={vote.member.id} shares={vote.member.shares} key={idx} />
-                                  ))}
-                                </Grid.Row>
-                              </Grid>
-                            ) : null}
-                          </Grid.Column>
-                        </Grid.Row>
-                      </Grid>
-                      <Grid>
-                        <Grid.Column textAlign="center">
-                          {proposal.aborted ? <p className="amount">Aborted</p> : <ProgressBar yes={yesShares} no={noShares} />}
-                        </Grid.Column>
-                      </Grid>
-                      <Grid columns="equal" centered>
-                        <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                          <Button className="btn" color="green" disabled={cannotVote} onClick={() => this.handleYes(proposal)}>
-                            Vote Yes
-                          </Button>
-                        </Grid.Column>
-                        <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                          <Button className="btn" color="red" disabled={cannotVote} onClick={() => this.handleNo(proposal)}>
-                            Vote No
-                          </Button>
-                        </Grid.Column>
-                        <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                          <Button
-                            className="btn"
-                            color="grey"
-                            onClick={() => this.handleProcess(proposal)}
-                            disabled={proposal.status !== ProposalStatus.ReadyForProcessing}
-                          >
-                            Process Proposal
-                          </Button>
-                        </Grid.Column>
-                      </Grid>
-                    </Grid.Column>
-                  </Grid>
-                </Segment>
+              <Grid columns="equal">
+                <Grid.Row>
+                  <Grid.Column>
+                    <span className="title">{proposal.title ? proposal.title : "N/A"}</span>
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column>
+                    <Linkify properties={{ target: "_blank" }}>
+                      <div className="subtext description wordwrap">{proposal.description ? proposal.description : "N/A"}</div>
+                    </Linkify>
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column mobile={8}>
+                    <Grid.Row>
+                      <Grid.Column>
+                        <p className="subtext">Applicant/Beneficiary</p>
+                      </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                      <Grid.Column>
+                        <ProfileHover address={proposal.applicantAddress} displayFull="true" />
+                      </Grid.Column>
+                    </Grid.Row>
+                  </Grid.Column>
+                  <Grid.Column mobile={8}>
+                    <Grid.Row>
+                      <Grid.Column>
+                        <p className="subtext">Proposer</p>
+                      </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                      <Grid.Column>
+                        <ProfileHover address={proposal.memberAddress} displayFull="true" />
+                      </Grid.Column>
+                    </Grid.Row>
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column className="tributes">
+                    <Segment className="pill" textAlign="center">
+                      <Icon name="ethereum" />
+                      {utils.formatEther(proposal.tokenTribute)} ETH
+                    </Segment>
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column>
+                    <p className="subtext voting">Shares</p>
+                    <p className="amount">{proposal.sharesRequested}</p>
+                  </Grid.Column>
+                  <Grid.Column textAlign="right">
+                    <p className="subtext">Total USD Value</p>
+                    <p className="amount">
+                      {convertWeiToDollars(
+                        utils
+                          .bigNumberify(proposal.sharesRequested)
+                          .mul(shareValue)
+                          .toString(),
+                        exchangeRate
+                      )}
+                    </p>
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column textAlign="center" className="pill_column">
+                    <span className="pill">{getProposalCountdownText(proposal)}</span>
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column>
+                    <Divider vertical />
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column className="member_list">
+                    <Grid.Row>
+                      <Grid.Column mobile={16} tablet={16} computer={16} className="pill_column">
+                        {proposal.votes.length > 0 ? (
+                          <Grid>
+                            <Grid.Row className="members_row">
+                              {/* centered */}
+                              {proposal.votes.map((vote, idx) => (
+                                <MemberAvatar member={vote.member.id} shares={vote.member.shares} key={idx} />
+                              ))}
+                            </Grid.Row>
+                          </Grid>
+                        ) : null}
+                      </Grid.Column>
+                    </Grid.Row>
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column textAlign="center">
+                    {proposal.aborted ? <p className="amount">Aborted</p> : <ProgressBar yes={yesShares} no={noShares} />}
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
+                  <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
+                    <Button className="btn" color="green" disabled={cannotVote} onClick={() => this.handleYes(proposal)}>
+                      Vote Yes
+                    </Button>
+                  </Grid.Column>
+                  <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
+                    <Button className="btn" color="red" disabled={cannotVote} onClick={() => this.handleNo(proposal)}>
+                      Vote No
+                    </Button>
+                  </Grid.Column>
+                  <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
+                    <Button
+                      className="btn"
+                      color="grey"
+                      onClick={() => this.handleProcess(proposal)}
+                      disabled={proposal.status !== ProposalStatus.ReadyForProcessing}
+                    >
+                      Process Proposal
+                    </Button>
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row>
                 <Grid.Column mobile={16} tablet={16} computer={12}>
                   <ToastMessage.Provider ref={node => (window.toastProvider = node)} />
                 </Grid.Column>
+                </Grid.Row>
               </Grid>
             </div>
           );
