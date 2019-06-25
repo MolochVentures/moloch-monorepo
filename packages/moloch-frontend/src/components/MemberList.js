@@ -40,7 +40,15 @@ const LoggedInUser = props => (
 
 const GET_ELDERS = gql`
   {
-    members(first: 100, where: { shares_gte: 100, isActive: true }) {
+    members(
+      first: 100, 
+      where: { 
+        shares_gte: 100, 
+        isActive: true 
+      },
+      orderBy: shares,
+      orderDirection: desc
+    ) {
       id
       shares
     }
@@ -62,7 +70,16 @@ const Elders = () => (
 
 const GET_NON_ELDERS = gql`
   {
-    members(first: 100, where: { shares_gt: 0, shares_lt: 100, isActive: true }) {
+    members(
+      first: 100, 
+      where: { 
+        shares_gt: 0, 
+        shares_lt: 100, 
+        isActive: true 
+      },
+      orderBy: shares,
+      orderDirection: desc
+    ) {
       id
       shares
     }
