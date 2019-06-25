@@ -1,8 +1,7 @@
 import React from "react";
-import { Grid, Button, Segment, Modal, Form, Statistic } from "semantic-ui-react";
+import { Grid, Button, Segment, Statistic } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { Query } from "react-apollo";
-import { getToken } from "../web3";
 import { utils } from "ethers";
 import { GET_METADATA, GET_MEMBERS, GET_PROPOSALS } from "../helpers/graphQlQueries";
 import { convertWeiToDollars } from "../helpers/currency";
@@ -38,7 +37,6 @@ export default class HomePage extends React.Component {
   };
 
   render() {
-    const { approval } = this.state;
     return (
       <Composed>
         {({ members, proposals, metadata }) => {
@@ -62,13 +60,13 @@ export default class HomePage extends React.Component {
             <div id="homepage">
               <Grid columns="equal" verticalAlign="middle">
                 <Grid.Row>
-                  <Grid.Column className="guild_value" computer={8} tablet={16}>
+                  <Grid.Column className="guild_value" computer={8} tablet={16} textAlign="center">
                     <Statistic inverted label="Guild Bank Value" value={convertWeiToDollars(guildBankValue, exchangeRate)} />
                   </Grid.Column>
-                  <Grid.Column mobile={16} tablet={8} computer={4}>
+                  <Grid.Column mobile={16} tablet={8} computer={4} textAlign="center">
                     <NumMembers members={members.data.members} loading={membersLoading} />
                   </Grid.Column >
-                  <Grid.Column mobile={16} tablet={8} computer={4}>
+                  <Grid.Column mobile={16} tablet={8} computer={4} textAlign="center">
                     <NumProposals proposals={proposals.data.proposals} loading={proposalsLoading} />
                   </Grid.Column>
                 </Grid.Row>

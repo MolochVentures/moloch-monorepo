@@ -260,14 +260,14 @@ export default class Header extends Component {
           if (error) throw new Error(`Error!: ${error}`);
           return (
             <div id="header">
-              <Grid columns="equal" verticalAlign="middle">
+              <Grid verticalAlign="middle">
                 <Grid.Row>
-                  <Grid.Column>
+                  <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
                     <Modal
                       basic
                       size="small"
                       trigger={
-                      <Button inverted>
+                      <Button size="small" inverted>
                           Approve wETH
                         </Button>
                       }
@@ -286,10 +286,10 @@ export default class Header extends Component {
                       </Modal.Content>
                     </Modal>
                   </Grid.Column>
-                  <Grid.Column textAlign="center" className="logo">
+                  <Grid.Column textAlign="center" className="logo" mobile={16} tablet={5} computer={5}>
                     <Link to="/">MOLOCH</Link>
                   </Grid.Column>
-                  <Grid.Column textAlign="right" className="dropdown">
+                  <Grid.Column textAlign="center" className="dropdown" mobile={16} tablet={5} computer={5}>
                     <Dropdown
                       className="right_dropdown"
                       open={this.state.visibleRightMenu}
