@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import { Grid, Icon, Dropdown, Form, Button, Modal } from "semantic-ui-react";
+import { Grid, Icon, Dropdown, Form, Button } from "semantic-ui-react";
 import { Query, withApollo } from "react-apollo";
 import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 import { getMoloch, initMetamask, initGnosisSafe, getToken } from "../web3";
