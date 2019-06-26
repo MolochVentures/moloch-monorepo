@@ -58,36 +58,28 @@ export default class HomePage extends React.Component {
           const { guildBankValue, exchangeRate, totalShares, shareValue } = metadata.data;
           return (
             <div id="homepage">
-              <Grid columns="equal" verticalAlign="middle">
-                <Grid.Row>
-                  <Grid.Column className="guild_value" computer={8} tablet={16} textAlign="center">
+              <Grid container verticalAlign="middle">
+                <Grid container doubling stackable columns={2}>
+                  <Grid.Column className="guild_value" textAlign="center">
                     <Statistic inverted label="Guild Bank Value" value={convertWeiToDollars(guildBankValue, exchangeRate)} />
                   </Grid.Column>
-                  <Grid.Column mobile={16} tablet={8} computer={4} textAlign="center">
+                  <Grid.Column textAlign="center">
                     <NumMembers members={members.data.members} loading={membersLoading} />
-                  </Grid.Column >
-                  <Grid.Column mobile={16} tablet={8} computer={4} textAlign="center">
                     <NumProposals proposals={proposals.data.proposals} loading={proposalsLoading} />
                   </Grid.Column>
-                </Grid.Row>
+                </Grid>
 
-                <Grid.Column width={16}>
-                  <Segment className="blurred box">
-                    <Grid columns="3" className="graph_values">
-                      <Grid.Row>
-                        <Grid.Column textAlign="center" floated="left" mobile={16} tablet={4} computer={4}>
-                          <Statistic inverted label="Total Shares" value={totalShares} />
-                        </Grid.Column>
-                        <Grid.Column textAlign="center" mobile={16} tablet={4} computer={4}>
-                          <Statistic inverted label="Total ETH" value={parseFloat(utils.formatEther(guildBankValue)).toFixed(2)} />
-                        </Grid.Column>
-                        <Grid.Column textAlign="center" floated="right" mobile={16} tablet={4} computer={4}>
-                          <Statistic inverted label="Share Value" value={convertWeiToDollars(shareValue, exchangeRate)} />
-                        </Grid.Column>
-                      </Grid.Row>
-                    </Grid>
-                  </Segment>
-                </Grid.Column>
+                <Grid container stackable columns={3} className="blurred box">
+                  <Grid.Column textAlign="center">
+                    <Statistic inverted label="Total Shares" value={totalShares} />
+                  </Grid.Column>
+                  <Grid.Column textAlign="center">
+                    <Statistic inverted label="Total ETH" value={parseFloat(utils.formatEther(guildBankValue)).toFixed(2)} />
+                  </Grid.Column>
+                  <Grid.Column textAlign="center">
+                    <Statistic inverted label="Share Value" value={convertWeiToDollars(shareValue, exchangeRate)} />
+                  </Grid.Column>
+                </Grid>
               </Grid>
             </div>
           );
