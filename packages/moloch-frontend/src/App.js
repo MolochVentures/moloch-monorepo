@@ -19,6 +19,7 @@ import { GET_METADATA } from "./helpers/graphQlQueries";
 import { getMedianizer, getMoloch, getToken, initWeb3 } from "./web3";
 import { utils } from "ethers";
 import { adopt } from "react-adopt";
+import { ToastMessage } from 'rimble-ui';
 
 console.log(process.env);
 
@@ -167,6 +168,7 @@ class App extends React.Component {
                       />
                     </Switch>
                   </Wrapper>
+                  <ToastMessage.Provider ref={node => (window.toastProvider = node)} />
                 </>
               );
             }}
