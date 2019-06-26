@@ -11,8 +11,8 @@ import { convertWeiToDollars } from "../helpers/currency";
 import { utils } from "ethers";
 import { adopt } from "react-adopt";
 import Linkify from "react-linkify";
-import { ToastMessage } from "rimble-ui";
 import ProfileHover from "profile-hover";
+import { monitorTx } from "../helpers/transaction";
 
 export const Vote = {
   Null: 0, // default value, counted as abstention
@@ -65,7 +65,6 @@ export default class ProposalDetail extends Component {
     moloch: null,
     shareValue: "0",
     exchangeRate: "0",
-    showToast: false,
     tx: {},
     txStatus: "submitted"
   };
@@ -80,77 +79,17 @@ export default class ProposalDetail extends Component {
 
   handleNo = async proposal => {
     const { moloch } = this.state;
-    this.monitorTx(moloch.submitVote(proposal.proposalIndex, Vote.No));
-    this.showToast();
+    monitorTx(moloch.submitVote(proposal.proposalIndex, Vote.No));
   };
 
   handleYes = async proposal => {
     const { moloch } = this.state;
-    this.monitorTx(moloch.submitVote(proposal.proposalIndex, Vote.Yes));
+    monitorTx(moloch.submitVote(proposal.proposalIndex, Vote.Yes));
   };
 
   handleProcess = async proposal => {
     const { moloch } = this.state;
-    this.monitorTx(moloch.processProposal(proposal.proposalIndex));
-  };
-
-  monitorTx = txPromise => {
-    window.toastProvider.addMessage("Confirm transaction using wallet...");
-    txPromise
-      .then(async tx => {
-        console.log("tx: ", tx);
-        window.toastProvider.removeMessage();
-        window.toastProvider.addMessage("Transaction submitted!", {
-          secondaryMessage: "Check progress on Etherscan",
-          actionHref: `https://etherscan.io/tx/${tx.hash}`,
-          actionText: "Check",
-          variant: "processing"
-        });
-        await tx.wait();
-        console.log("Tx wait complete");
-        window.toastProvider.removeMessage();
-        window.toastProvider.addMessage("Transaction Confirmed!", {
-          secondaryMessage: "View on Etherscan",
-          actionHref: `https://etherscan.io/tx/${tx.hash}`,
-          actionText: "View",
-          variant: "success"
-        });
-      })
-      .catch(e => {
-        console.log("e: ", e);
-        window.toastProvider.removeMessage();
-        window.toastProvider.addMessage("Error", {
-          secondaryMessage: "Error occurred while processing transaction. Please try again later.",
-          variant: "error"
-        });
-      });
-  };
-
-  getToastMessage = () => {
-    const { tx, txStatus } = this.state;
-    if (!tx || !tx.hash) {
-      return <ToastMessage message={"Please confirm transaction using your wallet."} />;
-    }
-    if (txStatus === "submitted") {
-      return (
-        <ToastMessage.Processing
-          message={"Transaction started..."}
-          secondaryMessage={"Check on its progress using Etherscan"}
-          actionText={"Check"}
-          actionHref={`https://etherscan.io/tx/${tx.hash}`}
-        />
-      );
-    }
-    if (txStatus === "confirmed") {
-      return (
-        <ToastMessage.Success
-          message={"Transaction Successful"}
-          secondaryMessage={"View transaction on Etherscan"}
-          actionText={"View"}
-          actionHref={`https://etherscan.io/tx/${tx.hash}`}
-        />
-      );
-    }
+    monitorTx(moloch.processProposal(proposal.proposalIndex));
   };
 
   render() {
@@ -316,11 +255,6 @@ export default class ProposalDetail extends Component {
                     >
                       Process Proposal
                     </Button>
-                  </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                  <Grid.Column mobile={16} tablet={16} computer={12}>
-                    <ToastMessage.Provider ref={node => (window.toastProvider = node)} />
                   </Grid.Column>
                 </Grid.Row>
               </Grid>
