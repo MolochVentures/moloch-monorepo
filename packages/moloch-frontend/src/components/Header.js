@@ -5,11 +5,22 @@ import { Query, withApollo } from "react-apollo";
 import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 import { getMoloch, initMetamask, initGnosisSafe, getToken } from "../web3";
 import { utils } from "ethers";
+import { monitorTx } from "../helpers/transaction";
 
 const MainMenu = props => (
   <div className="dropdownItems">
     {props.member && props.member.isActive ? (
       <>
+        <Dropdown.Item
+          icon="settings"
+          className="item"
+          content="Approve wETH"
+          onClick={() => {
+            props._handleOpenDropdown();
+            props.onLoadApproveWeth();
+          }}
+        />
+        <Dropdown.Divider />
         <Dropdown.Item className="item" onClick={() => props._handleCloseDropdown()}>
           <Link to={`/members/${props.member.id}`} className="link">
             <p>
@@ -74,8 +85,7 @@ class ChangeDelegateKeyMenu extends React.Component {
 
     console.log(`Sending moloch.updateDelegateKey(${newDelegateKey})`);
 
-    const tx = await moloch.updateDelegateKey(newDelegateKey);
-    console.log("tx: ", tx);
+    monitorTx(moloch.updateDelegateKey(newDelegateKey));
   };
 
   render() {
@@ -113,8 +123,7 @@ class WithdrawLootTokenMenu extends React.Component {
 
     console.log(`Sending moloch.ragequit(${ragequitAmount})`);
 
-    const tx = await moloch.ragequit(ragequitAmount);
-    console.log("tx: ", tx);
+    monitorTx(moloch.ragequit(ragequitAmount));
   };
 
   render() {
@@ -141,12 +150,45 @@ class WithdrawLootTokenMenu extends React.Component {
   }
 }
 
+class ApproveWethMenu extends React.Component {
+  state = {
+    approval: ""
+  };
+
+  approve = async () => {
+    const { approval } = this.state;
+    const { token } = this.props;
+
+    console.log("Approving wETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval).toString());
+    monitorTx(token.approve(process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval)));
+  };
+
+  render() {
+    const { approval } = this.state;
+    const { onLoadMain } = this.props;
+    return (
+      <div>
+        <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => onLoadMain()} />
+        <Dropdown.Divider />
+        <Dropdown.Item className="item submenu">
+          <p>
+            <Icon name="settings" />
+            Approve wETH
+          </p>
+          <Form.Input placeholder="wETH to Approve" onChange={event => this.setState({ approval: event.target.value })} value={approval} />
+          <Button onClick={this.approve}>Approve</Button>
+        </Dropdown.Item>
+      </div>
+    );
+  }
+}
+
 export default class Header extends Component {
   state = {
     visibleMenu: "main",
     visibleRightMenu: false,
     moloch: {},
-    approval: "0"
+    token: {}
   };
 
   async componentDidMount() {
@@ -190,7 +232,7 @@ export default class Header extends Component {
   getTopRightMenuContent(member) {
     const { loggedInUser } = this.props;
     let topRightMenuContent;
-    const { moloch } = this.state;
+    const { moloch, token } = this.state;
     if (loggedInUser) {
       switch (this.state.visibleMenu) {
         case "main":
@@ -201,6 +243,7 @@ export default class Header extends Component {
               _handleCloseDropdown={() => this._handleCloseDropdown()}
               onLoadChangeDelegateKey={() => this.setState({ visibleMenu: "changeDelegateKey" })}
               onLoadWithdrawLootToken={() => this.setState({ visibleMenu: "withdrawLootToken" })}
+              onLoadApproveWeth={() => this.setState({ visibleMenu: "approveWeth" })}
             />
           );
           break;
@@ -223,6 +266,17 @@ export default class Header extends Component {
                 this.setState({ visibleMenu: "main" });
               }}
               moloch={moloch}
+            />
+          );
+          break;
+        case "approveWeth":
+          topRightMenuContent = (
+            <ApproveWethMenu
+              onLoadMain={() => {
+                this._handleOpenDropdown();
+                this.setState({ visibleMenu: "main" });
+              }}
+              token={token}
             />
           );
           break;
@@ -252,7 +306,6 @@ export default class Header extends Component {
 
   render() {
     const { loggedInUser } = this.props;
-    const { approval } = this.state;
     return (
       <Query query={GET_MEMBER_DETAIL} variables={{ address: loggedInUser }}>
         {({ loading, error, data }) => {
@@ -260,49 +313,24 @@ export default class Header extends Component {
           if (error) throw new Error(`Error!: ${error}`);
           return (
             <div id="header">
-              <Grid verticalAlign="middle">
-                <Grid.Row>
-                  <Grid.Column textAlign="center" mobile={16} tablet={5} computer={5}>
-                    <Modal
-                      basic
-                      size="small"
-                      trigger={
-                      <Button size="small" inverted>
-                          Approve wETH
-                        </Button>
-                      }
-                    >
-                      <Modal.Header>Approve wETH</Modal.Header>
-                      <Modal.Content>
-                        <Form onSubmit={this.handleSubmit}>
-                          <Form.Field>
-                            <label>Amount to Approve</label>
-                            <input placeholder="Amount in ETH" name="amount" value={approval} onChange={this.handleChange} className="asset_amount" />
-                          </Form.Field>
-                          <Button type="submit" color="grey" className="btn_link">
-                            Submit
-                          </Button>
-                        </Form>
-                      </Modal.Content>
-                    </Modal>
-                  </Grid.Column>
-                  <Grid.Column textAlign="center" className="logo" mobile={16} tablet={5} computer={5}>
-                    <Link to="/">MOLOCH</Link>
-                  </Grid.Column>
-                  <Grid.Column textAlign="center" className="dropdown" mobile={16} tablet={5} computer={5}>
-                    <Dropdown
-                      className="right_dropdown"
-                      open={this.state.visibleRightMenu}
-                      onBlur={() => this._handleCloseDropdown()}
-                      onFocus={() => this._handleOpenDropdown()}
-                      text={loggedInUser ? `${loggedInUser.substring(0, 6)}...` : "Web3 Login"}
-                    >
-                      <Dropdown.Menu className="menu blurred" direction="left">
-                        {this.getTopRightMenuContent(data.member)}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </Grid.Column>
-                </Grid.Row>
+              <Grid container columns={3} stackable verticalAlign="middle">
+                <Grid.Column textAlign="center" only="computer tablet" />
+                <Grid.Column textAlign="center" className="logo">
+                  <Link to="/">MOLOCH</Link>
+                </Grid.Column>
+                <Grid.Column textAlign="center" className="dropdown">
+                  <Dropdown
+                    className="right_dropdown"
+                    open={this.state.visibleRightMenu}
+                    onBlur={() => this._handleCloseDropdown()}
+                    onFocus={() => this._handleOpenDropdown()}
+                    text={loggedInUser ? `${loggedInUser.substring(0, 6)}...` : "Web3 Login"}
+                  >
+                    <Dropdown.Menu className="menu blurred" direction="left">
+                      {this.getTopRightMenuContent(data.member)}
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </Grid.Column>
               </Grid>
             </div>
           );
