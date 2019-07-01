@@ -13,6 +13,7 @@ import { convertWeiToDollars } from "../helpers/currency";
 import { adopt } from "react-adopt";
 import { GET_METADATA, GET_MEMBER_DETAIL_WITH_VOTES } from "../helpers/graphQlQueries";
 import { getProposalCountdownText } from "../helpers/proposals";
+import { formatEthAddress } from "../helpers/address";
 
 const Composed = adopt({
   memberDetail: ({ render, name }) => (
@@ -67,7 +68,11 @@ const MemberDetail = ({ loggedInUser, member, shareValue, exchangeRate }) => (
           <p className="subtitle">Delegate Key</p>
         </Grid.Column>
         <Grid.Column tablet={8}>
-          <p className="subtitle">{member.delegateKey}</p>
+          <p className="subtitle">
+            <a href={`https://etherscan.io/address/${member.delegateKey}`} target="_blank" rel="noopener noreferrer">
+              {formatEthAddress(member.delegateKey)}
+            </a>
+          </p>
         </Grid.Column>
       </Grid.Row>
     </Grid>
@@ -155,7 +160,7 @@ const MemberDetailView = props => (
       return (
         <div id="member_detail">
           <Divider />
-          <Grid columns={16}>
+          <Grid container>
             <Grid.Row>
               <Grid.Column mobile={16} tablet={16} computer={6}>
                 <ProfileHover address={props.match.params.name} displayFull="true">
