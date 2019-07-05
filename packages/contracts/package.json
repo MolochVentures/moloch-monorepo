@@ -15,7 +15,7 @@
     "ethjs-provider-http": "^0.1.6",
     "ethjs-query": "^0.3.7",
     "ethjs-rpc": "^0.2.0",
-    "fs-extra": "^6.0.0",
+    "fs-extra": "^8.0.0",
     "openzeppelin-solidity": "^1.12.0",
     "truffle": "^5.0.3",
     "truffle-hdwallet-provider-privkey": "^1.0.3",
