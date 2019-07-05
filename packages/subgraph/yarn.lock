@@ -2,12 +2,12 @@
 # yarn lockfile v1
 
 
-"@graphprotocol/graph-cli@^0.12.0":
+"@graphprotocol/graph-cli@0.12.0":
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.12.0.tgz#bd923afe8961a145987540c7d04b8509da33f57c"
   integrity sha512-fUdBm06w7vGrxz/zmTsYKILPfowxxEoZwNB60QWEpEb8oGa3Wsm5UlQDN9mDgGN06HAWPO33C94JC6pukQRNPQ==
   dependencies:
-    assemblyscript "https://github.com/AssemblyScript/assemblyscript#36040d5b5312f19a025782b5e36663823494c2f3"
+    assemblyscript "git+https://github.com/AssemblyScript/assemblyscript.git#36040d5b5312f19a025782b5e36663823494c2f3"
     chalk "^2.4.1"
     chokidar "^2.0.4"
     debug "^3.1.0"
@@ -26,12 +26,12 @@
   optionalDependencies:
     keytar "^4.6.0"
 
-"@graphprotocol/graph-ts@^0.12.0":
+"@graphprotocol/graph-ts@0.12.0":
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.12.0.tgz#b6d8a7d8ec4e8d69a8834064dd6867fb87b96966"
   integrity sha512-1facmqAi/cKQVzK4g+DunpYQ+aDl8r6Ra87fBsQF0oNJfYAEPuk1QnxlZc8/uW9/SATesB+ljt9Bs/1+5AJRpg==
   dependencies:
-    assemblyscript "https://github.com/AssemblyScript/assemblyscript#36040d5b5312f19a025782b5e36663823494c2f3"
+    assemblyscript "git+https://github.com/AssemblyScript/assemblyscript.git#36040d5b5312f19a025782b5e36663823494c2f3"
 
 "@protobufjs/utf8@^1.1.0":
   version "1.1.0"
