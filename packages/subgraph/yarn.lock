@@ -2,10 +2,17 @@
 # yarn lockfile v1
 
 
-"@graphprotocol/graph-cli@0.12.0":
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.12.0.tgz#bd923afe8961a145987540c7d04b8509da33f57c"
-  integrity sha512-fUdBm06w7vGrxz/zmTsYKILPfowxxEoZwNB60QWEpEb8oGa3Wsm5UlQDN9mDgGN06HAWPO33C94JC6pukQRNPQ==
+"@babel/runtime@^7.4.5":
+  version "7.5.0"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.5.0.tgz#49dcbcd637099a55d3a61e590a00d6861393b1b5"
+  integrity sha512-2xsuyZ0R0RBFwjgae5NpXk8FcfH4qovj5cEM5VEeB7KXnKqzaisIu2HSV/mCEISolJJuR4wkViUGYujA8MH9tw==
+  dependencies:
+    regenerator-runtime "^0.13.2"
+
+"@graphprotocol/graph-cli@0.13.3":
+  version "0.13.3"
+  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-cli/-/graph-cli-0.13.3.tgz#9348a82528e3f9b445821a6028c78dee97d6ebea"
+  integrity sha512-CCBcpz5rNGgT+t30AODpG2xGrez/sj1Hy7uLYB6s9TM8PizPZaJvEt7h6GgdQ1cFTnPyO4KMSx/dmi6FwXx1Qw==
   dependencies:
     assemblyscript "git+https://github.com/AssemblyScript/assemblyscript.git#36040d5b5312f19a025782b5e36663823494c2f3"
     chalk "^2.4.1"
@@ -18,11 +25,12 @@
     immutable "^3.8.2"
     ipfs-http-client "^28.1.2"
     jayson "^2.0.6"
-    js-yaml "^3.12.0"
+    js-yaml "^3.13.1"
     node-fetch "^2.3.0"
     pkginfo "^0.4.1"
     prettier "^1.13.5"
     request "^2.88.0"
+    yaml "^1.5.1"
   optionalDependencies:
     keytar "^4.6.0"
 
@@ -1448,13 +1456,6 @@ js-sha3@~0.8.0:
   version "0.8.0"
   resolved "https://registry.npmjs.org/js-sha3/-/js-sha3-0.8.0.tgz#b9b7a5da73afad7dedd0f8c463954cbde6818840"
 
-js-yaml@^3.12.0:
-  version "3.12.1"
-  resolved "https://registry.npmjs.org/js-yaml/-/js-yaml-3.12.1.tgz#295c8632a18a23e054cf5c9d3cecafe678167600"
-  dependencies:
-    argparse "^1.0.7"
-    esprima "^4.0.0"
-
 js-yaml@^3.13.1:
   version "3.13.1"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.13.1.tgz#aff151b30bfdfa8e49e05da22e7415e9dfa37847"
@@ -2293,6 +2294,11 @@ readdirp@^2.0.0:
     micromatch "^3.1.10"
     readable-stream "^2.0.2"
 
+regenerator-runtime@^0.13.2:
+  version "0.13.2"
+  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.2.tgz#32e59c9a6fb9b1a4aff09b4930ca2d4477343447"
+  integrity sha512-S/TQAZJO+D3m9xeN1WTI8dLKBBiRgXBlTJvbWjCThHWZj9EvHK70Ff50/tYj2J/fvBY6JtFVwRuazHN2E7M9BA==
+
 regex-not@^1.0.0, regex-not@^1.0.2:
   version "1.0.2"
   resolved "https://registry.npmjs.org/regex-not/-/regex-not-1.0.2.tgz#1f4ece27e00b0b65e0247a6810e6a85d83a5752c"
@@ -2886,6 +2892,13 @@ xtend@^4.0.0, xtend@~4.0.1:
 yallist@^3.0.0, yallist@^3.0.2:
   version "3.0.3"
   resolved "https://registry.npmjs.org/yallist/-/yallist-3.0.3.tgz#b4b049e314be545e3ce802236d6cd22cd91c3de9"
+
+yaml@^1.5.1:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/yaml/-/yaml-1.6.0.tgz#d8a985cfb26086dd73f91c637f6e6bc909fddd3c"
+  integrity sha512-iZfse3lwrJRoSlfs/9KQ9iIXxs9++RvBFVzAqbbBiFT+giYtyanevreF9r61ZTbGMgWQBxAua3FzJiniiJXWWw==
+  dependencies:
+    "@babel/runtime" "^7.4.5"
 
 yargs-parser@^12.0.0:
   version "12.0.0"
