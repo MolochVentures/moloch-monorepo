@@ -25,7 +25,7 @@
     "react-redux": "7.1.0",
     "react-router-dom": "5.0.1",
     "react-scripts": "3.0.1",
-    "redux": "4.0.1",
+    "redux": "4.0.2",
     "redux-thunk": "2.3.0",
     "rimble-ui": "0.9.4",
     "safe-web3-provider": "gnosis/safe-web3-provider#3b21ac5",
