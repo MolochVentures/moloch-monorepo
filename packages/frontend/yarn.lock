@@ -1592,10 +1592,10 @@
     lodash "^4.17.11"
     react-motion "^0.5.2"
 
-"@nivo/axes@0.59.1":
-  version "0.59.1"
-  resolved "https://registry.yarnpkg.com/@nivo/axes/-/axes-0.59.1.tgz#04989ef4b8f35a29191f9993b3432e0779df4469"
-  integrity sha512-e4yhIJiUmI1aE4SvE9xudtf0GNx9kKIa2fGymHwgwhOAd8G733SyxlPHXrS7/xbTyB8QkMsB6kG+17BxArv12g==
+"@nivo/axes@0.59.2":
+  version "0.59.2"
+  resolved "https://registry.yarnpkg.com/@nivo/axes/-/axes-0.59.2.tgz#239780c32cfb7b188dbc844dbdaef5d530c945b9"
+  integrity sha512-jWNbBGwbYToC1GP7xepKrMX5+LtaNy33khCbskjNo2niwN9Si8dZ5BQX81ETJDEW36v01V2OmaGH88tcc1/qrg==
   dependencies:
     "@nivo/core" "0.59.1"
     d3-format "^1.3.2"
@@ -1644,13 +1644,13 @@
     lodash "^4.17.11"
     recompose "^0.30.0"
 
-"@nivo/line@0.59.1":
-  version "0.59.1"
-  resolved "https://registry.yarnpkg.com/@nivo/line/-/line-0.59.1.tgz#b3ebdb6a6a5a1c276e4ce34422ee5a44c8ddf5ee"
-  integrity sha512-AD8c/5oqO7I2tTeDeg1BCGICLnnYXw1k7g0OGJwxMthxBWtkvXMHMM132/VyzBQnB9uf5Mp9vernf3ZI0QE4Rg==
+"@nivo/line@0.59.2":
+  version "0.59.2"
+  resolved "https://registry.yarnpkg.com/@nivo/line/-/line-0.59.2.tgz#9016bfe3c32fbbda3bf101882dd18b4fda5fb759"
+  integrity sha512-PhEZISG8KfzVrxLX8huQwjUrXw4pGT++ELhitQzVd3MnBetGxU7ZRFFYa6ABw4Vq9VD5wWhtu7QTF5lNKN7FdQ==
   dependencies:
     "@nivo/annotations" "0.59.1"
-    "@nivo/axes" "0.59.1"
+    "@nivo/axes" "0.59.2"
     "@nivo/colors" "0.59.0"
     "@nivo/core" "0.59.1"
     "@nivo/legends" "0.59.1"
