@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@nivo/line": "0.59.2",
+    "@nivo/line": "0.59.3",
     "apollo-boost": "0.4.3",
     "apollo-cache-inmemory": "1.6.2",
     "apollo-cache-persist": "0.1.1",
