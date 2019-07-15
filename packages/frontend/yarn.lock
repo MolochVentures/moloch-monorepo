@@ -1644,27 +1644,27 @@
     lodash "^4.17.11"
     recompose "^0.30.0"
 
-"@nivo/line@0.59.2":
-  version "0.59.2"
-  resolved "https://registry.yarnpkg.com/@nivo/line/-/line-0.59.2.tgz#9016bfe3c32fbbda3bf101882dd18b4fda5fb759"
-  integrity sha512-PhEZISG8KfzVrxLX8huQwjUrXw4pGT++ELhitQzVd3MnBetGxU7ZRFFYa6ABw4Vq9VD5wWhtu7QTF5lNKN7FdQ==
+"@nivo/line@0.59.3":
+  version "0.59.3"
+  resolved "https://registry.yarnpkg.com/@nivo/line/-/line-0.59.3.tgz#3c2db5ad90eab2c386f4051daef287ca3a64128c"
+  integrity sha512-BB8pbcMGg2xu/71K4kasOXzP6WSQX+pYR1zptkZci1rVUoKjrjhJLQ4I++as8GtCQ1JvXnkBw/5hjWmP4ZV2Bw==
   dependencies:
     "@nivo/annotations" "0.59.1"
     "@nivo/axes" "0.59.2"
     "@nivo/colors" "0.59.0"
     "@nivo/core" "0.59.1"
     "@nivo/legends" "0.59.1"
-    "@nivo/scales" "0.59.1"
+    "@nivo/scales" "0.59.3"
     "@nivo/tooltip" "0.59.1"
-    "@nivo/voronoi" "0.59.1"
+    "@nivo/voronoi" "0.59.3"
     d3-shape "^1.3.5"
     lodash "^4.17.11"
     react-motion "^0.5.2"
 
-"@nivo/scales@0.59.1":
-  version "0.59.1"
-  resolved "https://registry.yarnpkg.com/@nivo/scales/-/scales-0.59.1.tgz#20092ca1f0f509961723ad3de2e737f4a08a2e33"
-  integrity sha512-hOl4xgxDQhRos85YQTJCXHdLdow6FR5dhe/uA3WbOcnkaCkLyE+0g9RHPxmkWapB8QSjkfM0BJSltdfSSvUpog==
+"@nivo/scales@0.59.3":
+  version "0.59.3"
+  resolved "https://registry.yarnpkg.com/@nivo/scales/-/scales-0.59.3.tgz#3e3e96768f6d28bb94c0940b939c0ff5de47d2d7"
+  integrity sha512-tKWSKfSFDNDX0Wq3L89i2+bDfQn05ZRor8s7eeuekTtvVol5PkMhhfx8uYBUtix+J8Vzpm1hpaT6sSwA7vG1LQ==
   dependencies:
     d3-scale "^3.0.0"
     d3-time-format "^2.1.3"
@@ -1679,13 +1679,13 @@
     react-measure "^2.2.4"
     react-motion "^0.5.2"
 
-"@nivo/voronoi@0.59.1":
-  version "0.59.1"
-  resolved "https://registry.yarnpkg.com/@nivo/voronoi/-/voronoi-0.59.1.tgz#08c6446ff5d9526214a46d16fe2b5f69810657e0"
-  integrity sha512-3E2sZps+iwJzvx4Ct+FScnP3N7Adi5r0yHjQQ9PeHtJVZ44QP/EzEuqp6jWn8WsqV913iFtIR2/o40PdEmLfxA==
+"@nivo/voronoi@0.59.3":
+  version "0.59.3"
+  resolved "https://registry.yarnpkg.com/@nivo/voronoi/-/voronoi-0.59.3.tgz#75a97e655bb473bf0cf830469850a4e97041fedf"
+  integrity sha512-RMMyCxCKopPbM5fJRx42SvTCCD1wg30axzNR5WiNTsj7SrLsdSS6DWnJzoxHJPgqIMKivsXDdL8nbrM/hgyvSg==
   dependencies:
     "@nivo/core" "0.59.1"
-    d3-delaunay "^4.1.5"
+    d3-delaunay "^5.1.1"
     d3-scale "^3.0.0"
     recompose "^0.30.0"
 
@@ -5322,12 +5322,12 @@ d3-color@1, d3-color@^1.2.3:
   resolved "https://registry.yarnpkg.com/d3-color/-/d3-color-1.2.8.tgz#4eaf9b60ef188c893fcf8b28f3546aafebfbd9f4"
   integrity sha512-yeANXzP37PHk0DbSTMNPhnJD+Nn4G//O5E825bR6fAfHH43hobSBpgB9G9oWVl9+XgUaQ4yCnsX1H+l8DoaL9A==
 
-d3-delaunay@^4.1.5:
-  version "4.1.5"
-  resolved "https://registry.yarnpkg.com/d3-delaunay/-/d3-delaunay-4.1.5.tgz#4318c6d28b22988d88d11650eda440318afe419a"
-  integrity sha512-rBKVohmXT9+BrDicH8umAVUwtkfLIydVlWnpIEDUZ4l2e1vXCaKbypByF8tkN8TUUKnzJY0s8ldQEroeBRMO9Q==
+d3-delaunay@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/d3-delaunay/-/d3-delaunay-5.1.1.tgz#fa2313f5fff1c6007f7d814276fc6914f370d63c"
+  integrity sha512-BPT4Ej3tpXe+XdexZnave8XfRZHqRn8CZt2oIO9xBhQAaoKgssa9RHuzeszizpOWqtnh6GHBQmLoE2guhifghA==
   dependencies:
-    delaunator "^2.0.0"
+    delaunator "4"
 
 d3-format@1, d3-format@^1.3.2:
   version "1.3.2"
@@ -5632,10 +5632,10 @@ del@^3.0.0:
     pify "^3.0.0"
     rimraf "^2.2.8"
 
-delaunator@^2.0.0:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/delaunator/-/delaunator-2.0.5.tgz#c2a9ba2cf3d5aaab8fa0aa3ae82426d3fc0aeaf5"
-  integrity sha512-GSYmkITO56erpQzv5Pw+8Vg769kurM16IVUq/AcMb5ZCJCtV7Z2agx9lJ7EbbLno8L099iH2d+hvAK34ZnsvIQ==
+delaunator@4:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/delaunator/-/delaunator-4.0.0.tgz#3630f477b4923f472f534c62a028aeca6fe22d96"
+  integrity sha512-KzVgOHix5xaIVzZSfbv3Uzw9aI7mQNDet4Yd2p+tBNkfNHMFJbjbVa3q0nC7q7TjWZLX49QbzcT+pXazXX3Qmg==
 
 delayed-stream@~1.0.0:
   version "1.0.0"
