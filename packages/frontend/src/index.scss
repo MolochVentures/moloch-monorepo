@@ -21,6 +21,12 @@ body {
   color: white;
 }
 
+.ui.statistic>.value, .ui.statistics .statistic>.value {
+  @media screen and (max-width: 376px) {
+    font-size: 2.5rem !important;
+  }
+}
+
 .title {
   font-size: 30px;
   line-height: 15px;

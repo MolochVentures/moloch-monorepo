@@ -58,7 +58,7 @@ export default class HomePage extends React.Component {
           const { guildBankValue, exchangeRate, totalShares, shareValue } = metadata.data;
           return (
             <div id="homepage">
-              <Grid container verticalAlign="middle">
+              <Grid container verticalAlign="middle" textAlign="center">
                 <Grid container doubling stackable columns={2}>
                   <Grid.Column className="guild_value" textAlign="center">
                     <Statistic inverted label="Guild Bank Value" value={convertWeiToDollars(guildBankValue, exchangeRate)} />
