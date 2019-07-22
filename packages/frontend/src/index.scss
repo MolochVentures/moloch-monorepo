@@ -162,18 +162,6 @@ body {
 }
 
 #homepage {
-  .guild_value {
-    .amount {
-      font-size: 50px;
-      line-height: 30px;
-    }
-  }
-  .browse_buttons, .submit_button {
-    .link:not(:first-of-type) {
-      margin-left: 10px !important;
-    }
-    margin-top: 40px;
-  }
   .graph {
     width: 100%;
     height: 60vh;
@@ -192,25 +180,12 @@ body {
 
   
   @media screen and (min-width: 320px) and (max-width: 375px) { 
-
-    .guild_value {
-      text-align: center;
-      .amount {
-        font-size: 30px;
-        line-height: 35px;
-      }
-    }
     .btn_link {
       margin-bottom:  10px !important;
       margin-left: 0px !important;
       width: 200px !important;
       padding-left: 5px !important;
       padding-right: 5px !important;
-    }
-    .browse_buttons, .submit_button {
-      .link:not(:first-of-type) {
-        margin-left: 0px !important;
-      }
     }
     .graph_values {
       text-align: center !important;
@@ -229,21 +204,13 @@ body {
   }
   
   @media screen and (min-width: 376px) and (max-width: 768px) { 
-  
-    .guild_value {
-      text-align: center;
-    }
+
     .btn_link {
       margin-bottom:  10px !important;
       margin-left: 0px !important;
       width: 200px !important;
       padding-left: 5px !important;
       padding-right: 5px !important;
-    }
-    .browse_buttons, .submit_button {
-      .link:not(:first-of-type) {
-        margin-left: 0px !important;
-      }
     }
     .graph_values {
       text-align: center !important;
@@ -260,13 +227,6 @@ body {
       padding-right: 10px !important;
     }
   }
-  
-  @media screen and (min-width: 769px) and (max-width: 1024px) { 
-    .browse_buttons {
-      text-align: right;
-    }
-  }
-
 }
 
 #member_list {
@@ -739,29 +699,6 @@ body {
 
   
   
-}
-
-#guild_bank {
-  .guild_value {
-    .amount {
-      font-size: 50px;
-      line-height: 30px;
-    }
-  }
-  .text_link {
-    color: #fff !important;
-  }
-  .currency_element {
-    margin-bottom: 75px;
-  }
-  .name {
-    margin-top: 10px;
-  }
-  .shares {
-    margin-bottom: 0px;
-    font-size: 16px;
-    font-weight: lighter;
-  }
 }
 
 .wordwrap { 
