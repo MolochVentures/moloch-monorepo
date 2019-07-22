@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Button, Segment, Statistic } from "semantic-ui-react";
+import { Grid, Button, Segment, Statistic, Label, Icon } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { Query } from "react-apollo";
 import { utils } from "ethers";
@@ -15,7 +15,7 @@ const Composed = adopt({
 
 const NumMembers = ({ members, loading }) => (
   <Link to="/members" className="link">
-    <Button size="large" color="grey" className="browse_buttons">
+    <Button color="grey" size="mini">
       {loading ? "..." : members.length} Members
     </Button>
   </Link>
@@ -23,68 +23,88 @@ const NumMembers = ({ members, loading }) => (
 
 const NumProposals = ({ proposals, loading }) => (
   <Link to="/proposals" className="link">
-    <Button size="large" color="grey" className="browse_buttons">
+    <Button color="grey" size="mini">
       {loading ? "..." : proposals.length} Proposals
     </Button>
   </Link>
 );
 
-export default class HomePage extends React.Component {
-  state = {
-    approval: "",
-    token: null,
-    userAddress: null
-  };
+const MolochPool = () => (
+  <Link to="/pool" className="link">
+    <Button compact color="grey" size="mini">
+      Moloch Pool
+    </Button>
+  </Link>
+);
 
-  render() {
-    return (
-      <Composed>
-        {({ members, proposals, metadata }) => {
-          if (metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
+export default function HomePage() {
+  return (
+    <Composed>
+      {({ members, proposals, metadata }) => {
+        if (metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
 
-          let membersLoading = false;
-          if (members.loading) {
-            membersLoading = true;
-          }
+        let membersLoading = false;
+        if (members.loading) {
+          membersLoading = true;
+        }
 
-          let proposalsLoading = false;
-          if (proposals.loading) {
-            proposalsLoading = true;
-          }
+        let proposalsLoading = false;
+        if (proposals.loading) {
+          proposalsLoading = true;
+        }
 
-          if (members.error) throw new Error(`Error!: ${members.error}`);
-          if (proposals.error) throw new Error(`Error!: ${proposals.error}`);
-          if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
-          const { guildBankValue, exchangeRate, totalShares, shareValue } = metadata.data;
-          return (
-            <div id="homepage">
-              <Grid container verticalAlign="middle" textAlign="center">
-                <Grid container doubling stackable columns={2}>
-                  <Grid.Column className="guild_value" textAlign="center">
-                    <Statistic inverted label="Guild Bank Value" value={convertWeiToDollars(guildBankValue, exchangeRate)} />
-                  </Grid.Column>
-                  <Grid.Column textAlign="center">
-                    <NumMembers members={members.data.members} loading={membersLoading} />
-                    <NumProposals proposals={proposals.data.proposals} loading={proposalsLoading} />
-                  </Grid.Column>
-                </Grid>
-
-                <Grid container stackable columns={3} className="blurred box">
-                  <Grid.Column textAlign="center">
-                    <Statistic inverted label="Total Shares" value={totalShares} />
-                  </Grid.Column>
-                  <Grid.Column textAlign="center">
-                    <Statistic inverted label="Total ETH" value={parseFloat(utils.formatEther(guildBankValue)).toFixed(2)} />
-                  </Grid.Column>
-                  <Grid.Column textAlign="center">
-                    <Statistic inverted label="Share Value" value={convertWeiToDollars(shareValue, exchangeRate)} />
-                  </Grid.Column>
-                </Grid>
+        if (members.error) throw new Error(`Error!: ${members.error}`);
+        if (proposals.error) throw new Error(`Error!: ${proposals.error}`);
+        if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
+        const { guildBankValue, exchangeRate, totalShares, shareValue } = metadata.data;
+        return (
+          <div id="homepage">
+            <Grid container verticalAlign="middle" textAlign="center">
+              <Grid container doubling stackable columns={2} verticalAlign="bottom">
+                <Grid.Column>
+                  <Grid.Row className="guild_value" textAlign="center">
+                    <Statistic inverted>
+                      <Statistic.Label>Guild Bank Value</Statistic.Label>
+                      <Statistic.Value>{convertWeiToDollars(guildBankValue, exchangeRate)}</Statistic.Value>
+                    </Statistic>
+                  </Grid.Row>
+                  <Grid.Row className="pool_value" textAlign="center">
+                    <Statistic size="tiny" inverted>
+                      <Statistic.Label>Moloch Pool Value</Statistic.Label>
+                      <Statistic.Value>{convertWeiToDollars(guildBankValue, exchangeRate)}</Statistic.Value>
+                    </Statistic>
+                  </Grid.Row>
+                </Grid.Column>
+                <Grid.Column>
+                  <Grid container stackable columns={3}>
+                    <Grid.Column>
+                      <NumMembers members={members.data.members} loading={membersLoading} />
+                    </Grid.Column>
+                    <Grid.Column>
+                      <NumProposals proposals={proposals.data.proposals} loading={proposalsLoading} />
+                    </Grid.Column>
+                    <Grid.Column>
+                      <MolochPool />
+                    </Grid.Column>
+                  </Grid>
+                </Grid.Column>
               </Grid>
-            </div>
-          );
-        }}
-      </Composed>
-    );
-  }
+
+              <Grid container stackable columns={3} className="blurred box">
+                <Grid.Column textAlign="center">
+                  <Statistic inverted label="Total Shares" value={totalShares} />
+                </Grid.Column>
+                <Grid.Column textAlign="center">
+                  <Statistic inverted label="Total ETH" value={parseFloat(utils.formatEther(guildBankValue)).toFixed(2)} />
+                </Grid.Column>
+                <Grid.Column textAlign="center">
+                  <Statistic inverted label="Share Value" value={convertWeiToDollars(shareValue, exchangeRate)} />
+                </Grid.Column>
+              </Grid>
+            </Grid>
+          </div>
+        );
+      }}
+    </Composed>
+  );
 }
