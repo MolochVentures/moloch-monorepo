@@ -1,0 +1,27 @@
+specVersion: 0.0.1
+description: Gravatar for Ethereum
+repository: https://github.com/graphprotocol/example-subgraph
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: MolochPool
+    network: mainnet
+    source:
+      address: '0x97eC917BFD947A138aC615426504DDc305aa1766'
+      abi: MolochPool
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Gravatar
+      abis:
+        - name: MolochPool
+          file: ./abis/MolochPool.json
+      eventHandlers:
+        - event: NewGravatar(uint256,address,string,string)
+          handler: handleNewGravatar
+        - event: UpdatedGravatar(uint256,address,string,string)
+          handler: handleUpdatedGravatar
+      file: ./src/mapping.ts

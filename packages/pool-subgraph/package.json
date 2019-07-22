@@ -1,0 +1,24 @@
+{
+  "name": "moloch-pool",
+  "version": "0.1.0",
+  "scripts": {
+    "build-contract": "solc contracts/Gravity.sol --abi -o abis --overwrite && solc contracts/Gravity.sol --bin -o bin --overwrite",
+    "create": "graph create MolochVentures/moloch-pool --node https://api.thegraph.com/deploy/",
+    "create-local": "graph create MolochVentures/moloch-pool --node http://127.0.0.1:8020",
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy MolochVentures/moloch-pool --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "deploy-local": "graph deploy MolochVentures/moloch-pool --ipfs http://localhost:5001 --node http://127.0.0.1:8020"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.13.3",
+    "@graphprotocol/graph-ts": "^0.13.0"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "babel-register": "^6.26.0",
+    "truffle": "^5.0.4",
+    "truffle-contract": "^4.0.5",
+    "truffle-hdwallet-provider": "^1.0.4"
+  }
+}

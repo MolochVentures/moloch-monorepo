@@ -20,6 +20,7 @@ import { getMedianizer, getMoloch, getToken, initWeb3 } from "./web3";
 import { utils } from "ethers";
 import { adopt } from "react-adopt";
 import { ToastMessage } from 'rimble-ui';
+import Pool from "components/Pool";
 
 console.log(process.env);
 
@@ -162,6 +163,10 @@ class App extends React.Component {
                             <Redirect to={{ pathname: "/" }} />
                           )
                         }
+                      />
+                      <Route
+                        path="/pool"
+                        component={props => <Pool {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
                       />
                       <Route
                         component={props => <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
