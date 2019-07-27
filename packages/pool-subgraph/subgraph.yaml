@@ -15,7 +15,7 @@ dataSources:
       apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
-        - Gravatar
+        - Member
       abis:
         - name: MolochPool
           file: ./abis/MolochPool.json
