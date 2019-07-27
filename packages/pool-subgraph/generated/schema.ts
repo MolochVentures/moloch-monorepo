@@ -12,7 +12,7 @@ import {
   BigDecimal
 } from "@graphprotocol/graph-ts";
 
-export class Gravatar extends Entity {
+export class Member extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -20,17 +20,17 @@ export class Gravatar extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save Gravatar entity without an ID");
+    assert(id !== null, "Cannot save Member entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save Gravatar entity with non-string ID. " +
+      "Cannot save Member entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("Gravatar", id.toString(), this);
+    store.set("Member", id.toString(), this);
   }
 
-  static load(id: string): Gravatar | null {
-    return store.get("Gravatar", id) as Gravatar | null;
+  static load(id: string): Member | null {
+    return store.get("Member", id) as Member | null;
   }
 
   get id(): string {
@@ -42,30 +42,29 @@ export class Gravatar extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get owner(): Bytes {
-    let value = this.get("owner");
-    return value.toBytes();
+  get shares(): BigInt {
+    let value = this.get("shares");
+    return value.toBigInt();
   }
 
-  set owner(value: Bytes) {
-    this.set("owner", Value.fromBytes(value));
+  set shares(value: BigInt) {
+    this.set("shares", Value.fromBigInt(value));
   }
 
-  get displayName(): string {
-    let value = this.get("displayName");
-    return value.toString();
+  get keepers(): Array<Bytes> | null {
+    let value = this.get("keepers");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytesArray();
+    }
   }
 
-  set displayName(value: string) {
-    this.set("displayName", Value.fromString(value));
-  }
-
-  get imageUrl(): string {
-    let value = this.get("imageUrl");
-    return value.toString();
-  }
-
-  set imageUrl(value: string) {
-    this.set("imageUrl", Value.fromString(value));
+  set keepers(value: Array<Bytes> | null) {
+    if (value === null) {
+      this.unset("keepers");
+    } else {
+      this.set("keepers", Value.fromBytesArray(value as Array<Bytes>));
+    }
   }
 }

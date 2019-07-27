@@ -1,5 +1,5 @@
 type Member @entity {
   id: ID!
   shares: BigInt!
-  keepers: [Address!]
+  keepers: [Bytes!]
 }

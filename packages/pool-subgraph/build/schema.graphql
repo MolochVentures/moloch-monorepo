@@ -1,6 +1,5 @@
-type Gravatar @entity {
+type Member @entity {
   id: ID!
-  owner: Bytes!
-  displayName: String!
-  imageUrl: String!
+  shares: BigInt!
+  keepers: [Bytes!]
 }
