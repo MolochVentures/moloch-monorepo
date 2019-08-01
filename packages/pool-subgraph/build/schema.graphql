@@ -1,5 +1,0 @@
-type Member @entity {
-  id: ID!
-  shares: BigInt!
-  keepers: [Bytes!]
-}
