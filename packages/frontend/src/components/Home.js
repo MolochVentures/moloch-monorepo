@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Button, Segment, Statistic, Label, Icon } from "semantic-ui-react";
+import { Grid, Button, Segment, Statistic } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { Query } from "react-apollo";
 import { utils } from "ethers";

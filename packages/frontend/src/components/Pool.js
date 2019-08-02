@@ -3,58 +3,42 @@ import { Grid, Button, Segment, Statistic } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { Query } from "react-apollo";
 import { utils } from "ethers";
-import { GET_METADATA, GET_MEMBERS, GET_PROPOSALS } from "../helpers/graphQlQueries";
+import { GET_METADATA } from "../helpers/graphQlQueries";
 import { convertWeiToDollars } from "../helpers/currency";
 import { adopt } from "react-adopt";
 
 const Composed = adopt({
-  members: ({ render }) => <Query query={GET_MEMBERS}>{render}</Query>,
-  proposals: ({ render }) => <Query query={GET_PROPOSALS}>{render}</Query>,
   metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>
 });
 
-const NumMembers = ({ members, loading }) => (
-  <Link to="/members" className="link">
-    <Button color="grey" size="mini">
-      {loading ? "..." : members.length} Members
+const NumMembers = () => (
+  <Link to="/pool-members" className="link">
+    <Button color="grey" size="small">
+      Members
     </Button>
   </Link>
 );
 
-const NumProposals = ({ proposals, loading }) => (
-  <Link to="/proposals" className="link">
-    <Button color="grey" size="mini">
-      {loading ? "..." : proposals.length} Proposals
+const Donate = () => (
+  <Link to="/pool-donate" className="link">
+    <Button color="grey" size="small">
+      Donate
     </Button>
   </Link>
 );
 
-const MolochPool = () => (
-  <Link to="/pool" className="link">
-    <Button compact color="grey" size="mini">
-      Moloch Pool
-    </Button>
-  </Link>
+const Sync = () => (
+  <Button compact color="grey" size="small">
+    Sync
+  </Button>
 );
 
 export default function Pool() {
   return (
     <Composed>
-      {({ members, proposals, metadata }) => {
+      {({ metadata }) => {
         if (metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
 
-        let membersLoading = false;
-        if (members.loading) {
-          membersLoading = true;
-        }
-
-        let proposalsLoading = false;
-        if (proposals.loading) {
-          proposalsLoading = true;
-        }
-
-        if (members.error) throw new Error(`Error!: ${members.error}`);
-        if (proposals.error) throw new Error(`Error!: ${proposals.error}`);
         if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
         const { guildBankValue, exchangeRate, totalShares, shareValue } = metadata.data;
         return (
@@ -70,13 +54,13 @@ export default function Pool() {
                 <Grid.Column>
                   <Grid container stackable columns={3}>
                     <Grid.Column>
-                      <NumMembers members={members.data.members} loading={membersLoading} />
+                      <NumMembers />
                     </Grid.Column>
                     <Grid.Column>
-                      <NumProposals proposals={proposals.data.proposals} loading={proposalsLoading} />
+                      <Donate />
                     </Grid.Column>
                     <Grid.Column>
-                      <MolochPool />
+                      <Sync />
                     </Grid.Column>
                   </Grid>
                 </Grid.Column>

@@ -16,7 +16,7 @@ import { ApolloClient } from "apollo-client";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { HttpLink } from "apollo-link-http";
 import { GET_METADATA } from "./helpers/graphQlQueries";
-import { getMedianizer, getMoloch, getToken, initWeb3 } from "./web3";
+import { getMedianizer, getMoloch, getToken, initWeb3, getMolochPool } from "./web3";
 import { utils } from "ethers";
 import { adopt } from "react-adopt";
 import { ToastMessage } from 'rimble-ui';
@@ -41,7 +41,8 @@ const initialData = {
   shareValue: "",
   totalShares: "",
   currentPeriod: "",
-  exchangeRate: ""
+  exchangeRate: "",
+  totalPoolShares: "",
 };
 cache.writeData({
   data: { ...initialData, loggedInUser: window.localStorage.getItem("loggedInUser") || "" }
@@ -89,7 +90,7 @@ class App extends React.Component {
     }
 
     let {
-      data: { exchangeRate, totalShares, currentPeriod, guildBankValue, shareValue }
+      data: { exchangeRate, totalShares, currentPeriod, guildBankValue, shareValue, totalPoolShares }
     } = await client.query({
       query: GET_METADATA
     });
@@ -116,12 +117,19 @@ class App extends React.Component {
       shareValue = utils.parseEther(ethPerShare.toString()); // in wei
     }
 
+    if (!totalPoolShares || refetch) {
+      const molochPool = await getMolochPool();
+      totalPoolShares = await molochPool.totalPoolShares();
+    }
+
     const dataToWrite = {
       guildBankValue: guildBankValue.toString(),
       shareValue: shareValue.toString(),
       totalShares: totalShares.toString(),
       currentPeriod: currentPeriod.toString(),
-      exchangeRate: exchangeRate.toString()
+      exchangeRate: exchangeRate.toString(),
+      totalPoolShares: totalPoolShares
+      .toString(),
     };
 
     client.writeData({

@@ -2,10 +2,12 @@ import SafeProvider from "safe-web3-provider"
 import { ethers } from 'ethers';
 
 const molochAbi = require('./abi/Moloch.abi.json')
+const molochPoolAbi = require('./abi/MolochPool.abi.json')
 const erc20Abi = require('./abi/ERC20.abi.json')
 const medianizerAbi = require('./abi/Medianizer.abi.json')
 
 let moloch
+let molochPool
 let token
 let medianizer
 let eth
@@ -104,6 +106,17 @@ export async function initMoloch(loggedInUser) {
   return moloch
 }
 
+export async function initMolochPool(loggedInUser) {
+  if (loggedInUser) {
+    eth = await getEthSigner()
+    molochPool = new ethers.Contract(process.env.REACT_APP_MOLOCH_POOL_ADDRESS, molochPoolAbi, eth.getSigner())
+  } else {
+    const provider = ethers.getDefaultProvider();
+    molochPool = new ethers.Contract(process.env.REACT_APP_MOLOCH_POOL_ADDRESS, molochPoolAbi, provider)
+  }
+  return molochPool
+}
+
 export async function initToken(loggedInUser) {
   if (loggedInUser) {
     eth = await getEthSigner()
@@ -126,6 +139,11 @@ export async function initMedianizer() {
 export async function getMoloch(loggedInUser) {
   await initMoloch(loggedInUser)
   return moloch
+}
+
+export async function getMolochPool(loggedInUser) {
+  await initMolochPool(loggedInUser)
+  return molochPool
 }
 
 export async function getToken(loggedInUser) {

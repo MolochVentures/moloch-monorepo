@@ -37,6 +37,7 @@ export const GET_METADATA = gql`
     guildBankValue @client
     shareValue @client
     currentPeriod @client
+    totalPoolShares @client
   }
 `;
 
