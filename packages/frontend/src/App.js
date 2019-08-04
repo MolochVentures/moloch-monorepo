@@ -1,5 +1,12 @@
+import { ApolloClient } from "apollo-client";
+import { InMemoryCache } from "apollo-cache-inmemory";
+import { HttpLink } from "apollo-link-http";
+import gql from "graphql-tag";
 import React from "react";
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
+import { ApolloProvider, Query } from "react-apollo";
+import { utils } from "ethers";
+import { ToastMessage } from "rimble-ui";
 
 import Background from "./components/Background";
 import Header from "./components/Header";
@@ -7,20 +14,14 @@ import Wrapper from "./components/Wrapper";
 import Home from "./components/Home";
 import ProposalList from "./components/ProposalList";
 import MemberList from "./components/MemberList";
+import Pool from "./components/Pool";
 import ProposalSubmission from "./components/ProposalSubmission";
-import { ApolloProvider, Query } from "react-apollo";
-import gql from "graphql-tag";
 import { resolvers } from "./resolvers";
 import { typeDefs } from "./schema";
-import { ApolloClient } from "apollo-client";
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { HttpLink } from "apollo-link-http";
 import { GET_METADATA, GET_POOL_METADATA } from "./helpers/graphQlQueries";
 import { getMedianizer, getMoloch, getToken, initWeb3, getMolochPool } from "./web3";
-import { utils } from "ethers";
-import { adopt } from "react-adopt";
-import { ToastMessage } from 'rimble-ui';
-import Pool from "components/Pool";
+import PoolMemberListView from "components/PoolMemberList";
+import { Dimmer, Loader } from "semantic-ui-react";
 
 console.log(process.env);
 
@@ -32,7 +33,7 @@ const client = new ApolloClient({
     uri: process.env.REACT_APP_GRAPH_NODE_URI
   }),
   resolvers,
-  typeDefs
+  typeDefs,
 });
 
 const initialData = {
@@ -58,9 +59,39 @@ const IS_LOGGED_IN = gql`
   }
 `;
 
-const Composed = adopt({
-  loggedInUserData: ({ render }) => <Query query={IS_LOGGED_IN}>{render}</Query>,
-});
+function getLocalResolvers(medianizer, moloch, molochPool, token) {
+  return {
+    Query: {
+      guildBankValue: () => {},
+      shareValue: (parent) => {
+        console.log('parent: ', parent);
+        return 100
+      },
+      totalShares: async () => {
+        return await moloch.totalShares();
+      },
+      currentPeriod: async () => {
+        return await moloch.getCurrentPeriod();
+      },
+      exchangeRate: async () => {
+        const rate = (await medianizer.compute())[0];
+        return utils.bigNumberify(rate);
+      },
+      proposalQueueLength: async () => {
+        return await moloch.getProposalQueueLength();
+      },
+      totalPoolShares: async () => {
+        return await molochPool.totalPoolShares()
+      },
+      poolValue: async () => {
+        return await token.balanceOf(process.env.REACT_APP_MOLOCH_POOL_ADDRESS)
+      },
+      poolShareValue: () => {
+        return 100
+      }
+    }
+  };
+}
 
 class App extends React.Component {
   state = {
@@ -85,15 +116,21 @@ class App extends React.Component {
 
     // make sure logged in metamask user is the one that's saved to storage
     if (loggedInUser) {
-      await initWeb3(client)
+      await initWeb3(client);
     }
+
+    const medianizer = await getMedianizer(loggedInUser);
+    const moloch = await getMoloch();
+    const molochPool = await getMolochPool();
+    const token = await getToken();
+    // TODO: MAKE THIS WORK
+    // client.addResolvers(getLocalResolvers(medianizer, moloch, molochPool, token))
 
     let {
       data: { exchangeRate, totalShares, currentPeriod, guildBankValue, shareValue, proposalQueueLength }
     } = await client.query({
       query: GET_METADATA
     });
-
 
     let {
       data: { totalPoolShares, poolValue, poolShareValue }
@@ -102,23 +139,19 @@ class App extends React.Component {
     });
 
     if (!exchangeRate || refetch) {
-      const medianizer = await getMedianizer(loggedInUser);
       exchangeRate = (await medianizer.compute())[0];
       exchangeRate = utils.bigNumberify(exchangeRate);
     }
 
     if (!totalShares || !currentPeriod || refetch) {
-      const moloch = await getMoloch();
       totalShares = await moloch.totalShares();
       currentPeriod = await moloch.getCurrentPeriod();
     }
 
     if (!proposalQueueLength || refetch) {
-      const moloch = await getMoloch();
-      proposalQueueLength = await moloch.getProposalQueueLength()
+      proposalQueueLength = await moloch.getProposalQueueLength();
     }
 
-    const token = await getToken();
     if (!guildBankValue || refetch) {
       guildBankValue = await token.balanceOf(process.env.REACT_APP_GUILD_BANK_ADDRESS);
     }
@@ -130,7 +163,6 @@ class App extends React.Component {
 
     // POOL
     if (!totalPoolShares || refetch) {
-      const molochPool = await getMolochPool();
       totalPoolShares = await molochPool.totalPoolShares();
     }
 
@@ -161,11 +193,12 @@ class App extends React.Component {
   }
 
   render() {
-    return this.state.restored ? (
+    const { restored } = this.state;
+    return restored ? (
       <ApolloProvider client={client}>
         <Router basename={process.env.PUBLIC_URL}>
-          <Composed>
-            {({ loggedInUserData }) => {
+          <Query query={IS_LOGGED_IN}>
+            {loggedInUserData => {
               return (
                 <>
                   <Background />
@@ -175,21 +208,21 @@ class App extends React.Component {
                       <Route
                         exact
                         path="/"
-                        render={props => <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
+                        render={props => <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} pageQueriesLoading={!restored} />}
                       />
                       <Route
                         path="/proposals"
-                        render={props =><ProposalList {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
+                        render={props => <ProposalList {...props} loggedInUser={loggedInUserData.data.loggedInUser} pageQueriesLoading={!restored} />}
                       />
                       <Route
                         path="/members"
-                        render={props => <MemberList {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
+                        render={props => <MemberList {...props} loggedInUser={loggedInUserData.data.loggedInUser} pageQueriesLoading={!restored} />}
                       />
                       <Route
                         path="/proposalsubmission"
                         render={props =>
                           loggedInUserData.data.loggedInUser ? (
-                            <ProposalSubmission {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
+                            <ProposalSubmission {...props} loggedInUser={loggedInUserData.data.loggedInUser} pageQueriesLoading={!restored} />
                           ) : (
                             <Redirect to={{ pathname: "/" }} />
                           )
@@ -197,10 +230,16 @@ class App extends React.Component {
                       />
                       <Route
                         path="/pool"
-                        component={props => <Pool {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
+                        component={props => <Pool {...props} loggedInUser={loggedInUserData.data.loggedInUser} pageQueriesLoading={!restored} />}
                       />
                       <Route
-                        component={props => <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
+                        path="/pool-members"
+                        render={props => (
+                          <PoolMemberListView {...props} loggedInUser={loggedInUserData.data.loggedInUser} pageQueriesLoading={!restored} />
+                        )}
+                      />
+                      <Route
+                        component={props => <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} pageQueriesLoading={!restored} />}
                       />
                     </Switch>
                   </Wrapper>
@@ -208,11 +247,16 @@ class App extends React.Component {
                 </>
               );
             }}
-          </Composed>
+          </Query>
         </Router>
       </ApolloProvider>
     ) : (
-      <div>Loading!!!</div>
+      <>
+        <Background />
+        <Dimmer active>
+          <Loader size="massive" />
+        </Dimmer>
+      </>
     );
   }
 }
