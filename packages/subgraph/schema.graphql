@@ -64,3 +64,8 @@ type PoolMember @entity {
   shares: BigInt!
   keepers: [Bytes!]
 }
+
+type PoolMeta @entity {
+  id: ID!
+  currentPoolIndex: BigInt!
+}

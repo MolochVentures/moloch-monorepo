@@ -15,8 +15,9 @@ import {
   Deposit,
   Withdraw,
   KeeperWithdraw,
+  Sync,
 } from "./types/MolochPool/MolochPool";
-import { Proposal, Member, Vote, Applicant, PoolMember } from "./types/schema";
+import { Proposal, Member, Vote, Applicant, PoolMember, PoolMeta } from "./types/schema";
 
 export function handleSummonComplete(event: SummonComplete): void {
   let member = new Member(event.params.summoner.toHex());
@@ -238,4 +239,14 @@ export function handlePoolRemoveKeepers(event: RemoveKeepers): void {
   //   member.keepers = member.keepers.filter(k => k != keeper);
   // }
   // member.save();
+}
+
+export function handlePoolSync(event: Sync): void {
+  let meta = PoolMeta.load("");
+  if (!meta) {
+    meta = new PoolMeta("");
+  }
+
+  meta.currentPoolIndex = event.params.currentProposalIndex;
+  meta.save();
 }

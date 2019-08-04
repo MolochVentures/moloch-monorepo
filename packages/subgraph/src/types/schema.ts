@@ -597,3 +597,43 @@ export class PoolMember extends Entity {
     }
   }
 }
+
+export class PoolMeta extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save PoolMeta entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save PoolMeta entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("PoolMeta", id.toString(), this);
+  }
+
+  static load(id: string): PoolMeta | null {
+    return store.get("PoolMeta", id) as PoolMeta | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get currentPoolIndex(): BigInt {
+    let value = this.get("currentPoolIndex");
+    return value.toBigInt();
+  }
+
+  set currentPoolIndex(value: BigInt) {
+    this.set("currentPoolIndex", Value.fromBigInt(value));
+  }
+}
