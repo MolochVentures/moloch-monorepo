@@ -1,19 +1,16 @@
-import React from "react";
-import { Grid, Button, Segment, Statistic } from "semantic-ui-react";
+import React, { useState, useEffect } from "react";
+import { Grid, Button, Statistic, Loader, Popup } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { Query } from "react-apollo";
 import { utils } from "ethers";
-import { GET_POOL_METADATA } from "../helpers/graphQlQueries";
 import { convertWeiToDollars } from "../helpers/currency";
-import { adopt } from "react-adopt";
-
-const Composed = adopt({
-  metadata: ({ render }) => <Query query={GET_POOL_METADATA}>{render}</Query>
-});
+import gql from "graphql-tag";
+import { getMolochPool } from "web3";
+import { monitorTx } from "helpers/transaction";
 
 const NumMembers = () => (
   <Link to="/pool-members" className="link">
-    <Button color="grey" size="small">
+    <Button color="grey" size="medium" fluid>
       Members
     </Button>
   </Link>
@@ -21,37 +18,88 @@ const NumMembers = () => (
 
 const Donate = () => (
   <Link to="/pool-donate" className="link">
-    <Button color="grey" size="small">
+    <Button color="grey" size="medium" fluid>
       Donate
     </Button>
   </Link>
 );
 
-const Sync = () => (
-  <Button compact color="grey" size="small">
-    Sync
-  </Button>
-);
-
-export default function Pool() {
+const Sync = ({ molochPool, lastProcessedProposalIndex, currentPoolIndex }) => {
+  const synced = currentPoolIndex >= lastProcessedProposalIndex;
   return (
-    <Composed>
-      {({ metadata }) => {
-        if (metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
+    <Popup
+      inverted
+      content={synced ? "Fully synced" : `Sync to last processed proposal ${lastProcessedProposalIndex}`}
+      trigger={
+        <Button
+          compact
+          color="grey"
+          size="medium"
+          fluid
+          onClick={() => {
+            monitorTx(molochPool.sync(lastProcessedProposalIndex));
+          }}
+          disabled={currentPoolIndex >= lastProcessedProposalIndex}
+        >
+          Sync
+        </Button>
+      }
+    />
+  );
+};
 
-        if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
-        const { totalPoolShares, poolValue, poolShareValue, exchangeRate } = metadata.data;
+const GET_POOL_METADATA = gql`
+  {
+    totalPoolShares @client
+    poolValue @client
+    poolShareValue @client
+    exchangeRate @client
+    proposals(first: 1, where: { processed: true }, orderBy: proposalIndex, orderDirection: desc) {
+      proposalIndex
+    }
+    poolMetas {
+      currentPoolIndex
+    }
+  }
+`;
+
+export default function Pool({ pageQueriesLoading, loggedInUser }) {
+  console.log("pageQueriesLoading: ", pageQueriesLoading);
+  const [molochPool, setMolochPool] = useState({});
+
+  useEffect(() => {
+    async function getMoloch() {
+      const pool = await getMolochPool(loggedInUser);
+      setMolochPool(pool);
+    }
+    getMoloch();
+  }, [loggedInUser]);
+
+  return (
+    <Query query={GET_POOL_METADATA}>
+      {({ loading, error, data }) => {
+        if (loading || pageQueriesLoading) return <Loader size="massive" active />;
+
+        if (error) throw new Error(`Error!: ${error}`);
+        const {
+          totalPoolShares,
+          poolValue,
+          poolShareValue,
+          exchangeRate,
+          proposals: [lastProcessedProposal],
+          poolMetas: [currentPoolIndex]
+        } = data;
         return (
           <div id="homepage">
             <Grid container verticalAlign="middle" textAlign="center">
-              <Grid container doubling stackable columns={2} verticalAlign="bottom">
+              <Grid container doubling stackable columns="equal" verticalAlign="bottom">
                 <Grid.Column>
                   <Statistic inverted>
                     <Statistic.Label>Moloch Pool Value</Statistic.Label>
                     <Statistic.Value>{convertWeiToDollars(poolValue, exchangeRate)}</Statistic.Value>
                   </Statistic>
                 </Grid.Column>
-                <Grid.Column>
+                <Grid.Column width={9}>
                   <Grid container stackable columns={3}>
                     <Grid.Column>
                       <NumMembers />
@@ -60,7 +108,11 @@ export default function Pool() {
                       <Donate />
                     </Grid.Column>
                     <Grid.Column>
-                      <Sync />
+                      <Sync
+                        lastProcessedProposalIndex={lastProcessedProposal.proposalIndex}
+                        currentPoolIndex={currentPoolIndex.currentPoolIndex}
+                        molochPool={molochPool}
+                      />
                     </Grid.Column>
                   </Grid>
                 </Grid.Column>
@@ -81,6 +133,6 @@ export default function Pool() {
           </div>
         );
       }}
-    </Composed>
+    </Query>
   );
 }

@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Button, Divider, Form, Grid, Input, Segment, Modal, Header, Icon, List } from "semantic-ui-react";
 import { getMoloch, getToken } from "../web3";
 import { utils } from "ethers";
+import { monitorTx } from "helpers/transaction";
 
 const DEPOSIT_WETH = "10";
 
@@ -17,6 +18,7 @@ class SubmitModal extends Component {
     const { token, address, tribute, moloch, loggedInUser, valid } = this.props;
     if (!valid) {
       alert("Please fill any missing fields.");
+      return;
     }
     this.setState({
       open: true
@@ -131,7 +133,7 @@ export default class ProposalSubmission extends Component {
 
     switch (fieldName) {
       case "title":
-        titleValid = value !== "";
+        titleValid = value && value !== "";
         fieldValidationErrors.title = titleValid ? "" : "Title is invalid";
         break;
       case "address":
@@ -187,8 +189,7 @@ export default class ProposalSubmission extends Component {
     let submittedTx;
     try {
       console.log("Submitting proposal: ", address, utils.parseEther(tribute).toString(), shares, JSON.stringify({ title, description }));
-      submittedTx = await moloch.submitProposal(address, utils.parseEther(tribute), shares, JSON.stringify({ title, description }));
-      console.log("submittedTx: ", submittedTx);
+      monitorTx(moloch.submitProposal(address, utils.parseEther(tribute), shares, JSON.stringify({ title, description })));
     } catch (e) {
       console.error(e);
       alert("Error processing proposal");
