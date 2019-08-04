@@ -57,5 +57,5 @@ dataSources:
         - event: Withdraw(address,uint256)
           handler: handlePoolWithdraw
         - event: Sync(uint256)
-          handler: handleSync
+          handler: handlePoolSync
       file: MolochPool/MolochPool.wasm

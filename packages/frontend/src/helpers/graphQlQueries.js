@@ -37,7 +37,16 @@ export const GET_METADATA = gql`
     guildBankValue @client
     shareValue @client
     currentPeriod @client
+    proposalQueueLength @client
+  }
+`;
+
+export const GET_POOL_METADATA = gql`
+  query Metadata {
     totalPoolShares @client
+    poolValue @client
+    poolShareValue @client
+    exchangeRate @client
   }
 `;
 

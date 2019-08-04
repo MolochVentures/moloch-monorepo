@@ -15,7 +15,7 @@ import { typeDefs } from "./schema";
 import { ApolloClient } from "apollo-client";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { HttpLink } from "apollo-link-http";
-import { GET_METADATA } from "./helpers/graphQlQueries";
+import { GET_METADATA, GET_POOL_METADATA } from "./helpers/graphQlQueries";
 import { getMedianizer, getMoloch, getToken, initWeb3, getMolochPool } from "./web3";
 import { utils } from "ethers";
 import { adopt } from "react-adopt";
@@ -42,7 +42,10 @@ const initialData = {
   totalShares: "",
   currentPeriod: "",
   exchangeRate: "",
+  proposalQueueLength: "",
   totalPoolShares: "",
+  poolValue: "",
+  poolShareValue: ""
 };
 cache.writeData({
   data: { ...initialData, loggedInUser: window.localStorage.getItem("loggedInUser") || "" }
@@ -57,19 +60,15 @@ const IS_LOGGED_IN = gql`
 
 const Composed = adopt({
   loggedInUserData: ({ render }) => <Query query={IS_LOGGED_IN}>{render}</Query>,
-  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>
 });
 
 class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      restored: false,
-      exchangeRate: "0",
-      totalShares: "0",
-      guildBankValue: "0"
-    };
-  }
+  state = {
+    restored: false,
+    exchangeRate: "0",
+    totalShares: "0",
+    guildBankValue: "0"
+  };
 
   async componentDidMount() {
     // await persistor.restore();
@@ -90,9 +89,16 @@ class App extends React.Component {
     }
 
     let {
-      data: { exchangeRate, totalShares, currentPeriod, guildBankValue, shareValue, totalPoolShares }
+      data: { exchangeRate, totalShares, currentPeriod, guildBankValue, shareValue, proposalQueueLength }
     } = await client.query({
       query: GET_METADATA
+    });
+
+
+    let {
+      data: { totalPoolShares, poolValue, poolShareValue }
+    } = await client.query({
+      query: GET_POOL_METADATA
     });
 
     if (!exchangeRate || refetch) {
@@ -107,6 +113,11 @@ class App extends React.Component {
       currentPeriod = await moloch.getCurrentPeriod();
     }
 
+    if (!proposalQueueLength || refetch) {
+      const moloch = await getMoloch();
+      proposalQueueLength = await moloch.getProposalQueueLength()
+    }
+
     const token = await getToken();
     if (!guildBankValue || refetch) {
       guildBankValue = await token.balanceOf(process.env.REACT_APP_GUILD_BANK_ADDRESS);
@@ -117,9 +128,19 @@ class App extends React.Component {
       shareValue = utils.parseEther(ethPerShare.toString()); // in wei
     }
 
+    // POOL
     if (!totalPoolShares || refetch) {
       const molochPool = await getMolochPool();
       totalPoolShares = await molochPool.totalPoolShares();
+    }
+
+    if (!poolValue || refetch) {
+      poolValue = await token.balanceOf(process.env.REACT_APP_MOLOCH_POOL_ADDRESS);
+    }
+
+    if (poolValue && totalPoolShares) {
+      const ethPerShare = totalPoolShares.toNumber() > 0 ? parseFloat(utils.formatEther(poolValue)) / totalPoolShares.toNumber() : 0; // in eth
+      poolShareValue = utils.parseEther(ethPerShare.toString()); // in wei
     }
 
     const dataToWrite = {
@@ -128,8 +149,10 @@ class App extends React.Component {
       totalShares: totalShares.toString(),
       currentPeriod: currentPeriod.toString(),
       exchangeRate: exchangeRate.toString(),
-      totalPoolShares: totalPoolShares
-      .toString(),
+      totalPoolShares: totalPoolShares.toString(),
+      proposalQueueLength: proposalQueueLength.toString(),
+      poolValue: poolValue.toString(),
+      poolShareValue: poolShareValue.toString()
     };
 
     client.writeData({
@@ -142,7 +165,7 @@ class App extends React.Component {
       <ApolloProvider client={client}>
         <Router basename={process.env.PUBLIC_URL}>
           <Composed>
-            {({ loggedInUserData, metadata }) => {
+            {({ loggedInUserData }) => {
               return (
                 <>
                   <Background />

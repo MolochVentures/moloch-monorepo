@@ -62,5 +62,5 @@ dataSources:
         # - event: RemoveKeepers(address,address[])
         #   handler: handlePoolRemoveKeepers
         - event: Sync(uint256)
-          handler: handleSync
+          handler: handlePoolSync
       file: ./src/mapping.ts
