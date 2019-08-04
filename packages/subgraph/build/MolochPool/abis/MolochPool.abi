@@ -208,13 +208,18 @@
     "inputs": [
       {
         "indexed": false,
-        "name": "tokenAmount",
+        "name": "donor",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "sharesMinted",
         "type": "uint256"
       },
       {
         "indexed": false,
-        "name": "donor",
-        "type": "address"
+        "name": "tokensDeposited",
+        "type": "uint256"
       }
     ],
     "name": "Deposit",
@@ -225,13 +230,13 @@
     "inputs": [
       {
         "indexed": false,
-        "name": "sharesToBurn",
-        "type": "uint256"
+        "name": "donor",
+        "type": "address"
       },
       {
         "indexed": false,
-        "name": "donor",
-        "type": "address"
+        "name": "sharesBurned",
+        "type": "uint256"
       }
     ],
     "name": "Withdraw",
@@ -242,13 +247,13 @@
     "inputs": [
       {
         "indexed": false,
-        "name": "sharesToBurn",
-        "type": "uint256"
+        "name": "donor",
+        "type": "address"
       },
       {
         "indexed": false,
-        "name": "donor",
-        "type": "address"
+        "name": "sharesBurned",
+        "type": "uint256"
       },
       {
         "indexed": false,
@@ -264,6 +269,11 @@
     "inputs": [
       {
         "indexed": false,
+        "name": "donor",
+        "type": "address"
+      },
+      {
+        "indexed": false,
         "name": "addedKeepers",
         "type": "address[]"
       }
@@ -274,6 +284,11 @@
   {
     "anonymous": false,
     "inputs": [
+      {
+        "indexed": false,
+        "name": "donor",
+        "type": "address"
+      },
       {
         "indexed": false,
         "name": "removedKeepers",

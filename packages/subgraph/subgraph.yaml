@@ -51,12 +51,14 @@ dataSources:
         - name: MolochPool
           file: ./abis/MolochPool.abi
       eventHandlers:
-        - event: SharesMinted(uint256,address,uint256)
-          handler: handleSharesMinted
-        - event: SharesBurned(uint256,address,uint256)
-          handler: handleSharesBurned
-        - event: AddKeepers(address[])
-          handler: handleAddKeepers
-        - event: RemoveKeepers(address[])
-          handler: handleRemoveKeepers
+        - event: Deposit(address,uint256,uint256)
+          handler: handlePoolDeposit
+        - event: Withdraw(address,uint256)
+          handler: handlePoolWithdraw
+        - event: KeeperWithdraw(address,uint256,address)
+          handler: handlePoolKeeperWithdraw
+        - event: AddKeepers(address,address[])
+          handler: handlePoolAddKeepers
+        - event: RemoveKeepers(address,address[])
+          handler: handlePoolRemoveKeepers
       file: ./src/mapping.ts

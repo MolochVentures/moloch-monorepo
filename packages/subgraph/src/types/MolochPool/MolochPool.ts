@@ -45,12 +45,16 @@ export class Deposit__Params {
     this._event = event;
   }
 
-  get tokenAmount(): BigInt {
-    return this._event.parameters[0].value.toBigInt();
+  get donor(): Address {
+    return this._event.parameters[0].value.toAddress();
   }
 
-  get donor(): Address {
-    return this._event.parameters[1].value.toAddress();
+  get sharesMinted(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+
+  get tokensDeposited(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
   }
 }
 
@@ -67,12 +71,12 @@ export class Withdraw__Params {
     this._event = event;
   }
 
-  get sharesToBurn(): BigInt {
-    return this._event.parameters[0].value.toBigInt();
+  get donor(): Address {
+    return this._event.parameters[0].value.toAddress();
   }
 
-  get donor(): Address {
-    return this._event.parameters[1].value.toAddress();
+  get sharesBurned(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
   }
 }
 
@@ -89,12 +93,12 @@ export class KeeperWithdraw__Params {
     this._event = event;
   }
 
-  get sharesToBurn(): BigInt {
-    return this._event.parameters[0].value.toBigInt();
+  get donor(): Address {
+    return this._event.parameters[0].value.toAddress();
   }
 
-  get donor(): Address {
-    return this._event.parameters[1].value.toAddress();
+  get sharesBurned(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
   }
 
   get keeper(): Address {
@@ -115,8 +119,12 @@ export class AddKeepers__Params {
     this._event = event;
   }
 
+  get donor(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
   get addedKeepers(): Array<Address> {
-    return this._event.parameters[0].value.toAddressArray();
+    return this._event.parameters[1].value.toAddressArray();
   }
 }
 
@@ -133,8 +141,12 @@ export class RemoveKeepers__Params {
     this._event = event;
   }
 
+  get donor(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
   get removedKeepers(): Array<Address> {
-    return this._event.parameters[0].value.toAddressArray();
+    return this._event.parameters[1].value.toAddressArray();
   }
 }
 

@@ -10,10 +10,11 @@ import {
   UpdateDelegateKey
 } from "./types/Moloch/Moloch";
 import {
-  SharesMinted,
-  SharesBurned,
   AddKeepers,
-  RemoveKeepers
+  RemoveKeepers,
+  Deposit,
+  Withdraw,
+  KeeperWithdraw,
 } from "./types/MolochPool/MolochPool";
 import { Proposal, Member, Vote, Applicant, PoolMember } from "./types/schema";
 
@@ -195,28 +196,34 @@ export function handleUpdateDelegateKey(event: UpdateDelegateKey): void {
   member.save();
 }
 
-export function handleSharesMinted(event: SharesMinted): void {
-  let id = event.params.recipient.toHex();
+export function handlePoolDeposit(event: Deposit): void {
+  let id = event.params.donor.toHex();
   let member = PoolMember.load(id);
 
   if (member == null) {
     member = new PoolMember(id);
-    member.shares = event.params.sharesToMint;
+    member.shares = event.params.sharesMinted;
     member.keepers = [];
   } else {
-    member.shares.plus(event.params.sharesToMint);
+    member.shares.plus(event.params.sharesMinted);
   }
 
   member.save();
 }
 
-export function handleSharesBurned(event: SharesBurned): void {
-  let member = PoolMember.load(event.params.recipient.toHex());
-  member.shares.minus(event.params.sharesToBurn);
+export function handlePoolWithdraw(event: Withdraw): void {
+  let member = PoolMember.load(event.params.donor.toHex());
+  member.shares.minus(event.params.sharesBurned);
   member.save();
 }
 
-export function handleAddKeepers(event: AddKeepers): void {
+export function handlePoolKeeperWithdraw(event: KeeperWithdraw): void {
+  let member = PoolMember.load(event.params.donor.toHex());
+  member.shares.minus(event.params.sharesBurned);
+  member.save();
+}
+
+export function handlePoolAddKeepers(event: AddKeepers): void {
   let member = PoolMember.load(event.transaction.from.toHex());
   if (member) {
     member.keepers.concat(event.params.addedKeepers as Bytes[]);
@@ -224,7 +231,7 @@ export function handleAddKeepers(event: AddKeepers): void {
   }
 }
 
-export function handleRemoveKeepers(event: RemoveKeepers): void {
+export function handlePoolRemoveKeepers(event: RemoveKeepers): void {
   // let member = Member.load(event.transaction.from.toHex());
   // for (let i = 0; i < event.params.removedKeepers.length; i++) {
   //   let keeper = member.keepers[i];
