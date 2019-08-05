@@ -152,8 +152,8 @@ class WithdrawLootTokenMenu extends React.Component {
 }
 
 function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
-  const [approval, setApproval] = useState();
-  const [wrap, setWrap] = useState();
+  const [approval, setApproval] = useState("");
+  const [wrap, setWrap] = useState("");
   const [myWeth, setMyWeth] = useState("...");
   const [myEth, setMyEth] = useState("...");
 
