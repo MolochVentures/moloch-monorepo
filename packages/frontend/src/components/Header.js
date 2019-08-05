@@ -1,11 +1,12 @@
-import React, { Component } from "react";
+import React, { Component, useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Grid, Icon, Dropdown, Form, Button } from "semantic-ui-react";
 import { Query, withApollo } from "react-apollo";
 import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
-import { getMoloch, initMetamask, initGnosisSafe, getToken } from "../web3";
+import { getMoloch, initMetamask, initGnosisSafe, getToken, getEthSigner } from "../web3";
 import { utils } from "ethers";
 import { monitorTx } from "../helpers/transaction";
+import { formatEther } from "ethers/utils";
 
 const MainMenu = props => (
   <div className="dropdownItems">
@@ -14,7 +15,7 @@ const MainMenu = props => (
         <Dropdown.Item
           icon="settings"
           className="item"
-          content="Approve wETH"
+          content="wETH Center"
           onClick={() => {
             props._handleOpenDropdown();
             props.onLoadApproveWeth();
@@ -150,37 +151,63 @@ class WithdrawLootTokenMenu extends React.Component {
   }
 }
 
-class ApproveWethMenu extends React.Component {
-  state = {
-    approval: ""
-  };
+function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
+  const [approval, setApproval] = useState();
+  const [wrap, setWrap] = useState();
+  const [myWeth, setMyWeth] = useState("...");
+  const [myEth, setMyEth] = useState("...");
 
-  approve = async () => {
-    const { approval } = this.state;
-    const { token } = this.props;
-
+  const approve = useCallback(() => {
     console.log("Approving wETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval).toString());
     monitorTx(token.approve(process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval)));
-  };
+  }, [approval, token])
 
-  render() {
-    const { approval } = this.state;
-    const { onLoadMain } = this.props;
-    return (
-      <div>
-        <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => onLoadMain()} />
-        <Dropdown.Divider />
-        <Dropdown.Item className="item submenu">
-          <p>
-            <Icon name="settings" />
-            Approve wETH
-          </p>
-          <Form.Input placeholder="wETH to Approve" onChange={event => this.setState({ approval: event.target.value })} value={approval} />
-          <Button onClick={this.approve}>Approve</Button>
-        </Dropdown.Item>
-      </div>
-    );
-  }
+  const wrapEth = useCallback(() => {
+    console.log("Wrapping ETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(wrap).toString());
+    monitorTx(token.deposit({ value: utils.parseEther(wrap) }));
+  }, [wrap, token])
+
+  const unwrapWeth = useCallback(() => {
+    console.log("Unwrapping wETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval).toString());
+    monitorTx(token.withdraw({ value: utils.parseEther(approval) }));
+  }, [approval, token])
+
+
+  useEffect(() => {
+    async function fetchMyWeth() {
+      const weth = await token.balanceOf(loggedInUser)
+      setMyWeth(parseFloat(formatEther(weth)).toFixed(2))
+    }
+    fetchMyWeth()
+  }, [token, loggedInUser])
+
+  useEffect(() => {
+    async function fetchMyEth() {
+      const e = await eth.getBalance(loggedInUser)
+      setMyEth(parseFloat(formatEther(e)).toFixed(2))
+    }
+    fetchMyEth()
+  }, [eth, loggedInUser])
+
+  return (
+    <>
+      <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => onLoadMain()} />
+      <Dropdown.Divider />
+      <Dropdown.Item className="item submenu">
+        <p>
+          <Icon name="settings" />
+          wETH Center
+        </p>
+        <Form.Input placeholder={`${myWeth} wETH available`} onChange={event => setApproval(event.target.value)} value={approval} />
+        <Button.Group>
+          <Button onClick={approve}>Approve</Button>
+          <Button onClick={unwrapWeth}>Unwrap</Button>
+        </Button.Group>
+        <Form.Input placeholder={`${myEth} ETH available`} onChange={event => setWrap(event.target.value)} value={wrap} />
+        <Button onClick={wrapEth}>Wrap</Button>
+      </Dropdown.Item>
+    </>
+  );
 }
 
 export default class Header extends Component {
@@ -188,17 +215,21 @@ export default class Header extends Component {
     visibleMenu: "main",
     visibleRightMenu: false,
     moloch: {},
-    token: {}
+    token: {},
+    eth: {}
   };
 
   async componentDidMount() {
     const { loggedInUser } = this.props;
+    
     const moloch = await getMoloch(loggedInUser);
-    this.setState({ moloch });
-
     const token = await getToken(loggedInUser);
+    const eth = await getEthSigner();
+
     this.setState({
-      token
+      token,
+      moloch,
+      eth
     });
   }
 
@@ -232,7 +263,7 @@ export default class Header extends Component {
   getTopRightMenuContent(member) {
     const { loggedInUser } = this.props;
     let topRightMenuContent;
-    const { moloch, token } = this.state;
+    const { moloch, token, eth } = this.state;
     if (loggedInUser) {
       switch (this.state.visibleMenu) {
         case "main":
@@ -277,6 +308,8 @@ export default class Header extends Component {
                 this.setState({ visibleMenu: "main" });
               }}
               token={token}
+              eth={eth}
+              loggedInUser={loggedInUser}
             />
           );
           break;
