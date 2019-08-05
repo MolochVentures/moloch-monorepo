@@ -11,6 +11,41 @@ import gql from "graphql-tag";
 import { GET_METADATA } from "./helpers/graphQlQueries";
 
 export const resolvers = {
+  // Query: {
+  //   guildBankValue: () => {},
+  //   shareValue: (parent) => {
+  //     console.log('parent: ', parent);
+  //     return 100
+  //   },
+  //   totalShares: async () => {
+  //     // return await moloch.totalShares();
+  //     return 100
+  //   },
+  //   currentPeriod: async () => {
+  //     // return await moloch.getCurrentPeriod();
+  //     return 100
+  //   },
+  //   exchangeRate: async () => {
+  //     // const rate = (await medianizer.compute())[0];
+  //     // return utils.bigNumberify(rate);
+  //     return 100
+  //   },
+  //   proposalQueueLength: async () => {
+  //     // return await moloch.getProposalQueueLength();
+  //     return 100
+  //   },
+  //   totalPoolShares: async () => {
+  //     // return await molochPool.totalPoolShares()
+  //     return 100
+  //   },
+  //   poolValue: async () => {
+  //     // return await token.balanceOf(process.env.REACT_APP_MOLOCH_POOL_ADDRESS)
+  //     return 100
+  //   },
+  //   poolShareValue: () => {
+  //     return 100
+  //   }
+  // },
   Proposal: {
     status: (proposal, _args, { cache }) => {
       const { currentPeriod } = cache.readQuery({ query: GET_METADATA });

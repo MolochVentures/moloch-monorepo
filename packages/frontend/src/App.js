@@ -22,18 +22,26 @@ import { GET_METADATA, GET_POOL_METADATA } from "./helpers/graphQlQueries";
 import { getMedianizer, getMoloch, getToken, initWeb3, getMolochPool } from "./web3";
 import PoolMemberListView from "components/PoolMemberList";
 import { Dimmer, Loader } from "semantic-ui-react";
+import { withClientState } from "apollo-link-state";
+import { ApolloLink } from "apollo-link";
+import { isDependee, resolveDependee, pipeResolvers, resolveDependees } from 'graphql-resolvers'
 
 console.log(process.env);
 
 const cache = new InMemoryCache();
 
+const stateLink = withClientState({
+  cache,
+  resolvers,
+  typeDefs
+});
+
 const client = new ApolloClient({
   cache,
-  link: new HttpLink({
+  link: ApolloLink.from([stateLink, new HttpLink({
     uri: process.env.REACT_APP_GRAPH_NODE_URI
-  }),
+  })]),
   resolvers,
-  typeDefs,
 });
 
 const initialData = {
@@ -59,36 +67,56 @@ const IS_LOGGED_IN = gql`
   }
 `;
 
+// TODO: MAKE THESE WORK!
+const shareValue = pipeResolvers(
+  resolveDependees(['totalShares', 'guildBankValue']),
+  (totalShares, guildBankValue) => {
+    const ethPerShare = totalShares.toNumber() > 0 ? parseFloat(utils.formatEther(guildBankValue)) / totalShares.toNumber() : 0; // in eth
+    const value = utils.parseEther(ethPerShare.toString()); // in wei
+    return value
+  }
+)
+
+const poolShareValue = pipeResolvers(
+  resolveDependees(['totalPoolShares', 'poolValue']),
+  ([totalPoolShares, poolValue]) => {
+    const ethPerShare = totalPoolShares.toNumber() > 0 ? parseFloat(utils.formatEther(poolValue)) / totalPoolShares.toNumber() : 0; // in eth
+    const value = utils.parseEther(ethPerShare.toString()); // in wei
+    return value
+  }
+)
+
 function getLocalResolvers(medianizer, moloch, molochPool, token) {
   return {
     Query: {
-      guildBankValue: () => {},
-      shareValue: (parent) => {
-        console.log('parent: ', parent);
-        return 100
+      guildBankValue: async () => {
+        const value = (await token.balanceOf(process.env.REACT_APP_GUILD_BANK_ADDRESS)).toString();
+        return value
       },
       totalShares: async () => {
-        return await moloch.totalShares();
+        const shares = (await moloch.totalShares()).toString();
+        return shares
       },
       currentPeriod: async () => {
-        return await moloch.getCurrentPeriod();
+        const period = (await moloch.getCurrentPeriod()).toString();
+        return period
       },
       exchangeRate: async () => {
         const rate = (await medianizer.compute())[0];
-        return utils.bigNumberify(rate);
+        return utils.bigNumberify(rate).toString();
       },
       proposalQueueLength: async () => {
-        return await moloch.getProposalQueueLength();
+        const length = (await moloch.getProposalQueueLength()).toString();
+        return length
       },
       totalPoolShares: async () => {
-        return await molochPool.totalPoolShares()
+        const shares = (await molochPool.totalPoolShares()).toString()
+        return shares
       },
       poolValue: async () => {
-        return await token.balanceOf(process.env.REACT_APP_MOLOCH_POOL_ADDRESS)
+        const value = (await token.balanceOf(process.env.REACT_APP_MOLOCH_POOL_ADDRESS)).toString()
+        return value
       },
-      poolShareValue: () => {
-        return 100
-      }
     }
   };
 }
@@ -101,7 +129,7 @@ class App extends React.Component {
     guildBankValue: "0"
   };
 
-  async componentDidMount() {
+  async componentWillMount() {
     // await persistor.restore();
     await this.populateData(true);
     this.setState({ restored: true });
@@ -123,73 +151,73 @@ class App extends React.Component {
     const moloch = await getMoloch();
     const molochPool = await getMolochPool();
     const token = await getToken();
-    // TODO: MAKE THIS WORK
-    // client.addResolvers(getLocalResolvers(medianizer, moloch, molochPool, token))
+    // // TODO: MAKE THIS WORK
+    client.addResolvers(getLocalResolvers(medianizer, moloch, molochPool, token))
 
-    let {
-      data: { exchangeRate, totalShares, currentPeriod, guildBankValue, shareValue, proposalQueueLength }
-    } = await client.query({
-      query: GET_METADATA
-    });
+    // let {
+    //   data: { exchangeRate, totalShares, currentPeriod, guildBankValue, shareValue, proposalQueueLength }
+    // } = await client.query({
+    //   query: GET_METADATA
+    // });
 
-    let {
-      data: { totalPoolShares, poolValue, poolShareValue }
-    } = await client.query({
-      query: GET_POOL_METADATA
-    });
+    // let {
+    //   data: { totalPoolShares, poolValue, poolShareValue }
+    // } = await client.query({
+    //   query: GET_POOL_METADATA
+    // });
 
-    if (!exchangeRate || refetch) {
-      exchangeRate = (await medianizer.compute())[0];
-      exchangeRate = utils.bigNumberify(exchangeRate);
-    }
+    // if (!exchangeRate || refetch) {
+    //   exchangeRate = (await medianizer.compute())[0];
+    //   exchangeRate = utils.bigNumberify(exchangeRate);
+    // }
 
-    if (!totalShares || !currentPeriod || refetch) {
-      totalShares = await moloch.totalShares();
-      currentPeriod = await moloch.getCurrentPeriod();
-    }
+    // if (!totalShares || !currentPeriod || refetch) {
+    //   totalShares = await moloch.totalShares();
+    //   currentPeriod = await moloch.getCurrentPeriod();
+    // }
 
-    if (!proposalQueueLength || refetch) {
-      proposalQueueLength = await moloch.getProposalQueueLength();
-    }
+    // if (!proposalQueueLength || refetch) {
+    //   proposalQueueLength = await moloch.getProposalQueueLength();
+    // }
 
-    if (!guildBankValue || refetch) {
-      guildBankValue = await token.balanceOf(process.env.REACT_APP_GUILD_BANK_ADDRESS);
-    }
+    // if (!guildBankValue || refetch) {
+    //   guildBankValue = await token.balanceOf(process.env.REACT_APP_GUILD_BANK_ADDRESS);
+    // }
 
-    if (guildBankValue && totalShares) {
-      const ethPerShare = totalShares.toNumber() > 0 ? parseFloat(utils.formatEther(guildBankValue)) / totalShares.toNumber() : 0; // in eth
-      shareValue = utils.parseEther(ethPerShare.toString()); // in wei
-    }
+    // if (guildBankValue && totalShares) {
+    //   const ethPerShare = totalShares.toNumber() > 0 ? parseFloat(utils.formatEther(guildBankValue)) / totalShares.toNumber() : 0; // in eth
+    //   shareValue = utils.parseEther(ethPerShare.toString()); // in wei
+    // }
 
-    // POOL
-    if (!totalPoolShares || refetch) {
-      totalPoolShares = await molochPool.totalPoolShares();
-    }
+    // // POOL
+    // if (!totalPoolShares || refetch) {
+    //   totalPoolShares = await molochPool.totalPoolShares();
+    // }
 
-    if (!poolValue || refetch) {
-      poolValue = await token.balanceOf(process.env.REACT_APP_MOLOCH_POOL_ADDRESS);
-    }
+    // if (!poolValue || refetch) {
+    //   poolValue = await token.balanceOf(process.env.REACT_APP_MOLOCH_POOL_ADDRESS);
+    // }
 
-    if (poolValue && totalPoolShares) {
-      const ethPerShare = totalPoolShares.toNumber() > 0 ? parseFloat(utils.formatEther(poolValue)) / totalPoolShares.toNumber() : 0; // in eth
-      poolShareValue = utils.parseEther(ethPerShare.toString()); // in wei
-    }
+    // if (poolValue && totalPoolShares) {
+    //   const ethPerShare = totalPoolShares.toNumber() > 0 ? parseFloat(utils.formatEther(poolValue)) / totalPoolShares.toNumber() : 0; // in eth
+    //   poolShareValue = utils.parseEther(ethPerShare.toString()); // in wei
+    // }
 
-    const dataToWrite = {
-      guildBankValue: guildBankValue.toString(),
-      shareValue: shareValue.toString(),
-      totalShares: totalShares.toString(),
-      currentPeriod: currentPeriod.toString(),
-      exchangeRate: exchangeRate.toString(),
-      totalPoolShares: totalPoolShares.toString(),
-      proposalQueueLength: proposalQueueLength.toString(),
-      poolValue: poolValue.toString(),
-      poolShareValue: poolShareValue.toString()
-    };
+    // const dataToWrite = {
+    //   guildBankValue: guildBankValue.toString(),
+    //   shareValue: shareValue.toString(),
+    //   totalShares: totalShares.toString(),
+    //   currentPeriod: currentPeriod.toString(),
+    //   exchangeRate: exchangeRate.toString(),
+    //   totalPoolShares: totalPoolShares.toString(),
+    //   proposalQueueLength: proposalQueueLength.toString(),
+    //   poolValue: poolValue.toString(),
+    //   poolShareValue: poolShareValue.toString()
+    // };
 
-    client.writeData({
-      data: dataToWrite
-    });
+    // client.writeData({
+    //   data: dataToWrite
+    // });
   }
 
   render() {

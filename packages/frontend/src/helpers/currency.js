@@ -1,4 +1,5 @@
 import { utils } from "ethers";
+import { bigNumberify } from "ethers/utils";
 
 export const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -16,4 +17,10 @@ export function convertWeiToDollars(weiAmount, exchangeRate) {
   const exchWeiToEth = utils.formatEther(exchangeRate)
   
   return currencyFormatter.format(parseFloat(weitoEth * exchWeiToEth))
+}
+
+export function getShareValue(totalShares, totalValue) {
+  const ethPerShare = bigNumberify(totalShares).toNumber() > 0 ? parseFloat(utils.formatEther(totalValue)) / totalShares.toNumber() : 0; // in eth
+  const value = utils.parseEther(ethPerShare.toString()); // in wei
+  return value
 }

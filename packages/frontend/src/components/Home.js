@@ -3,14 +3,9 @@ import { Grid, Button, Segment, Statistic, Loader } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { Query } from "react-apollo";
 import { utils } from "ethers";
-import { GET_METADATA, GET_POOL_METADATA } from "../helpers/graphQlQueries";
-import { convertWeiToDollars } from "../helpers/currency";
+import { convertWeiToDollars, getShareValue } from "../helpers/currency";
 import { adopt } from "react-adopt";
-
-const Composed = adopt({
-  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>,
-  poolMetadata: ({ render }) => <Query query={GET_POOL_METADATA}>{render}</Query>
-});
+import gql from "graphql-tag";
 
 const NumMembers = () => (
   <Link to="/members" className="link">
@@ -36,17 +31,29 @@ const MolochPool = () => (
   </Link>
 );
 
+const GET_METADATA = gql`
+  {
+    exchangeRate @client
+    totalShares @client
+    guildBankValue @client
+    currentPeriod @client
+    proposalQueueLength @client
+    poolValue @client
+  }
+`;
+
 export default function HomePage() {
   return (
-    <Composed>
-      {({ metadata, poolMetadata }) => {
-        if (metadata.loading) return <Segment className="blurred box"><Loader size="massive" active /></Segment>;
-
+    <Query query={GET_METADATA}>
+      {(metadata) => {
+        if (metadata.loading) return <Loader size="massive" active />;
+        
         if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
-        if (poolMetadata.error) throw new Error(`Error!: ${poolMetadata.error}`);
+        const { guildBankValue, exchangeRate, totalShares, poolValue } = metadata.data;
+        
+        const shareValue = getShareValue(totalShares, guildBankValue)
         console.log('metadata: ', metadata);
-        const { guildBankValue, exchangeRate, totalShares, shareValue } = metadata.data;
-        const { poolValue } = poolMetadata.data;
+
         return (
           <div id="homepage">
             <Grid container verticalAlign="middle" textAlign="center">
@@ -95,6 +102,6 @@ export default function HomePage() {
           </div>
         );
       }}
-    </Composed>
+    </Query>
   );
 }
