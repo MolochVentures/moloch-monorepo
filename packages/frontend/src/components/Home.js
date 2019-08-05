@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Grid, Button, Segment, Statistic, Loader } from "semantic-ui-react";
+import React from "react";
+import { Grid, Button, Statistic, Loader } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { Query } from "react-apollo";
 import { utils } from "ethers";
 import { convertWeiToDollars, getShareValue } from "../helpers/currency";
 import gql from "graphql-tag";
-import { getMolochPool } from "web3";
-import { getToken } from "web3";
 
 const NumMembers = () => (
   <Link to="/members" className="link">
