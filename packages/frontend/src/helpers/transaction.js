@@ -25,7 +25,7 @@ export function monitorTx(txPromise) {
       window.toastProvider.removeMessage();
       window.toastProvider.addMessage("Error", {
         secondaryMessage: "Error occurred while processing transaction. Please try again later.",
-        variant: "error"
+        variant: "failure"
       });
     });
 };

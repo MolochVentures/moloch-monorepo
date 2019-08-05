@@ -1,90 +1,100 @@
 import React from "react";
-import { Grid, Button, Segment, Statistic } from "semantic-ui-react";
+import { Grid, Button, Segment, Statistic, Loader } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { Query } from "react-apollo";
 import { utils } from "ethers";
-import { GET_METADATA, GET_MEMBERS, GET_PROPOSALS } from "../helpers/graphQlQueries";
+import { GET_METADATA, GET_POOL_METADATA } from "../helpers/graphQlQueries";
 import { convertWeiToDollars } from "../helpers/currency";
 import { adopt } from "react-adopt";
 
 const Composed = adopt({
-  members: ({ render }) => <Query query={GET_MEMBERS}>{render}</Query>,
-  proposals: ({ render }) => <Query query={GET_PROPOSALS}>{render}</Query>,
-  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>
+  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>,
+  poolMetadata: ({ render }) => <Query query={GET_POOL_METADATA}>{render}</Query>
 });
 
-const NumMembers = ({ members, loading }) => (
+const NumMembers = () => (
   <Link to="/members" className="link">
-    <Button size="large" color="grey" className="browse_buttons">
-      {loading ? "..." : members.length} Members
+    <Button color="grey" size="medium" fluid>
+      Members
     </Button>
   </Link>
 );
 
-const NumProposals = ({ proposals, loading }) => (
+const NumProposals = () => (
   <Link to="/proposals" className="link">
-    <Button size="large" color="grey" className="browse_buttons">
-      {loading ? "..." : proposals.length} Proposals
+    <Button color="grey" size="medium" fluid>
+      Proposals
     </Button>
   </Link>
 );
 
-export default class HomePage extends React.Component {
-  state = {
-    approval: "",
-    token: null,
-    userAddress: null
-  };
+const MolochPool = () => (
+  <Link to="/pool" className="link">
+    <Button compact color="grey" size="medium" fluid>
+      Pool
+    </Button>
+  </Link>
+);
 
-  render() {
-    return (
-      <Composed>
-        {({ members, proposals, metadata }) => {
-          if (metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
+export default function HomePage() {
+  return (
+    <Composed>
+      {({ metadata, poolMetadata }) => {
+        if (metadata.loading) return <Segment className="blurred box"><Loader size="massive" active /></Segment>;
 
-          let membersLoading = false;
-          if (members.loading) {
-            membersLoading = true;
-          }
-
-          let proposalsLoading = false;
-          if (proposals.loading) {
-            proposalsLoading = true;
-          }
-
-          if (members.error) throw new Error(`Error!: ${members.error}`);
-          if (proposals.error) throw new Error(`Error!: ${proposals.error}`);
-          if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
-          const { guildBankValue, exchangeRate, totalShares, shareValue } = metadata.data;
-          return (
-            <div id="homepage">
-              <Grid container verticalAlign="middle" textAlign="center">
-                <Grid container doubling stackable columns={2}>
-                  <Grid.Column className="guild_value" textAlign="center">
-                    <Statistic inverted label="Guild Bank Value" value={convertWeiToDollars(guildBankValue, exchangeRate)} />
-                  </Grid.Column>
-                  <Grid.Column textAlign="center">
-                    <NumMembers members={members.data.members} loading={membersLoading} />
-                    <NumProposals proposals={proposals.data.proposals} loading={proposalsLoading} />
-                  </Grid.Column>
-                </Grid>
-
-                <Grid container stackable columns={3} className="blurred box">
-                  <Grid.Column textAlign="center">
-                    <Statistic inverted label="Total Shares" value={totalShares} />
-                  </Grid.Column>
-                  <Grid.Column textAlign="center">
-                    <Statistic inverted label="Total ETH" value={parseFloat(utils.formatEther(guildBankValue)).toFixed(2)} />
-                  </Grid.Column>
-                  <Grid.Column textAlign="center">
-                    <Statistic inverted label="Share Value" value={convertWeiToDollars(shareValue, exchangeRate)} />
-                  </Grid.Column>
-                </Grid>
+        if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
+        if (poolMetadata.error) throw new Error(`Error!: ${poolMetadata.error}`);
+        console.log('metadata: ', metadata);
+        const { guildBankValue, exchangeRate, totalShares, shareValue } = metadata.data;
+        const { poolValue } = poolMetadata.data;
+        return (
+          <div id="homepage">
+            <Grid container verticalAlign="middle" textAlign="center">
+              <Grid container doubling stackable columns="equal" verticalAlign="bottom">
+                <Grid.Column>
+                  <Grid.Row className="guild_value" textAlign="center">
+                    <Statistic inverted>
+                      <Statistic.Label>Guild Bank Value</Statistic.Label>
+                      <Statistic.Value>{convertWeiToDollars(guildBankValue, exchangeRate)}</Statistic.Value>
+                    </Statistic>
+                  </Grid.Row>
+                  <Grid.Row className="pool_value" textAlign="center">
+                    <Statistic size="tiny" inverted>
+                      <Statistic.Label>Moloch Pool Value</Statistic.Label>
+                      <Statistic.Value>{convertWeiToDollars(poolValue, exchangeRate)}</Statistic.Value>
+                    </Statistic>
+                  </Grid.Row>
+                </Grid.Column>
+                <Grid.Column width={9}>
+                  <Grid container stackable columns={3} padded textAlign="center">
+                    <Grid.Column>
+                      <NumMembers />
+                    </Grid.Column>
+                    <Grid.Column>
+                      <NumProposals />
+                    </Grid.Column>
+                    <Grid.Column>
+                      <MolochPool />
+                    </Grid.Column>
+                  </Grid>
+                </Grid.Column>
               </Grid>
-            </div>
-          );
-        }}
-      </Composed>
-    );
-  }
+
+              <Grid container stackable columns={3} className="blurred box">
+                <Grid.Column textAlign="center">
+                  <Statistic inverted label="Total Shares" value={totalShares} />
+                </Grid.Column>
+                <Grid.Column textAlign="center">
+                  <Statistic inverted label="Total ETH" value={parseFloat(utils.formatEther(guildBankValue)).toFixed(2)} />
+                </Grid.Column>
+                <Grid.Column textAlign="center">
+                  <Statistic inverted label="Share Value" value={convertWeiToDollars(shareValue, exchangeRate)} />
+                </Grid.Column>
+              </Grid>
+            </Grid>
+          </div>
+        );
+      }}
+    </Composed>
+  );
 }

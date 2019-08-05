@@ -58,3 +58,14 @@ type Member @entity {
   votes: [Vote!]!
   submissions: [Proposal!]!
 }
+
+type PoolMember @entity {
+  id: ID!
+  shares: BigInt!
+  keepers: [Bytes!]
+}
+
+type PoolMeta @entity {
+  id: ID!
+  currentPoolIndex: BigInt!
+}

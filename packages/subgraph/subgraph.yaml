@@ -12,7 +12,7 @@ dataSources:
       abi: Moloch
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.2
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
         - Proposal
@@ -20,18 +20,47 @@ dataSources:
         - name: Moloch
           file: ./abis/Moloch.abi
       eventHandlers:
-        - event: SummonComplete(address,uint256)
+        - event: SummonComplete(indexed address,uint256)
           handler: handleSummonComplete
-        - event: SubmitProposal(uint256,address,address,address,uint256,uint256)
+        - event: SubmitProposal(uint256,indexed address,indexed address,indexed address,uint256,uint256)
           handler: handleSubmitProposal
-        - event: SubmitVote(uint256,address,address,uint8)
+        - event: SubmitVote(indexed uint256,indexed address,indexed address,uint8)
           handler: handleSubmitVote
-        - event: ProcessProposal(uint256,address,address,uint256,uint256,bool)
+        - event: ProcessProposal(indexed uint256,indexed address,indexed address,uint256,uint256,bool)
           handler: handleProcessProposal
-        - event: Ragequit(address,uint256)
+        - event: Ragequit(indexed address,uint256)
           handler: handleRagequit
-        - event: Abort(uint256,address)
+        - event: Abort(indexed uint256,address)
           handler: handleAbort
-        - event: UpdateDelegateKey(address,address)
+        - event: UpdateDelegateKey(indexed address,address)
           handler: handleUpdateDelegateKey       
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: MolochPool
+    network: mainnet
+    source:
+      address: '0x97eC917BFD947A138aC615426504DDc305aa1766'
+      abi: MolochPool
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - PoolMember
+      abis:
+        - name: MolochPool
+          file: ./abis/MolochPool.abi
+      eventHandlers:
+        - event: Deposit(address,uint256,uint256)
+          handler: handlePoolDeposit
+        - event: Withdraw(address,uint256)
+          handler: handlePoolWithdraw
+        - event: KeeperWithdraw(address,uint256,address)
+          handler: handlePoolKeeperWithdraw
+        - event: AddKeepers(address,address[])
+          handler: handlePoolAddKeepers
+        - event: RemoveKeepers(address,address[])
+          handler: handlePoolRemoveKeepers
+        - event: Sync(uint256)
+          handler: handlePoolSync
       file: ./src/mapping.ts

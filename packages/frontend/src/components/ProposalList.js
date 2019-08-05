@@ -1,5 +1,5 @@
 import React from "react";
-import { Segment, Grid, Button, Tab, Icon } from "semantic-ui-react";
+import { Segment, Grid, Button, Tab, Icon, Loader } from "semantic-ui-react";
 import { Route, Switch, Link } from "react-router-dom";
 
 import ProposalDetail, { Vote } from "./ProposalDetail";
@@ -84,7 +84,7 @@ const Composed = adopt({
 const ProposalList = ({ isActive }) => (
   <Composed>
     {({ activeProposalsResult, completedProposalsResult, metadata }) => {
-      if (metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
+      if (metadata.loading) return <Loader size="massive" />;
       if (activeProposalsResult.loading) {
         activeProposalsResult.data = { proposals: [] };
       }

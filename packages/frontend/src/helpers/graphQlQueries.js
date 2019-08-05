@@ -37,6 +37,16 @@ export const GET_METADATA = gql`
     guildBankValue @client
     shareValue @client
     currentPeriod @client
+    proposalQueueLength @client
+  }
+`;
+
+export const GET_POOL_METADATA = gql`
+  query Metadata {
+    totalPoolShares @client
+    poolValue @client
+    poolShareValue @client
+    exchangeRate @client
   }
 `;
 
@@ -48,6 +58,26 @@ export const GET_MEMBER_DETAIL = gql`
       isActive
       tokenTribute
       delegateKey
+    }
+  }
+`;
+
+export const GET_POOL_MEMBERS = gql`
+  query Metadata {
+    poolMembers(first: 100, orderBy: shares, orderDirection: desc) {
+      id
+      shares
+      keepers
+    }
+  }
+`;
+
+export const GET_POOL_MEMBER_DETAIL = gql`
+  query PoolMember($address: String!) {
+    poolMember(id: $address) {
+      id
+      shares
+      keepers
     }
   }
 `;
@@ -74,7 +104,7 @@ export const GET_MEMBER_DETAIL_WITH_VOTES = gql`
       delegateKey
       votes {
         uintVote
-          proposal {
+        proposal {
           id
           timestamp
           tokenTribute
@@ -155,7 +185,7 @@ export const GET_ACTIVE_PROPOSAL_LIST = gql`
 
 export const GET_COMPLETED_PROPOSAL_LIST = gql`
   {
-    proposals(first: 100, orderBy: proposalIndex, orderDirection: desc, where: { processed: true } ) {
+    proposals(first: 100, orderBy: proposalIndex, orderDirection: desc, where: { processed: true }) {
       id
       timestamp
       tokenTribute
@@ -216,6 +246,14 @@ export const GET_PROPOSAL_HISTORY = gql`
   }
 `;
 
+export const GET_LAST_PROCESSED = gql`
+{
+  proposals(first: 1, where: {processed: true}, orderBy: proposalIndex, orderDirection: desc) {
+    proposalIndex
+  }
+}
+`
+
 export const GET_PROPOSAL_DETAIL = gql`
   query Proposal($id: String!) {
     proposal(id: $id) {
@@ -254,21 +292,21 @@ export const GET_PROPOSAL_DETAIL = gql`
 
 export const SET_PROPOSAL_ATTRIBUTES = gql`
   mutation SetAttributes(
-    $status: String!, 
-    $title: String!, 
-    $description: String!, 
-    $gracePeriod: Number!, 
-    $votingEnds: Number!, 
-    $votingStarts: Number!, 
+    $status: String!
+    $title: String!
+    $description: String!
+    $gracePeriod: Number!
+    $votingEnds: Number!
+    $votingStarts: Number!
     $readyForProcessing: Bool!
   ) {
     setAttributes(
-      status: $status, 
-      title: $title, 
-      description: $description, 
-      gracePeriod: $gracePeriod, 
-      votingEnds: $votingEnds, 
-      votingStarts: $votingStarts, 
+      status: $status
+      title: $title
+      description: $description
+      gracePeriod: $gracePeriod
+      votingEnds: $votingEnds
+      votingStarts: $votingStarts
       readyForProcessing: $readyForProcessing
     ) @client {
       status
