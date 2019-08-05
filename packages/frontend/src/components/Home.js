@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Grid, Button, Segment, Statistic, Loader } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { Query } from "react-apollo";
 import { utils } from "ethers";
 import { convertWeiToDollars, getShareValue } from "../helpers/currency";
-import { adopt } from "react-adopt";
 import gql from "graphql-tag";
+import { getMolochPool } from "web3";
+import { getToken } from "web3";
 
 const NumMembers = () => (
   <Link to="/members" className="link">
@@ -42,17 +43,16 @@ const GET_METADATA = gql`
   }
 `;
 
-export default function HomePage() {
+export default function HomePage({ pageQueriesLoading }) {
   return (
     <Query query={GET_METADATA}>
-      {(metadata) => {
-        if (metadata.loading) return <Loader size="massive" active />;
-        
-        if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
-        const { guildBankValue, exchangeRate, totalShares, poolValue } = metadata.data;
+      {({ loading, error, data }) => {
+        if (loading || pageQueriesLoading) return <Loader size="massive" active />;
+        if (error) throw new Error(`Error!: ${error}`);
+        const { guildBankValue, exchangeRate, totalShares, poolValue } = data;
         
         const shareValue = getShareValue(totalShares, guildBankValue)
-        console.log('metadata: ', metadata);
+        console.log('metadata: ', data);
 
         return (
           <div id="homepage">

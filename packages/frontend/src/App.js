@@ -33,7 +33,19 @@ const cache = new InMemoryCache();
 const stateLink = withClientState({
   cache,
   resolvers,
-  typeDefs
+  typeDefs,
+  defaults: {
+    loggedInUser: "",
+    guildBankValue: "0",
+    shareValue: "0",
+    totalShares: "0",
+    currentPeriod: "0",
+    exchangeRate: "0",
+    proposalQueueLength: "0",
+    totalPoolShares: "0",
+    poolValue: "0",
+    poolShareValue: "0"
+  }
 });
 
 const client = new ApolloClient({
@@ -44,22 +56,11 @@ const client = new ApolloClient({
   resolvers,
 });
 
-const initialData = {
-  loggedInUser: "",
-  guildBankValue: "",
-  shareValue: "",
-  totalShares: "",
-  currentPeriod: "",
-  exchangeRate: "",
-  proposalQueueLength: "",
-  totalPoolShares: "",
-  poolValue: "",
-  poolShareValue: ""
-};
 cache.writeData({
-  data: { ...initialData, loggedInUser: window.localStorage.getItem("loggedInUser") || "" }
+  // data: { ...initialData, loggedInUser: window.localStorage.getItem("loggedInUser") || "" }
+  data: { loggedInUser: window.localStorage.getItem("loggedInUser") || "" }
 });
-client.onResetStore(() => cache.writeData({ data: initialData }));
+// client.onResetStore(() => cache.writeData({ data: initialData }));
 
 const IS_LOGGED_IN = gql`
   query IsUserLoggedIn {
@@ -124,9 +125,6 @@ function getLocalResolvers(medianizer, moloch, molochPool, token) {
 class App extends React.Component {
   state = {
     restored: false,
-    exchangeRate: "0",
-    totalShares: "0",
-    guildBankValue: "0"
   };
 
   async componentWillMount() {
@@ -151,7 +149,7 @@ class App extends React.Component {
     const moloch = await getMoloch();
     const molochPool = await getMolochPool();
     const token = await getToken();
-    // // TODO: MAKE THIS WORK
+
     client.addResolvers(getLocalResolvers(medianizer, moloch, molochPool, token))
 
     // let {

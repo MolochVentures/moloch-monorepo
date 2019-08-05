@@ -103,6 +103,10 @@ const GET_POOL_METADATA = gql`
     poolMetas {
       currentPoolIndex
     }
+    totalShares @client
+    guildBankValue @client
+    currentPeriod @client
+    proposalQueueLength @client
   }
 `;
 
@@ -133,6 +137,7 @@ export default function Pool({ pageQueriesLoading, loggedInUser }) {
           proposals: [lastProcessedProposal],
           poolMetas: [currentPoolIndex]
         } = data;
+        console.log('data: ', data);
 
         const poolShareValue = getShareValue(totalPoolShares, poolValue)
         
