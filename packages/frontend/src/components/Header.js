@@ -161,13 +161,18 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
     monitorTx(token.approve(process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval)));
   }, [approval, token]);
 
+  const approvePool = useCallback(() => {
+    console.log("Approving wETH: ", process.env.REACT_APP_MOLOCH_POOL_ADDRESS, utils.parseEther(approval).toString());
+    monitorTx(token.approve(process.env.REACT_APP_MOLOCH_POOL_ADDRESS, utils.parseEther(approval)));
+  }, [approval, token]);
+
   const wrapEth = useCallback(() => {
-    console.log("Wrapping ETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(wrap).toString());
+    console.log("Wrapping ETH: ", process.env.REACT_APP_TOKEN_ADDRESS, utils.parseEther(wrap).toString());
     monitorTx(token.deposit({ value: utils.parseEther(wrap) }));
   }, [wrap, token]);
 
   const unwrapWeth = useCallback(() => {
-    console.log("Unwrapping wETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval).toString());
+    console.log("Unwrapping wETH: ", process.env.REACT_APP_TOKEN_ADDRESS, utils.parseEther(approval).toString());
     monitorTx(token.withdraw({ value: utils.parseEther(approval) }));
   }, [approval, token]);
 
@@ -198,7 +203,8 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
         </p>
         <Form.Input placeholder={`${myWeth} wETH available`} onChange={event => setApproval(event.target.value)} value={approval} />
         <Button.Group>
-          <Button onClick={approve}>Approve</Button>
+          <Button onClick={approve}>Approve Moloch</Button>
+          <Button onClick={approvePool}>Approve Pool</Button>
           <Button onClick={unwrapWeth}>Unwrap</Button>
         </Button.Group>
         <Form.Input placeholder={`${myEth} ETH available`} onChange={event => setWrap(event.target.value)} value={wrap} />
