@@ -10,18 +10,18 @@ import { formatEther } from "ethers/utils";
 
 const MainMenu = props => (
   <div className="dropdownItems">
+    <Dropdown.Item
+      icon="settings"
+      className="item"
+      content="wETH Center"
+      onClick={() => {
+        props._handleOpenDropdown();
+        props.onLoadApproveWeth();
+      }}
+    />
+    <Dropdown.Divider />
     {props.member && props.member.isActive ? (
       <>
-        <Dropdown.Item
-          icon="settings"
-          className="item"
-          content="wETH Center"
-          onClick={() => {
-            props._handleOpenDropdown();
-            props.onLoadApproveWeth();
-          }}
-        />
-        <Dropdown.Divider />
         <Dropdown.Item className="item" onClick={() => props._handleCloseDropdown()}>
           <Link to={`/members/${props.member.id}`} className="link">
             <p>
