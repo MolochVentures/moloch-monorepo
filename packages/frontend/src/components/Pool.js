@@ -11,7 +11,7 @@ import {
   Input,
 } from "semantic-ui-react";
 import { Link } from "react-router-dom";
-import { Query, useQuery } from "react-apollo";
+import { useQuery } from "react-apollo";
 import { utils } from "ethers";
 import { convertWeiToDollars, getShareValue } from "../helpers/currency";
 import gql from "graphql-tag";

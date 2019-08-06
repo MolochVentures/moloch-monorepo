@@ -1,6 +1,5 @@
 import { useQuery } from "@apollo/react-hooks";
 import { HttpLink, ApolloClient, InMemoryCache } from "apollo-boost";
-import { utils } from "ethers";
 import gql from "graphql-tag";
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
