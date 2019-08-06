@@ -150,7 +150,12 @@ export const GET_PROPOSALS = gql`
 
 export const GET_ACTIVE_PROPOSAL_LIST = gql`
   {
-    proposals(first: 100, orderBy: proposalIndex, orderDirection: desc, where: { processed: false }) {
+    proposals(
+      first: 100
+      orderBy: proposalIndex
+      orderDirection: desc
+      where: { processed: false }
+    ) {
       id
       timestamp
       tokenTribute
@@ -183,7 +188,12 @@ export const GET_ACTIVE_PROPOSAL_LIST = gql`
 
 export const GET_COMPLETED_PROPOSAL_LIST = gql`
   {
-    proposals(first: 100, orderBy: proposalIndex, orderDirection: desc, where: { processed: true }) {
+    proposals(
+      first: 100
+      orderBy: proposalIndex
+      orderDirection: desc
+      where: { processed: true }
+    ) {
       id
       timestamp
       tokenTribute
@@ -245,12 +255,12 @@ export const GET_PROPOSAL_HISTORY = gql`
 `;
 
 export const GET_LAST_PROCESSED = gql`
-{
-  proposals(first: 1, where: {processed: true}, orderBy: proposalIndex, orderDirection: desc) {
-    proposalIndex
+  {
+    proposals(first: 1, where: { processed: true }, orderBy: proposalIndex, orderDirection: desc) {
+      proposalIndex
+    }
   }
-}
-`
+`;
 
 export const GET_PROPOSAL_DETAIL = gql`
   query Proposal($id: String!) {
