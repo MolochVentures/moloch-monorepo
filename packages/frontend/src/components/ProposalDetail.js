@@ -1,18 +1,17 @@
 import React, { Component } from "react";
-import { Grid, Icon, Segment, Button, Image } from "semantic-ui-react";
+import { Grid, Icon, Segment, Button, Image, Loader } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import hood from "assets/hood.png";
 import ProgressBar from "./ProgressBar";
 import { Query } from "react-apollo";
 import { ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import { getMoloch } from "../web3";
-import { GET_PROPOSAL_DETAIL, GET_METADATA, GET_MEMBER_BY_DELEGATE_KEY } from "../helpers/graphQlQueries";
 import { convertWeiToDollars, getShareValue } from "../helpers/currency";
 import { utils } from "ethers";
-import { adopt } from "react-adopt";
 import Linkify from "react-linkify";
 import ProfileHover from "profile-hover";
 import { monitorTx } from "../helpers/transaction";
+import gql from "graphql-tag";
 
 export const Vote = {
   Null: 0, // default value, counted as abstention
@@ -31,19 +30,53 @@ const MemberAvatar = ({ member }) => {
   );
 };
 
-const Composed = adopt({
-  proposalDetail: ({ render, id }) => (
-    <Query query={GET_PROPOSAL_DETAIL} variables={{ id }}>
-      {render}
-    </Query>
-  ),
-  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>,
-  member: ({ render, delegateKey }) => (
-    <Query query={GET_MEMBER_BY_DELEGATE_KEY} variables={{ delegateKey }}>
-      {render}
-    </Query>
-  )
-});
+const GET_PROPOSAL_DETAIL = gql`
+  query Proposal($id: String!, $delegateKey: String!) {
+    proposal(id: $id) {
+      id
+      applicantAddress
+      memberAddress
+      timestamp
+      tokenTribute
+      sharesRequested
+      processed
+      didPass
+      aborted
+      yesVotes
+      noVotes
+      proposalIndex
+      votes(first: 100) {
+        member {
+          id
+          shares
+        }
+        uintVote
+      }
+      details
+      startingPeriod
+      processed
+      status @client
+      title @client
+      description @client
+      gracePeriod @client
+      votingEnds @client
+      votingStarts @client
+      readyForProcessing @client
+    }
+    members(where: { delegateKey: $delegateKey }) {
+      id
+      shares
+      isActive
+      tokenTribute
+      delegateKey
+    }
+    exchangeRate @client
+    totalShares @client
+    guildBankValue @client
+    currentPeriod @client
+    proposalQueueLength @client
+  }
+`;
 
 export default class ProposalDetail extends Component {
   state = {
@@ -96,17 +129,15 @@ export default class ProposalDetail extends Component {
     const { loggedInUser } = this.props;
 
     return (
-      <Composed id={this.props.match.params.id} delegateKey={loggedInUser}>
-        {({ proposalDetail, metadata, member }) => {
-          console.log("proposalDetail: ", proposalDetail);
-          if (proposalDetail.loading || metadata.loading || member.loading) return <Segment className="blurred box">Loading...</Segment>;
-          if (proposalDetail.error) throw new Error(`Error!: ${proposalDetail.error}`);
-          if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
-          if (member.error) throw new Error(`Error!: ${member.error}`);
+      <Query query={GET_PROPOSAL_DETAIL} variables={{ id: this.props.match.params.id, delegateKey: loggedInUser }}>
+        {({ loading, error, data }) => {
+          console.log("proposalDetail: ", data);
+          if (loading) return <Loader size="massive" active />;
+          if (error) throw new Error(`Error!: ${error}`);
 
-          const { proposal } = proposalDetail.data;
-          const { exchangeRate, totalShares, guildBankValue } = metadata.data;
-          const shareValue = getShareValue(totalShares, guildBankValue)
+          const { proposal, exchangeRate, totalShares, guildBankValue, members } = data;
+
+          const shareValue = getShareValue(totalShares, guildBankValue);
 
           const yesShares = proposal.votes.reduce((totalVotes, vote) => {
             if (vote.uintVote === Vote.Yes) {
@@ -124,7 +155,7 @@ export default class ProposalDetail extends Component {
             }
           }, 0);
 
-          const user = member.data.members.length > 0 ? member.data.members[0] : null;
+          const user = members.length > 0 ? members[0] : null;
           const userHasVoted = proposal.votes.find(vote => vote.member.id === loggedInUser) ? true : false;
           const cannotVote =
             proposal.aborted ||
@@ -247,7 +278,7 @@ export default class ProposalDetail extends Component {
             </div>
           );
         }}
-      </Composed>
+      </Query>
     );
   }
 }
