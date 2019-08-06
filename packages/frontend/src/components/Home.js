@@ -30,22 +30,24 @@ const MolochPool = () => (
   </Link>
 );
 
-const GET_METADATA = gql`
+// TODO: why do we need the proposal query??
+const GET_POOL_METADATA = gql`
   {
+    poolValue @client
     exchangeRate @client
+    proposals(first: 1, where: { processed: true }, orderBy: proposalIndex, orderDirection: desc) {
+      proposalIndex
+    }
     totalShares @client
     guildBankValue @client
-    currentPeriod @client
-    proposalQueueLength @client
-    poolValue @client
   }
 `;
 
-export default function HomePage({ pageQueriesLoading }) {
+export default () => {
   return (
-    <Query query={GET_METADATA}>
+    <Query query={GET_POOL_METADATA}>
       {({ loading, error, data }) => {
-        if (loading || pageQueriesLoading) return <Loader size="massive" active />;
+        if (loading) return <Loader size="massive" active />;
         if (error) throw new Error(`Error!: ${error}`);
         const { guildBankValue, exchangeRate, totalShares, poolValue } = data;
         

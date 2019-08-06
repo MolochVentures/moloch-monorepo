@@ -59,12 +59,12 @@ const ProposalCard = ({ proposal }) => {
             </Grid.Row>
           </Grid>
           {proposal.aborted ? (
-             <Grid columns="equal" className="deadlines">
-            <Grid.Row>
-              <Grid.Column textAlign="center">
-                <p className="amount">Aborted</p>
-              </Grid.Column>
-            </Grid.Row>
+            <Grid columns="equal" className="deadlines">
+              <Grid.Row>
+                <Grid.Column textAlign="center">
+                  <p className="amount">Aborted</p>
+                </Grid.Column>
+              </Grid.Row>
             </Grid>
           ) : (
             <ProgressBar yes={yesShares} no={noShares} />

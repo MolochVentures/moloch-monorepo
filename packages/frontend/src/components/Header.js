@@ -1,6 +1,6 @@
-import React, { Component, useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Grid, Icon, Dropdown, Form, Button } from "semantic-ui-react";
+import { Grid, Icon, Dropdown, Form, Button, Loader } from "semantic-ui-react";
 import { Query, withApollo } from "react-apollo";
 import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 import { getMoloch, initMetamask, initGnosisSafe, getToken, getEthSigner } from "../web3";
@@ -61,7 +61,6 @@ const MainMenu = props => (
           props._handleCloseDropdown();
           window.localStorage.setItem("loggedInUser", "");
           await props.client.resetStore();
-          await props.populateData(true);
           window.location.reload();
         }}
       >
@@ -160,34 +159,33 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
   const approve = useCallback(() => {
     console.log("Approving wETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval).toString());
     monitorTx(token.approve(process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval)));
-  }, [approval, token])
+  }, [approval, token]);
 
   const wrapEth = useCallback(() => {
     console.log("Wrapping ETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(wrap).toString());
     monitorTx(token.deposit({ value: utils.parseEther(wrap) }));
-  }, [wrap, token])
+  }, [wrap, token]);
 
   const unwrapWeth = useCallback(() => {
     console.log("Unwrapping wETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval).toString());
     monitorTx(token.withdraw({ value: utils.parseEther(approval) }));
-  }, [approval, token])
-
+  }, [approval, token]);
 
   useEffect(() => {
     async function fetchMyWeth() {
-      const weth = await token.balanceOf(loggedInUser)
-      setMyWeth(parseFloat(formatEther(weth)).toFixed(2))
+      const weth = await token.balanceOf(loggedInUser);
+      setMyWeth(parseFloat(formatEther(weth)).toFixed(2));
     }
-    fetchMyWeth()
-  }, [token, loggedInUser])
+    fetchMyWeth();
+  }, [token, loggedInUser]);
 
   useEffect(() => {
     async function fetchMyEth() {
-      const e = await eth.getBalance(loggedInUser)
-      setMyEth(parseFloat(formatEther(e)).toFixed(2))
+      const e = await eth.getBalance(loggedInUser);
+      setMyEth(parseFloat(formatEther(e)).toFixed(2));
     }
-    fetchMyEth()
-  }, [eth, loggedInUser])
+    fetchMyEth();
+  }, [eth, loggedInUser]);
 
   return (
     <>
@@ -210,40 +208,27 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
   );
 }
 
-export default class Header extends Component {
-  state = {
-    visibleMenu: "main",
-    visibleRightMenu: false,
-    moloch: {},
-    token: {},
-    eth: {}
-  };
+export default ({ loggedInUser, client }) => {
+  const [visibleRightMenu, setVisibleRightMenu] = useState(false);
+  const [visibleMenu, setVisibleMenu] = useState("main");
+  const [moloch, setMoloch] = useState({});
+  const [token, setToken] = useState({});
+  const [eth, setEth] = useState({});
 
-  async componentDidMount() {
-    const { loggedInUser } = this.props;
-    
-    const moloch = await getMoloch(loggedInUser);
-    const token = await getToken(loggedInUser);
-    const eth = await getEthSigner();
+  useEffect(() => {
+    async function init() {
+      setMoloch(await getMoloch(loggedInUser));
+      setToken(await getToken(loggedInUser));
+      setEth(await getEthSigner());
+    }
+    init();
+  }, [loggedInUser]);
 
-    this.setState({
-      token,
-      moloch,
-      eth
-    });
-  }
+  const _handleOpenDropdown = () => setVisibleRightMenu(true);
 
-  _handleOpenDropdown() {
-    this.setState({ visibleRightMenu: true });
-  }
+  const _handleCloseDropdown = () => setVisibleRightMenu(false);
 
-  _handleCloseDropdown() {
-    this.setState({ visibleRightMenu: false });
-  }
-
-  logIn = async method => {
-    const { loggedInUser } = this.props;
-    const { client } = this.props;
+  const logIn = async method => {
     let eth;
     if (method === "metamask") {
       eth = await initMetamask(client);
@@ -256,25 +241,23 @@ export default class Header extends Component {
       return;
     }
 
-    const moloch = await getMoloch(loggedInUser);
-    this.setState({ moloch });
-  };
+    const molochInstance = await getMoloch(loggedInUser);
+    setMoloch(molochInstance);
+  }
 
-  getTopRightMenuContent(member) {
-    const { loggedInUser } = this.props;
+  const getTopRightMenuContent = member => {
     let topRightMenuContent;
-    const { moloch, token, eth } = this.state;
     if (loggedInUser) {
-      switch (this.state.visibleMenu) {
+      switch (visibleMenu) {
         case "main":
           topRightMenuContent = (
             <MainMenuWrapped
               member={member}
-              _handleOpenDropdown={() => this._handleOpenDropdown()}
-              _handleCloseDropdown={() => this._handleCloseDropdown()}
-              onLoadChangeDelegateKey={() => this.setState({ visibleMenu: "changeDelegateKey" })}
-              onLoadWithdrawLootToken={() => this.setState({ visibleMenu: "withdrawLootToken" })}
-              onLoadApproveWeth={() => this.setState({ visibleMenu: "approveWeth" })}
+              _handleOpenDropdown={() => _handleOpenDropdown()}
+              _handleCloseDropdown={() => _handleCloseDropdown()}
+              onLoadChangeDelegateKey={() => setVisibleMenu("changeDelegateKey")}
+              onLoadWithdrawLootToken={() => setVisibleMenu("withdrawLootToken")}
+              onLoadApproveWeth={() => setVisibleMenu("approveWeth")}
             />
           );
           break;
@@ -282,8 +265,8 @@ export default class Header extends Component {
           topRightMenuContent = (
             <ChangeDelegateKeyMenu
               onLoadMain={() => {
-                this._handleOpenDropdown();
-                this.setState({ visibleMenu: "main" });
+                _handleOpenDropdown();
+                setVisibleMenu("main");
               }}
               moloch={moloch}
             />
@@ -293,8 +276,8 @@ export default class Header extends Component {
           topRightMenuContent = (
             <WithdrawLootTokenMenu
               onLoadMain={() => {
-                this._handleOpenDropdown();
-                this.setState({ visibleMenu: "main" });
+                _handleOpenDropdown();
+                setVisibleMenu("main");
               }}
               moloch={moloch}
             />
@@ -304,8 +287,8 @@ export default class Header extends Component {
           topRightMenuContent = (
             <ApproveWethMenu
               onLoadMain={() => {
-                this._handleOpenDropdown();
-                this.setState({ visibleMenu: "main" });
+                _handleOpenDropdown();
+                setVisibleMenu("main");
               }}
               token={token}
               eth={eth}
@@ -319,56 +302,44 @@ export default class Header extends Component {
     } else {
       topRightMenuContent = (
         <>
-          <Dropdown.Item icon="user" className="item" content="Log In With Metamask" onClick={() => this.logIn("metamask")} />
+          <Dropdown.Item icon="user" className="item" content="Log In With Metamask" onClick={() => logIn("metamask")} />
           <Dropdown.Divider />
-          <Dropdown.Item icon="user" className="item" content="Log In With Gnosis Safe" onClick={() => this.logIn("gnosis")} />
+          <Dropdown.Item icon="user" className="item" content="Log In With Gnosis Safe" onClick={() => logIn("gnosis")} />
         </>
       );
     }
     return topRightMenuContent;
-  }
-
-  handleChange = e => this.setState({ approval: e.target.value });
-
-  handleSubmit = async () => {
-    const { approval, token } = this.state;
-    console.log("Approving wETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval).toString());
-    const tx = await token.approve(process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval));
-    console.log("tx: ", tx);
   };
 
-  render() {
-    const { loggedInUser } = this.props;
-    return (
-      <Query query={GET_MEMBER_DETAIL} variables={{ address: loggedInUser }}>
-        {({ loading, error, data }) => {
-          if (loading) return "Loading...";
-          if (error) throw new Error(`Error!: ${error}`);
-          return (
-            <div id="header">
-              <Grid container columns={3} stackable verticalAlign="middle">
-                <Grid.Column textAlign="center" only="computer tablet" />
-                <Grid.Column textAlign="center" className="logo">
-                  <Link to="/">MOLOCH</Link>
-                </Grid.Column>
-                <Grid.Column textAlign="center" className="dropdown">
-                  <Dropdown
-                    className="right_dropdown"
-                    open={this.state.visibleRightMenu}
-                    onBlur={() => this._handleCloseDropdown()}
-                    onFocus={() => this._handleOpenDropdown()}
-                    text={loggedInUser ? `${loggedInUser.substring(0, 6)}...` : "Web3 Login"}
-                  >
-                    <Dropdown.Menu className="menu blurred" direction="left">
-                      {this.getTopRightMenuContent(data.member)}
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </Grid.Column>
-              </Grid>
-            </div>
-          );
-        }}
-      </Query>
-    );
-  }
-}
+  return (
+    <Query query={GET_MEMBER_DETAIL} variables={{ address: loggedInUser }}>
+      {({ loading, error, data }) => {
+        if (loading) return <Loader active />;
+        if (error) throw new Error(`Error!: ${error}`);
+        return (
+          <div id="header">
+            <Grid container columns={3} stackable verticalAlign="middle">
+              <Grid.Column textAlign="center" only="computer tablet" />
+              <Grid.Column textAlign="center" className="logo">
+                <Link to="/">MOLOCH</Link>
+              </Grid.Column>
+              <Grid.Column textAlign="center" className="dropdown">
+                <Dropdown
+                  className="right_dropdown"
+                  open={visibleRightMenu}
+                  onBlur={() => _handleCloseDropdown()}
+                  onFocus={() => _handleOpenDropdown()}
+                  text={loggedInUser ? `${loggedInUser.substring(0, 6)}...` : "Web3 Login"}
+                >
+                  <Dropdown.Menu className="menu blurred" direction="left">
+                    {getTopRightMenuContent(data.member)}
+                  </Dropdown.Menu>
+                </Dropdown>
+              </Grid.Column>
+            </Grid>
+          </div>
+        );
+      }}
+    </Query>
+  );
+};
