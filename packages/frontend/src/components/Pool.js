@@ -103,10 +103,6 @@ const GET_POOL_METADATA = gql`
     poolMetas {
       currentPoolIndex
     }
-    totalShares @client
-    guildBankValue @client
-    currentPeriod @client
-    proposalQueueLength @client
   }
 `;
 
@@ -117,12 +113,12 @@ export default function Pool({ pageQueriesLoading, loggedInUser }) {
   useEffect(() => {
     async function fetchData() {
       const pool = await getMolochPool(loggedInUser);
-      const token = await getToken(loggedInUser);
+      const t = await getToken(loggedInUser);
       setMolochPool(pool);
-      setToken(token);
+      setToken(t);
     }
     fetchData();
-  }, [loggedInUser]);
+  }, [loggedInUser, token]);
 
   return (
     <Query query={GET_POOL_METADATA}>
