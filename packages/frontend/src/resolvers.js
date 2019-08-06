@@ -5,47 +5,51 @@ import {
   GRACE_PERIOD_LENGTH,
   inVotingPeriod,
   inQueue,
-  passedVotingAndGrace
+  passedVotingAndGrace,
 } from "./helpers/proposals";
 import gql from "graphql-tag";
 import { GET_METADATA } from "./helpers/graphQlQueries";
+import { getToken, getMoloch, getMedianizer, getMolochPool } from "./web3";
+import { bigNumberify } from "ethers/utils";
 
 export const resolvers = {
-  // Query: {
-  //   guildBankValue: () => {},
-  //   shareValue: (parent) => {
-  //     console.log('parent: ', parent);
-  //     return 100
-  //   },
-  //   totalShares: async () => {
-  //     // return await moloch.totalShares();
-  //     return 100
-  //   },
-  //   currentPeriod: async () => {
-  //     // return await moloch.getCurrentPeriod();
-  //     return 100
-  //   },
-  //   exchangeRate: async () => {
-  //     // const rate = (await medianizer.compute())[0];
-  //     // return utils.bigNumberify(rate);
-  //     return 100
-  //   },
-  //   proposalQueueLength: async () => {
-  //     // return await moloch.getProposalQueueLength();
-  //     return 100
-  //   },
-  //   totalPoolShares: async () => {
-  //     // return await molochPool.totalPoolShares()
-  //     return 100
-  //   },
-  //   poolValue: async () => {
-  //     // return await token.balanceOf(process.env.REACT_APP_MOLOCH_POOL_ADDRESS)
-  //     return 100
-  //   },
-  //   poolShareValue: () => {
-  //     return 100
-  //   }
-  // },
+  Query: {
+    guildBankValue: async () => {
+      const token = await getToken();
+      const value = (await token.balanceOf(process.env.REACT_APP_GUILD_BANK_ADDRESS)).toString();
+      return value;
+    },
+    totalShares: async () => {
+      const moloch = await getMoloch();
+      const shares = (await moloch.totalShares()).toString();
+      return shares;
+    },
+    currentPeriod: async () => {
+      const moloch = await getMoloch();
+      const period = (await moloch.getCurrentPeriod()).toString();
+      return period;
+    },
+    exchangeRate: async () => {
+      const medianizer = await getMedianizer();
+      const rate = (await medianizer.compute())[0];
+      return bigNumberify(rate).toString();
+    },
+    proposalQueueLength: async () => {
+      const moloch = await getMoloch();
+      const length = (await moloch.getProposalQueueLength()).toString();
+      return length;
+    },
+    totalPoolShares: async () => {
+      const molochPool = await getMolochPool();
+      const shares = (await molochPool.totalPoolShares()).toString();
+      return shares;
+    },
+    poolValue: async () => {
+      const token = await getToken();
+      const value = (await token.balanceOf(process.env.REACT_APP_MOLOCH_POOL_ADDRESS)).toString();
+      return value;
+    },
+  },
   Proposal: {
     status: (proposal, _args, { cache }) => {
       const { currentPeriod } = cache.readQuery({ query: GET_METADATA });
@@ -55,18 +59,26 @@ export const resolvers = {
       try {
         const details = JSON.parse(proposal.details);
         if (details.title === "") {
-          return "N/A"
+          return "N/A";
         }
         return details.title || proposal.details || "";
       } catch (e) {
         // special cases for malformed proposals, remove this once proposal is stale
-        if (proposal.details === '{	itle:Member Proposal: DCInvestor,description:https://paper.dropbox.com/doc/MGP3-ETH2.0-Test-Runner--AcFiUF_av4SF5CHOuS4qSH0WAg-DZu4VRgbP1LZeUimS1k3L}') {
-          return "Moloch Grant Proposal: ETH 2.0 Test Runner"
+        if (
+          proposal.details ===
+          "{	itle:Member Proposal: DCInvestor,description:https://paper.dropbox.com/doc/MGP3-ETH2.0-Test-Runner--AcFiUF_av4SF5CHOuS4qSH0WAg-DZu4VRgbP1LZeUimS1k3L}"
+        ) {
+          return "Moloch Grant Proposal: ETH 2.0 Test Runner";
         }
-        if (proposal.details === '{title:Member Proposal: Anon,description:https://etherpad.net/p/anon_moloch_proposal}') {
-          return "Member Proposal: Anon"
+        if (
+          proposal.details ===
+          "{title:Member Proposal: Anon,description:https://etherpad.net/p/anon_moloch_proposal}"
+        ) {
+          return "Member Proposal: Anon";
         }
-        console.log(`Could not parse title from proposal.proposalIndex: ${proposal.proposalIndex} proposal.details: ${proposal.details}`);
+        console.log(
+          `Could not parse title from proposal.proposalIndex: ${proposal.proposalIndex} proposal.details: ${proposal.details}`,
+        );
         return proposal.details || "";
       }
     },
@@ -75,20 +87,30 @@ export const resolvers = {
         const details = JSON.parse(proposal.details);
         return details.description || "";
       } catch (e) {
-        if (proposal.details === '{	itle:Member Proposal: DCInvestor,description:https://paper.dropbox.com/doc/MGP3-ETH2.0-Test-Runner--AcFiUF_av4SF5CHOuS4qSH0WAg-DZu4VRgbP1LZeUimS1k3L}') {
-          return "https://paper.dropbox.com/doc/MGP3-ETH2.0-Test-Runner--AcFiUF_av4SF5CHOuS4qSH0WAg-DZu4VRgbP1LZeUimS1k3L"
+        if (
+          proposal.details ===
+          "{	itle:Member Proposal: DCInvestor,description:https://paper.dropbox.com/doc/MGP3-ETH2.0-Test-Runner--AcFiUF_av4SF5CHOuS4qSH0WAg-DZu4VRgbP1LZeUimS1k3L}"
+        ) {
+          return "https://paper.dropbox.com/doc/MGP3-ETH2.0-Test-Runner--AcFiUF_av4SF5CHOuS4qSH0WAg-DZu4VRgbP1LZeUimS1k3L";
         }
-        if (proposal.details === '{title:Member Proposal: Anon,description:https://etherpad.net/p/anon_moloch_proposal}') {
-          return "https://etherpad.net/p/anon_moloch_proposal"
+        if (
+          proposal.details ===
+          "{title:Member Proposal: Anon,description:https://etherpad.net/p/anon_moloch_proposal}"
+        ) {
+          return "https://etherpad.net/p/anon_moloch_proposal";
         }
-        console.log(`Could not parse description from proposal.proposalIndex: ${proposal.proposalIndex} proposal.details: ${proposal.details}`);
+        console.log(
+          `Could not parse description from proposal.proposalIndex: ${proposal.proposalIndex} proposal.details: ${proposal.details}`,
+        );
         return "";
       }
     },
     gracePeriod: (proposal, _args, { cache }) => {
       const { currentPeriod } = cache.readQuery({ query: GET_METADATA });
       if (inGracePeriod(proposal, currentPeriod)) {
-        return +proposal.startingPeriod + VOTING_PERIOD_LENGTH + GRACE_PERIOD_LENGTH - currentPeriod;
+        return (
+          +proposal.startingPeriod + VOTING_PERIOD_LENGTH + GRACE_PERIOD_LENGTH - currentPeriod
+        );
       }
       return 0;
     },
@@ -111,8 +133,8 @@ export const resolvers = {
       if (passedVotingAndGrace(proposal, currentPeriod) && !proposal.processed) {
         return true;
       }
-      return false
-    }
+      return false;
+    },
   },
   Mutation: {
     setAttributes: (_, variables, { cache }) => {
@@ -137,10 +159,10 @@ export const resolvers = {
         gracePeriod: variables.gracePeriod,
         votingEnds: variables.votingEnds,
         votingStarts: variables.votingStarts,
-        readyForProcessing: variables.readyForProcessing
+        readyForProcessing: variables.readyForProcessing,
       };
       cache.writeData({ id, data });
       return data;
-    }
-  }
+    },
+  },
 };

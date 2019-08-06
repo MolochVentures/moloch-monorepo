@@ -19,7 +19,7 @@ import ProposalSubmission from "./components/ProposalSubmission";
 import Wrapper from "./components/Wrapper";
 import { resolvers } from "./resolvers";
 import { typeDefs } from "./schema";
-import { getMedianizer, getMoloch, getToken, initWeb3, getMolochPool } from "./web3";
+import { initWeb3 } from "./web3";
 
 console.log(process.env);
 
@@ -57,41 +57,6 @@ const IS_LOGGED_IN = gql`
     loggedInUser @client
   }
 `;
-
-function getLocalResolvers(medianizer, moloch, molochPool, token) {
-  return {
-    Query: {
-      guildBankValue: async () => {
-        const value = (await token.balanceOf(process.env.REACT_APP_GUILD_BANK_ADDRESS)).toString();
-        return value;
-      },
-      totalShares: async () => {
-        const shares = (await moloch.totalShares()).toString();
-        return shares;
-      },
-      currentPeriod: async () => {
-        const period = (await moloch.getCurrentPeriod()).toString();
-        return period;
-      },
-      exchangeRate: async () => {
-        const rate = (await medianizer.compute())[0];
-        return utils.bigNumberify(rate).toString();
-      },
-      proposalQueueLength: async () => {
-        const length = (await moloch.getProposalQueueLength()).toString();
-        return length;
-      },
-      totalPoolShares: async () => {
-        const shares = (await molochPool.totalPoolShares()).toString();
-        return shares;
-      },
-      poolValue: async () => {
-        const value = (await token.balanceOf(process.env.REACT_APP_MOLOCH_POOL_ADDRESS)).toString();
-        return value;
-      },
-    },
-  };
-}
 
 const Routes = () => {
   const { loading, error, data } = useQuery(IS_LOGGED_IN);
@@ -161,14 +126,6 @@ const App = () => {
       if (loggedInUser && client) {
         await initWeb3(client, loggedInUser);
       }
-
-      const medianizer = await getMedianizer(loggedInUser);
-      const moloch = await getMoloch();
-      const molochPool = await getMolochPool();
-      const token = await getToken();
-
-      client.addResolvers(getLocalResolvers(medianizer, moloch, molochPool, token));
-      console.log(await client.getResolvers());
       setRestored(true);
     }
     init();

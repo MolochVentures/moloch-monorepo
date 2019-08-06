@@ -50,8 +50,8 @@ export async function initMetamask(client, loggedInUser) {
   if (client && loggedInUser !== coinbase) {
     client.writeData({
       data: {
-        loggedInUser: coinbase
-      }
+        loggedInUser: coinbase,
+      },
     });
     window.localStorage.setItem("loggedInUser", coinbase);
   }
@@ -64,7 +64,7 @@ export async function initGnosisSafe(client) {
    */
   const provider = new SafeProvider({
     // TODO: CHANGE THIS TO INFURA/ALCHEMY
-    rpcUrl: process.env.REACT_APP_ETH_URL
+    rpcUrl: process.env.REACT_APP_ETH_URL,
   });
 
   /**
@@ -78,8 +78,8 @@ export async function initGnosisSafe(client) {
   }
   client.writeData({
     data: {
-      loggedInUser: coinbase
-    }
+      loggedInUser: coinbase,
+    },
   });
   window.localStorage.setItem("loggedInUser", coinbase);
 }
@@ -111,10 +111,18 @@ export async function initMoloch(loggedInUser) {
 export async function initMolochPool(loggedInUser) {
   if (loggedInUser) {
     eth = await getEthSigner();
-    molochPool = new ethers.Contract(process.env.REACT_APP_MOLOCH_POOL_ADDRESS, molochPoolAbi, eth.getSigner());
+    molochPool = new ethers.Contract(
+      process.env.REACT_APP_MOLOCH_POOL_ADDRESS,
+      molochPoolAbi,
+      eth.getSigner(),
+    );
   } else {
     const provider = ethers.getDefaultProvider();
-    molochPool = new ethers.Contract(process.env.REACT_APP_MOLOCH_POOL_ADDRESS, molochPoolAbi, provider);
+    molochPool = new ethers.Contract(
+      process.env.REACT_APP_MOLOCH_POOL_ADDRESS,
+      molochPoolAbi,
+      provider,
+    );
   }
   return molochPool;
 }
@@ -133,7 +141,11 @@ export async function initToken(loggedInUser) {
 export async function initMedianizer() {
   // pull from mainnet
   let provider = ethers.getDefaultProvider();
-  medianizer = new ethers.Contract(process.env.REACT_APP_MEDIANIZER_ADDRESS, medianizerAbi, provider);
+  medianizer = new ethers.Contract(
+    process.env.REACT_APP_MEDIANIZER_ADDRESS,
+    medianizerAbi,
+    provider,
+  );
   return medianizer;
 }
 
