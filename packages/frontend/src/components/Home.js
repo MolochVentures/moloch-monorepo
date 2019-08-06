@@ -1,16 +1,10 @@
 import React from "react";
-import { Grid, Button, Segment, Statistic, Loader } from "semantic-ui-react";
+import { Grid, Button, Statistic, Loader } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { Query } from "react-apollo";
 import { utils } from "ethers";
-import { GET_METADATA, GET_POOL_METADATA } from "../helpers/graphQlQueries";
-import { convertWeiToDollars } from "../helpers/currency";
-import { adopt } from "react-adopt";
-
-const Composed = adopt({
-  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>,
-  poolMetadata: ({ render }) => <Query query={GET_POOL_METADATA}>{render}</Query>
-});
+import { convertWeiToDollars, getShareValue } from "../helpers/currency";
+import gql from "graphql-tag";
 
 const NumMembers = () => (
   <Link to="/members" className="link">
@@ -36,17 +30,30 @@ const MolochPool = () => (
   </Link>
 );
 
-export default function HomePage() {
-  return (
-    <Composed>
-      {({ metadata, poolMetadata }) => {
-        if (metadata.loading) return <Segment className="blurred box"><Loader size="massive" active /></Segment>;
+// TODO: why do we need the proposal query??
+const GET_POOL_METADATA = gql`
+  {
+    poolValue @client
+    exchangeRate @client
+    proposals(first: 1, where: { processed: true }, orderBy: proposalIndex, orderDirection: desc) {
+      proposalIndex
+    }
+    totalShares @client
+    guildBankValue @client
+  }
+`;
 
-        if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
-        if (poolMetadata.error) throw new Error(`Error!: ${poolMetadata.error}`);
-        console.log('metadata: ', metadata);
-        const { guildBankValue, exchangeRate, totalShares, shareValue } = metadata.data;
-        const { poolValue } = poolMetadata.data;
+export default () => {
+  return (
+    <Query query={GET_POOL_METADATA}>
+      {({ loading, error, data }) => {
+        if (loading) return <Loader size="massive" active />;
+        if (error) throw new Error(`Error!: ${error}`);
+        const { guildBankValue, exchangeRate, totalShares, poolValue } = data;
+        
+        const shareValue = getShareValue(totalShares, guildBankValue)
+        console.log('metadata: ', data);
+
         return (
           <div id="homepage">
             <Grid container verticalAlign="middle" textAlign="center">
@@ -95,6 +102,6 @@ export default function HomePage() {
           </div>
         );
       }}
-    </Composed>
+    </Query>
   );
 }

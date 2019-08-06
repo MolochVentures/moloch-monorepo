@@ -3,7 +3,7 @@ import { Grid, Button, Statistic, Loader, Popup, Modal, Header, Icon, Input } fr
 import { Link } from "react-router-dom";
 import { Query } from "react-apollo";
 import { utils } from "ethers";
-import { convertWeiToDollars } from "../helpers/currency";
+import { convertWeiToDollars, getShareValue } from "../helpers/currency";
 import gql from "graphql-tag";
 import { getMolochPool } from "web3";
 import { monitorTx } from "helpers/transaction";
@@ -96,7 +96,6 @@ const GET_POOL_METADATA = gql`
   {
     totalPoolShares @client
     poolValue @client
-    poolShareValue @client
     exchangeRate @client
     proposals(first: 1, where: { processed: true }, orderBy: proposalIndex, orderDirection: desc) {
       proposalIndex
@@ -104,6 +103,10 @@ const GET_POOL_METADATA = gql`
     poolMetas {
       currentPoolIndex
     }
+    totalShares @client
+    guildBankValue @client
+    currentPeriod @client
+    proposalQueueLength @client
   }
 `;
 
@@ -130,11 +133,14 @@ export default function Pool({ pageQueriesLoading, loggedInUser }) {
         const {
           totalPoolShares,
           poolValue,
-          poolShareValue,
           exchangeRate,
           proposals: [lastProcessedProposal],
           poolMetas: [currentPoolIndex]
         } = data;
+        console.log('data: ', data);
+
+        const poolShareValue = getShareValue(totalPoolShares, poolValue)
+        
         return (
           <div id="homepage">
             <Grid container verticalAlign="middle" textAlign="center">
