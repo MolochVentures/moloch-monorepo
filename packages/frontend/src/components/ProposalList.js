@@ -6,7 +6,12 @@ import ProposalDetail, { Vote } from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
 import { Query } from "react-apollo";
 import { ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
-import { GET_METADATA, GET_MEMBER_BY_DELEGATE_KEY, GET_COMPLETED_PROPOSAL_LIST, GET_ACTIVE_PROPOSAL_LIST } from "../helpers/graphQlQueries";
+import {
+  GET_METADATA,
+  GET_MEMBER_BY_DELEGATE_KEY,
+  GET_COMPLETED_PROPOSAL_LIST,
+  GET_ACTIVE_PROPOSAL_LIST,
+} from "../helpers/graphQlQueries";
 import { utils } from "ethers";
 import { adopt } from "react-adopt";
 
@@ -34,7 +39,9 @@ const ProposalCard = ({ proposal }) => {
       <Link to={{ pathname: `/proposals/${id}` }} className="uncolored">
         <Segment className="blurred box">
           <p className="name">{proposal.title ? proposal.title : "N/A"}</p>
-          <p className="subtext description">{proposal.description ? proposal.description : "N/A"}</p>
+          <p className="subtext description">
+            {proposal.description ? proposal.description : "N/A"}
+          </p>
           <Grid columns="equal" className="value_shares">
             <Grid.Row>
               <Grid.Column textAlign="center">
@@ -45,7 +52,9 @@ const ProposalCard = ({ proposal }) => {
                 <p className="subtext">
                   Tribute <Icon name="ethereum" />
                 </p>
-                <p className="amount">{parseFloat(utils.formatEther(proposal.tokenTribute)).toFixed(2)}</p>
+                <p className="amount">
+                  {parseFloat(utils.formatEther(proposal.tokenTribute)).toFixed(2)}
+                </p>
               </Grid.Column>
             </Grid.Row>
           </Grid>
@@ -77,8 +86,10 @@ const ProposalCard = ({ proposal }) => {
 
 const Composed = adopt({
   activeProposalsResult: ({ render }) => <Query query={GET_ACTIVE_PROPOSAL_LIST}>{render}</Query>,
-  completedProposalsResult: ({ render }) => <Query query={GET_COMPLETED_PROPOSAL_LIST}>{render}</Query>,
-  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>
+  completedProposalsResult: ({ render }) => (
+    <Query query={GET_COMPLETED_PROPOSAL_LIST}>{render}</Query>
+  ),
+  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>,
 });
 
 const ProposalList = ({ isActive }) => (
@@ -94,7 +105,8 @@ const ProposalList = ({ isActive }) => (
       }
 
       if (activeProposalsResult.error) throw new Error(`Error!: ${activeProposalsResult.error}`);
-      if (completedProposalsResult.error) throw new Error(`Error!: ${completedProposalsResult.error}`);
+      if (completedProposalsResult.error)
+        throw new Error(`Error!: ${completedProposalsResult.error}`);
       if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
 
       const { proposals } = activeProposalsResult.data;
@@ -104,23 +116,39 @@ const ProposalList = ({ isActive }) => (
       // sort in descending order of index
       const sortProposals = (a, b) => b.proposalIndex - a.proposalIndex;
 
-      const gracePeriod = proposals.filter(p => p.status === ProposalStatus.GracePeriod).sort(sortProposals);
-      const votingPeriod = proposals.filter(p => p.status === ProposalStatus.VotingPeriod).sort(sortProposals);
-      const inQueue = proposals.filter(p => p.status === ProposalStatus.InQueue).sort(sortProposals);
-      const readyForProcessing = proposals.filter(p => p.status === ProposalStatus.ReadyForProcessing).sort(sortProposals);
+      const gracePeriod = proposals
+        .filter(p => p.status === ProposalStatus.GracePeriod)
+        .sort(sortProposals);
+      const votingPeriod = proposals
+        .filter(p => p.status === ProposalStatus.VotingPeriod)
+        .sort(sortProposals);
+      const inQueue = proposals
+        .filter(p => p.status === ProposalStatus.InQueue)
+        .sort(sortProposals);
+      const readyForProcessing = proposals
+        .filter(p => p.status === ProposalStatus.ReadyForProcessing)
+        .sort(sortProposals);
 
       const panes = [
         {
-          menuItem: `Voting Period (${activeProposalsResult.loading ? "..." : votingPeriod.length})`,
+          menuItem: `Voting Period (${
+            activeProposalsResult.loading ? "..." : votingPeriod.length
+          })`,
           render: () => (
             <Tab.Pane attached={false}>
               <Grid columns={3}>
                 {votingPeriod.map((p, index) => (
-                  <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={+totalShares} proposal={p} key={index} />
+                  <ProposalCard
+                    exchangeRate={exchangeRate}
+                    shareValue={shareValue}
+                    totalShares={+totalShares}
+                    proposal={p}
+                    key={index}
+                  />
                 ))}
               </Grid>
             </Tab.Pane>
-          )
+          ),
         },
         {
           menuItem: `Grace Period (${activeProposalsResult.loading ? "..." : gracePeriod.length})`,
@@ -128,35 +156,57 @@ const ProposalList = ({ isActive }) => (
             <Tab.Pane attached={false}>
               <Grid columns={3}>
                 {gracePeriod.map((p, index) => (
-                  <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={+totalShares} proposal={p} key={index} />
+                  <ProposalCard
+                    exchangeRate={exchangeRate}
+                    shareValue={shareValue}
+                    totalShares={+totalShares}
+                    proposal={p}
+                    key={index}
+                  />
                 ))}
               </Grid>
             </Tab.Pane>
-          )
+          ),
         },
         {
-          menuItem: `Ready For Processing (${activeProposalsResult.loading ? "..." : readyForProcessing.length})`,
+          menuItem: `Ready For Processing (${
+            activeProposalsResult.loading ? "..." : readyForProcessing.length
+          })`,
           render: () => (
             <Tab.Pane attached={false}>
               <Grid columns={3}>
                 {readyForProcessing.map((p, index) => (
-                  <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={+totalShares} proposal={p} key={index} />
+                  <ProposalCard
+                    exchangeRate={exchangeRate}
+                    shareValue={shareValue}
+                    totalShares={+totalShares}
+                    proposal={p}
+                    key={index}
+                  />
                 ))}
               </Grid>
             </Tab.Pane>
-          )
+          ),
         },
         {
-          menuItem: `Completed (${completedProposalsResult.loading ? "..." : completedProposals.length})`,
+          menuItem: `Completed (${
+            completedProposalsResult.loading ? "..." : completedProposals.length
+          })`,
           render: () => (
             <Tab.Pane attached={false}>
               <Grid columns={3}>
                 {completedProposals.map((p, index) => (
-                  <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={+totalShares} proposal={p} key={index} />
+                  <ProposalCard
+                    exchangeRate={exchangeRate}
+                    shareValue={shareValue}
+                    totalShares={+totalShares}
+                    proposal={p}
+                    key={index}
+                  />
                 ))}
               </Grid>
             </Tab.Pane>
-          )
+          ),
         },
         {
           menuItem: `In Queue (${activeProposalsResult.loading ? "..." : inQueue.length})`,
@@ -164,19 +214,32 @@ const ProposalList = ({ isActive }) => (
             <Tab.Pane attached={false}>
               <Grid columns={3}>
                 {inQueue.map((p, index) => (
-                  <ProposalCard exchangeRate={exchangeRate} shareValue={shareValue} totalShares={+totalShares} proposal={p} key={index} />
+                  <ProposalCard
+                    exchangeRate={exchangeRate}
+                    shareValue={shareValue}
+                    totalShares={+totalShares}
+                    proposal={p}
+                    key={index}
+                  />
                 ))}
               </Grid>
             </Tab.Pane>
-          )
-        }
+          ),
+        },
       ];
 
       return (
         <div id="proposal_list">
           <>
             <Grid columns={16} verticalAlign="middle">
-              <Grid.Column mobile={16} tablet={8} computer={4} textAlign="right" floated="right" className="submit_button">
+              <Grid.Column
+                mobile={16}
+                tablet={8}
+                computer={4}
+                textAlign="right"
+                floated="right"
+                className="submit_button"
+              >
                 <Link to={isActive ? "/proposalsubmission" : "/proposals"} className="link">
                   <Button size="large" color="red" disabled={!isActive}>
                     New Proposal
@@ -201,8 +264,17 @@ const ProposalListView = ({ loggedInUser }) => {
         const member = data.members.length > 0 ? data.members[0] : null;
         return (
           <Switch>
-            <Route exact path="/proposals" render={props => <ProposalList {...props} isActive={member ? member.isActive : false} />} />
-            <Route path="/proposals/:id" render={props => <ProposalDetail {...props} loggedInUser={loggedInUser} />} />
+            <Route
+              exact
+              path="/proposals"
+              render={props => (
+                <ProposalList {...props} isActive={member ? member.isActive : false} />
+              )}
+            />
+            <Route
+              path="/proposals/:id"
+              render={props => <ProposalDetail {...props} loggedInUser={loggedInUser} />}
+            />
           </Switch>
         );
       }}

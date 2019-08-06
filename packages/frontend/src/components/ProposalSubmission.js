@@ -1,5 +1,16 @@
 import React, { Component } from "react";
-import { Button, Divider, Form, Grid, Input, Segment, Modal, Header, Icon, List } from "semantic-ui-react";
+import {
+  Button,
+  Divider,
+  Form,
+  Grid,
+  Input,
+  Segment,
+  Modal,
+  Header,
+  Icon,
+  List,
+} from "semantic-ui-react";
 import { getMoloch, getToken } from "../web3";
 import { utils } from "ethers";
 import { monitorTx } from "helpers/transaction";
@@ -11,7 +22,7 @@ class SubmitModal extends Component {
     loading: true,
     beneficiaryApproved: false,
     depositApproved: false,
-    open: false
+    open: false,
   };
 
   handleOpen = async () => {
@@ -21,7 +32,7 @@ class SubmitModal extends Component {
       return;
     }
     this.setState({
-      open: true
+      open: true,
     });
 
     const beneficiaryAllowance = await token.allowance(address, moloch.address);
@@ -39,13 +50,13 @@ class SubmitModal extends Component {
     this.setState({
       beneficiaryApproved,
       depositApproved,
-      loading: false
+      loading: false,
     });
   };
 
   handleClose = () => {
     this.setState({
-      open: false
+      open: false,
     });
   };
 
@@ -68,18 +79,34 @@ class SubmitModal extends Component {
         <Modal.Content>
           <List>
             <List.Item>
-              {loading ? <List.Icon name="time" /> : depositApproved ? <List.Icon name="check circle" /> : <List.Icon name="x" />}
+              {loading ? (
+                <List.Icon name="time" />
+              ) : depositApproved ? (
+                <List.Icon name="check circle" />
+              ) : (
+                <List.Icon name="x" />
+              )}
               <List.Content>10 wETH Deposit Approved</List.Content>
             </List.Item>
             <List.Item>
-              {loading ? <List.Icon name="time" /> : beneficiaryApproved ? <List.Icon name="check circle" /> : <List.Icon name="x" />}
+              {loading ? (
+                <List.Icon name="time" />
+              ) : beneficiaryApproved ? (
+                <List.Icon name="check circle" />
+              ) : (
+                <List.Icon name="x" />
+              )}
               <List.Content>Tribute Approved By Beneficiary</List.Content>
             </List.Item>
             <List.Item>
               {submittedTx ? <List.Icon name="code" /> : <></>}
               <List.Content>
                 {submittedTx ? (
-                  <a href={`https://etherscan.io/tx/${submittedTx.hash}`} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={`https://etherscan.io/tx/${submittedTx.hash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     View Transaction on Etherscan
                   </a>
                 ) : (
@@ -90,7 +117,13 @@ class SubmitModal extends Component {
           </List>
         </Modal.Content>
         <Modal.Actions>
-          <Button basic color="green" inverted onClick={handleSubmit} disabled={submittedTx || !depositApproved || !beneficiaryApproved}>
+          <Button
+            basic
+            color="green"
+            inverted
+            onClick={handleSubmit}
+            disabled={submittedTx || !depositApproved || !beneficiaryApproved}
+          >
             <Icon name="check" /> Submit
           </Button>
           <Button basic color="red" inverted onClick={this.handleClose}>
@@ -115,7 +148,7 @@ export default class ProposalSubmission extends Component {
     tributeValid: false,
     sharesValid: false,
     addressValid: false,
-    formValid: false
+    formValid: false,
   };
 
   async componentDidMount() {
@@ -124,12 +157,19 @@ export default class ProposalSubmission extends Component {
     const token = await getToken(loggedInUser);
     this.setState({
       moloch,
-      token
+      token,
     });
   }
 
   validateField = (fieldName, value) => {
-    let { fieldValidationErrors, titleValid, descriptionValid, tributeValid, sharesValid, addressValid } = this.state;
+    let {
+      fieldValidationErrors,
+      titleValid,
+      descriptionValid,
+      tributeValid,
+      sharesValid,
+      addressValid,
+    } = this.state;
 
     switch (fieldName) {
       case "title":
@@ -164,15 +204,17 @@ export default class ProposalSubmission extends Component {
         descriptionValid,
         tributeValid,
         sharesValid,
-        addressValid
+        addressValid,
       },
-      this.validateForm
+      this.validateForm,
     );
   };
 
   validateForm = () => {
     const { titleValid, descriptionValid, sharesValid, tributeValid, addressValid } = this.state;
-    this.setState({ formValid: titleValid && descriptionValid && sharesValid && tributeValid && addressValid });
+    this.setState({
+      formValid: titleValid && descriptionValid && sharesValid && tributeValid && addressValid,
+    });
   };
 
   handleInput = event => {
@@ -188,15 +230,28 @@ export default class ProposalSubmission extends Component {
 
     let submittedTx;
     try {
-      console.log("Submitting proposal: ", address, utils.parseEther(tribute).toString(), shares, JSON.stringify({ title, description }));
-      monitorTx(moloch.submitProposal(address, utils.parseEther(tribute), shares, JSON.stringify({ title, description })));
+      console.log(
+        "Submitting proposal: ",
+        address,
+        utils.parseEther(tribute).toString(),
+        shares,
+        JSON.stringify({ title, description }),
+      );
+      monitorTx(
+        moloch.submitProposal(
+          address,
+          utils.parseEther(tribute),
+          shares,
+          JSON.stringify({ title, description }),
+        ),
+      );
     } catch (e) {
       console.error(e);
       alert("Error processing proposal");
     }
 
     this.setState({
-      submittedTx
+      submittedTx,
     });
   };
 
@@ -215,7 +270,7 @@ export default class ProposalSubmission extends Component {
       sharesValid,
       tributeValid,
       addressValid,
-      submittedTx
+      submittedTx,
     } = this.state;
     const { loggedInUser } = this.props;
     return (

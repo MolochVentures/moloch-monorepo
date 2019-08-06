@@ -9,8 +9,8 @@ const currencies = [
     name: "ETH",
     shares: 508,
     value: 32000,
-    icon: ethereumIcon
-  }
+    icon: ethereumIcon,
+  },
 ];
 
 const CurrencyElement = ({ name, shares, icon, value }) => (
@@ -24,7 +24,7 @@ const CurrencyElement = ({ name, shares, icon, value }) => (
 
 export default class GuildBank extends React.Component {
   state = {
-    isActive: true
+    isActive: true,
   };
 
   redeemToken() {}
@@ -41,7 +41,12 @@ export default class GuildBank extends React.Component {
                 <Grid.Column textAlign="center" className="guild_value">
                   <p className="subtext">Guild Bank Value</p>
                   <p className="amount">$53,640,918</p>
-                  <Button size="large" color="grey" disabled={data.member.isActive && this.state.isActive ? false : true} onClick={this.redeemToken}>
+                  <Button
+                    size="large"
+                    color="grey"
+                    disabled={data.member.isActive && this.state.isActive ? false : true}
+                    onClick={this.redeemToken}
+                  >
                     Redeem Loot Token
                   </Button>
                 </Grid.Column>

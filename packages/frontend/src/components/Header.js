@@ -1,29 +1,37 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Grid, Icon, Dropdown, Form, Button, Loader } from "semantic-ui-react";
-import { Query, withApollo } from "react-apollo";
+import { withApollo, useQuery } from "react-apollo";
 import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 import { getMoloch, initMetamask, initGnosisSafe, getToken, getEthSigner } from "../web3";
 import { utils } from "ethers";
 import { monitorTx } from "../helpers/transaction";
 import { formatEther } from "ethers/utils";
 
-const MainMenu = props => (
+const MainMenu = ({
+  _handleOpenDropdown,
+  onLoadApproveWeth,
+  member,
+  _handleCloseDropdown,
+  onLoadChangeDelegateKey,
+  onLoadWithdrawLootToken,
+  client,
+}) => (
   <div className="dropdownItems">
     <Dropdown.Item
       icon="settings"
       className="item"
       content="wETH Center"
       onClick={() => {
-        props._handleOpenDropdown();
-        props.onLoadApproveWeth();
+        _handleOpenDropdown();
+        onLoadApproveWeth();
       }}
     />
     <Dropdown.Divider />
-    {props.member && props.member.isActive ? (
+    {member && member.isActive ? (
       <>
-        <Dropdown.Item className="item" onClick={() => props._handleCloseDropdown()}>
-          <Link to={`/members/${props.member.id}`} className="link">
+        <Dropdown.Item className="item" onClick={() => _handleCloseDropdown()}>
+          <Link to={`/members/${member.id}`} className="link">
             <p>
               <Icon name="user" />
               View Profile
@@ -36,8 +44,8 @@ const MainMenu = props => (
           className="item"
           content="Change Delegate Key"
           onClick={() => {
-            props._handleOpenDropdown();
-            props.onLoadChangeDelegateKey();
+            _handleOpenDropdown();
+            onLoadChangeDelegateKey();
           }}
         />
         <Dropdown.Divider />
@@ -46,8 +54,8 @@ const MainMenu = props => (
           className="item"
           content="Ragequit"
           onClick={() => {
-            props._handleOpenDropdown();
-            props.onLoadWithdrawLootToken();
+            _handleOpenDropdown();
+            onLoadWithdrawLootToken();
           }}
         />
         <Dropdown.Divider />
@@ -58,9 +66,9 @@ const MainMenu = props => (
         to="/login"
         className="link"
         onClick={async () => {
-          props._handleCloseDropdown();
+          _handleCloseDropdown();
           window.localStorage.setItem("loggedInUser", "");
-          await props.client.resetStore();
+          await client.resetStore();
           window.location.reload();
         }}
       >
@@ -76,7 +84,7 @@ const MainMenuWrapped = withApollo(MainMenu);
 
 class ChangeDelegateKeyMenu extends React.Component {
   state = {
-    newDelegateKey: ""
+    newDelegateKey: "",
   };
 
   submitChangeDelegateKey = async () => {
@@ -93,7 +101,12 @@ class ChangeDelegateKeyMenu extends React.Component {
     const { onLoadMain } = this.props;
     return (
       <div>
-        <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => onLoadMain()} />
+        <Dropdown.Item
+          icon="arrow left"
+          className="item"
+          content="Back to Menu"
+          onClick={() => onLoadMain()}
+        />
         <Dropdown.Divider />
         <Dropdown.Item className="item submenu">
           <p>
@@ -114,7 +127,7 @@ class ChangeDelegateKeyMenu extends React.Component {
 
 class WithdrawLootTokenMenu extends React.Component {
   state = {
-    ragequitAmount: ""
+    ragequitAmount: "",
   };
 
   submitRagequit = async () => {
@@ -131,7 +144,12 @@ class WithdrawLootTokenMenu extends React.Component {
     const { onLoadMain } = this.props;
     return (
       <div>
-        <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => onLoadMain()} />
+        <Dropdown.Item
+          icon="arrow left"
+          className="item"
+          content="Back to Menu"
+          onClick={() => onLoadMain()}
+        />
         <Dropdown.Divider />
         <Dropdown.Item className="item submenu">
           <p>
@@ -157,22 +175,38 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
   const [myEth, setMyEth] = useState("...");
 
   const approve = useCallback(() => {
-    console.log("Approving wETH: ", process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval).toString());
+    console.log(
+      "Approving wETH: ",
+      process.env.REACT_APP_MOLOCH_ADDRESS,
+      utils.parseEther(approval).toString(),
+    );
     monitorTx(token.approve(process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval)));
   }, [approval, token]);
 
   const approvePool = useCallback(() => {
-    console.log("Approving wETH: ", process.env.REACT_APP_MOLOCH_POOL_ADDRESS, utils.parseEther(approval).toString());
+    console.log(
+      "Approving wETH: ",
+      process.env.REACT_APP_MOLOCH_POOL_ADDRESS,
+      utils.parseEther(approval).toString(),
+    );
     monitorTx(token.approve(process.env.REACT_APP_MOLOCH_POOL_ADDRESS, utils.parseEther(approval)));
   }, [approval, token]);
 
   const wrapEth = useCallback(() => {
-    console.log("Wrapping ETH: ", process.env.REACT_APP_TOKEN_ADDRESS, utils.parseEther(wrap).toString());
+    console.log(
+      "Wrapping ETH: ",
+      process.env.REACT_APP_TOKEN_ADDRESS,
+      utils.parseEther(wrap).toString(),
+    );
     monitorTx(token.deposit({ value: utils.parseEther(wrap) }));
   }, [wrap, token]);
 
   const unwrapWeth = useCallback(() => {
-    console.log("Unwrapping wETH: ", process.env.REACT_APP_TOKEN_ADDRESS, utils.parseEther(approval).toString());
+    console.log(
+      "Unwrapping wETH: ",
+      process.env.REACT_APP_TOKEN_ADDRESS,
+      utils.parseEther(approval).toString(),
+    );
     monitorTx(token.withdraw({ value: utils.parseEther(approval) }));
   }, [approval, token]);
 
@@ -194,20 +228,33 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
 
   return (
     <>
-      <Dropdown.Item icon="arrow left" className="item" content="Back to Menu" onClick={() => onLoadMain()} />
+      <Dropdown.Item
+        icon="arrow left"
+        className="item"
+        content="Back to Menu"
+        onClick={() => onLoadMain()}
+      />
       <Dropdown.Divider />
       <Dropdown.Item className="item submenu">
         <p>
           <Icon name="settings" />
           wETH Center
         </p>
-        <Form.Input placeholder={`${myWeth} wETH available`} onChange={event => setApproval(event.target.value)} value={approval} />
+        <Form.Input
+          placeholder={`${myWeth} wETH available`}
+          onChange={event => setApproval(event.target.value)}
+          value={approval}
+        />
         <Button.Group>
           <Button onClick={approve}>Approve Moloch</Button>
           <Button onClick={approvePool}>Approve Pool</Button>
           <Button onClick={unwrapWeth}>Unwrap</Button>
         </Button.Group>
-        <Form.Input placeholder={`${myEth} ETH available`} onChange={event => setWrap(event.target.value)} value={wrap} />
+        <Form.Input
+          placeholder={`${myEth} ETH available`}
+          onChange={event => setWrap(event.target.value)}
+          value={wrap}
+        />
         <Button onClick={wrapEth}>Wrap</Button>
       </Dropdown.Item>
     </>
@@ -249,7 +296,7 @@ export default ({ loggedInUser, client }) => {
 
     const molochInstance = await getMoloch(loggedInUser);
     setMoloch(molochInstance);
-  }
+  };
 
   const getTopRightMenuContent = member => {
     let topRightMenuContent;
@@ -308,44 +355,51 @@ export default ({ loggedInUser, client }) => {
     } else {
       topRightMenuContent = (
         <>
-          <Dropdown.Item icon="user" className="item" content="Log In With Metamask" onClick={() => logIn("metamask")} />
+          <Dropdown.Item
+            icon="user"
+            className="item"
+            content="Log In With Metamask"
+            onClick={() => logIn("metamask")}
+          />
           <Dropdown.Divider />
-          <Dropdown.Item icon="user" className="item" content="Log In With Gnosis Safe" onClick={() => logIn("gnosis")} />
+          <Dropdown.Item
+            icon="user"
+            className="item"
+            content="Log In With Gnosis Safe"
+            onClick={() => logIn("gnosis")}
+          />
         </>
       );
     }
     return topRightMenuContent;
   };
 
+  const { loading, error, data } = useQuery(GET_MEMBER_DETAIL, {
+    variables: { address: loggedInUser },
+  });
+  if (loading) return <Loader active />;
+  if (error) throw new Error(`Error!: ${error}`);
   return (
-    <Query query={GET_MEMBER_DETAIL} variables={{ address: loggedInUser }}>
-      {({ loading, error, data }) => {
-        if (loading) return <Loader active />;
-        if (error) throw new Error(`Error!: ${error}`);
-        return (
-          <div id="header">
-            <Grid container columns={3} stackable verticalAlign="middle">
-              <Grid.Column textAlign="center" only="computer tablet" />
-              <Grid.Column textAlign="center" className="logo">
-                <Link to="/">MOLOCH</Link>
-              </Grid.Column>
-              <Grid.Column textAlign="center" className="dropdown">
-                <Dropdown
-                  className="right_dropdown"
-                  open={visibleRightMenu}
-                  onBlur={() => _handleCloseDropdown()}
-                  onFocus={() => _handleOpenDropdown()}
-                  text={loggedInUser ? `${loggedInUser.substring(0, 6)}...` : "Web3 Login"}
-                >
-                  <Dropdown.Menu className="menu blurred" direction="left">
-                    {getTopRightMenuContent(data.member)}
-                  </Dropdown.Menu>
-                </Dropdown>
-              </Grid.Column>
-            </Grid>
-          </div>
-        );
-      }}
-    </Query>
+    <div id="header">
+      <Grid container columns={3} stackable verticalAlign="middle">
+        <Grid.Column textAlign="center" only="computer tablet" />
+        <Grid.Column textAlign="center" className="logo">
+          <Link to="/">MOLOCH</Link>
+        </Grid.Column>
+        <Grid.Column textAlign="center" className="dropdown">
+          <Dropdown
+            className="right_dropdown"
+            open={visibleRightMenu}
+            onBlur={() => _handleCloseDropdown()}
+            onFocus={() => _handleOpenDropdown()}
+            text={loggedInUser ? `${loggedInUser.substring(0, 6)}...` : "Web3 Login"}
+          >
+            <Dropdown.Menu className="menu blurred" direction="left">
+              {getTopRightMenuContent(data.member)}
+            </Dropdown.Menu>
+          </Dropdown>
+        </Grid.Column>
+      </Grid>
+    </div>
   );
 };

@@ -6,47 +6,54 @@ import MemberDetail from "./MemberDetail";
 import bull from "assets/bull.png";
 import hood from "assets/hood.png";
 
-import { Query } from "react-apollo";
+import { useQuery } from "react-apollo";
 import gql from "graphql-tag";
 import { GET_MEMBERS, GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 
 const MemberAvatar = ({ address, shares }) => (
-  <Grid.Column mobile={5} tablet={3} computer={3} textAlign="center" className="member_avatar" title={address}>
+  <Grid.Column
+    mobile={5}
+    tablet={3}
+    computer={3}
+    textAlign="center"
+    className="member_avatar"
+    title={address}
+  >
     <Link to={`/members/${address}`} className="uncolored">
       <Image src={hood} centered size="tiny" />
-      <p className="name">{!address ? "" : address.length > 10 ? address.substring(0, 10) + "..." : address}</p>
+      <p className="name">
+        {!address ? "" : address.length > 10 ? address.substring(0, 10) + "..." : address}
+      </p>
       <p className="subtext">{shares} shares</p>
     </Link>
   </Grid.Column>
 );
 
-const LoggedInUser = props => (
-  <Query query={GET_MEMBER_DETAIL} variables={{ address: props.loggedInUser }}>
-    {({ loading, error, data }) => {
-      if (loading) return "...";
-      if (error) throw new Error(`Error!: ${error}`);
-      return data.member && data.member.isActive ? (
-        <Link to={`/members/${data.member.id}`} className="uncolored">
-          <Image centered src={bull} size="tiny" />
-          <p className="name">{!data.member.id ? "" : data.member.id.length > 10 ? data.member.id.substring(0, 10) + "..." : data.member.id}</p>
-          <p className="subtext">{data.member.shares ? data.member.shares : 0} shares</p>
-        </Link>
-      ) : (
-        <div />
-      );
-    }}
-  </Query>
-);
+const LoggedInUser = () => {
+  const { loading, error, data } = useQuery(GET_MEMBER_DETAIL);
+  if (loading) return "...";
+  if (error) throw new Error(error);
+
+  const { member } = data;
+  return member && member.isActive ? (
+    <Link to={`/members/${member.id}`} className="uncolored">
+      <Image centered src={bull} size="tiny" />
+      <p className="name">
+        {!member.id ? "" : member.id.length > 10 ? member.id.substring(0, 10) + "..." : member.id}
+      </p>
+      <p className="subtext">{member.shares ? member.shares : 0} shares</p>
+    </Link>
+  ) : (
+    <div />
+  );
+};
 
 const GET_ELDERS = gql`
   {
     members(
-      first: 100, 
-      where: { 
-        shares_gte: 100, 
-        isActive: true 
-      },
-      orderBy: shares,
+      first: 100
+      where: { shares_gte: 100, isActive: true }
+      orderBy: shares
       orderDirection: desc
     ) {
       id
@@ -54,30 +61,25 @@ const GET_ELDERS = gql`
     }
   }
 `;
-const Elders = () => (
-  <Query query={GET_ELDERS}>
-    {({ loading, error, data }) => {
-      if (loading) return "...";
-      if (error) throw new Error(`Error!: ${error}`);
-      return data.members.length > 0 ? (
-        data.members.map((elder, idx) => <MemberAvatar address={elder.id} shares={elder.shares} key={idx} />)
-      ) : (
-        <>No elders to show.</>
-      );
-    }}
-  </Query>
-);
+const Elders = () => {
+  const { loading, error, data } = useQuery(GET_ELDERS);
+  if (loading) return "...";
+  if (error) throw new Error(error);
+  return data.members.length > 0 ? (
+    data.members.map((elder, idx) => (
+      <MemberAvatar address={elder.id} shares={elder.shares} key={idx} />
+    ))
+  ) : (
+    <>No elders to show.</>
+  );
+};
 
 const GET_NON_ELDERS = gql`
   {
     members(
-      first: 100, 
-      where: { 
-        shares_gt: 0, 
-        shares_lt: 100, 
-        isActive: true 
-      },
-      orderBy: shares,
+      first: 100
+      where: { shares_gt: 0, shares_lt: 100, isActive: true }
+      orderBy: shares
       orderDirection: desc
     ) {
       id
@@ -85,79 +87,82 @@ const GET_NON_ELDERS = gql`
     }
   }
 `;
-const Contributors = () => (
-  <Query query={GET_NON_ELDERS}>
-    {({ loading, error, data }) => {
-      if (loading) return "...";
-      if (error) throw new Error(`Error!: ${error}`);
-      return data.members.length > 0 ? (
-        data.members.map((contributor, idx) => <MemberAvatar address={contributor.id} shares={contributor.shares} key={idx} />)
-      ) : (
-        <>No contributors to show.</>
-      );
-    }}
-  </Query>
-);
+const Contributors = () => {
+  const { loading, error, data } = useQuery(GET_NON_ELDERS);
+  if (loading) return "...";
+  if (error) throw new Error(error);
+  return data.members.length > 0 ? (
+    data.members.map((contributor, idx) => (
+      <MemberAvatar address={contributor.id} shares={contributor.shares} key={idx} />
+    ))
+  ) : (
+    <>No contributors to show.</>
+  );
+};
 
-const MemberList = props => (
-  <Query query={GET_MEMBERS}>
-    {({ loading, error, data }) => {
-      let members;
-      if (error) {
-        members = "NA";
-        console.error(`Could not load members: ${error}`);
-      } else if (loading) {
-        members = "-";
-      } else {
-        members = data.members.length;
-      }
-      return (
-        <div id="member_list">
-          <Grid columns={16} verticalAlign="middle">
-            <Grid.Column mobile={16} tablet={6} computer={6} textAlign="left" className="member_list_header">
-              <p className="subtext">{members} Members</p>
-            </Grid.Column>
+const MemberList = props => {
+  const { loading, error, data } = useQuery(GET_MEMBERS);
+  let members;
+  if (error) {
+    members = "NA";
+    console.error(`Could not load members: ${error}`);
+  } else if (loading) {
+    members = "-";
+  } else {
+    members = data.members.length;
+  }
+  return (
+    <div id="member_list">
+      <Grid columns={16} verticalAlign="middle">
+        <Grid.Column
+          mobile={16}
+          tablet={6}
+          computer={6}
+          textAlign="left"
+          className="member_list_header"
+        >
+          <p className="subtext">{members} Members</p>
+        </Grid.Column>
+      </Grid>
 
-            {/* <Grid.Column mobile={16} tablet={10} computer={10} textAlign="right" className="submit_button">
-              <Link to='/membershipproposalsubmission' className="link">
-                <Button size='large' color='red' disabled={(props.user.status === 'founder') ? true : false}>Membership Proposal</Button>
-              </Link>
-            </Grid.Column> */}
-          </Grid>
-
-          <Grid>
-            <Grid.Column textAlign="center">
-              <LoggedInUser {...props} />
-            </Grid.Column>
-          </Grid>
-          <Grid className="member_item">
-            <Grid.Row>
-              <p style={{ paddingLeft: "1rem" }}>Elders (100+ shares)</p>
-            </Grid.Row>
-            <Divider />
-            <Grid.Row className="members_row" centered>
-              <Elders />
-            </Grid.Row>
-          </Grid>
-          <Grid className="member_item">
-            <Grid.Row>
-              <p style={{ paddingLeft: "1rem" }}>Contributors</p>
-            </Grid.Row>
-            <Divider />
-            <Grid.Row className="members_row" centered>
-              <Contributors />
-            </Grid.Row>
-          </Grid>
-        </div>
-      );
-    }}
-  </Query>
-);
+      <Grid>
+        <Grid.Column textAlign="center">
+          <LoggedInUser {...props} />
+        </Grid.Column>
+      </Grid>
+      <Grid className="member_item">
+        <Grid.Row>
+          <p style={{ paddingLeft: "1rem" }}>Elders (100+ shares)</p>
+        </Grid.Row>
+        <Divider />
+        <Grid.Row className="members_row" centered>
+          <Elders />
+        </Grid.Row>
+      </Grid>
+      <Grid className="member_item">
+        <Grid.Row>
+          <p style={{ paddingLeft: "1rem" }}>Contributors</p>
+        </Grid.Row>
+        <Divider />
+        <Grid.Row className="members_row" centered>
+          <Contributors />
+        </Grid.Row>
+      </Grid>
+    </div>
+  );
+};
 
 const MemberListView = higherProps => (
   <Switch>
-    <Route exact path="/members" render={props => <MemberList {...props} loggedInUser={higherProps.loggedInUser} />} />
-    <Route path="/members/:name" render={props => <MemberDetail {...props} loggedInUser={higherProps.loggedInUser} />} />
+    <Route
+      exact
+      path="/members"
+      render={props => <MemberList {...props} loggedInUser={higherProps.loggedInUser} />}
+    />
+    <Route
+      path="/members/:name"
+      render={props => <MemberDetail {...props} loggedInUser={higherProps.loggedInUser} />}
+    />
   </Switch>
 );
 

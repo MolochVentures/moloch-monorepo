@@ -1,9 +1,9 @@
-import React, { Component } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { Grid, Icon, Segment, Button, Image, Loader } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import hood from "assets/hood.png";
 import ProgressBar from "./ProgressBar";
-import { Query } from "react-apollo";
+import { useQuery } from "react-apollo";
 import { ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import { getMoloch } from "../web3";
 import { convertWeiToDollars, getShareValue } from "../helpers/currency";
@@ -16,15 +16,24 @@ import gql from "graphql-tag";
 export const Vote = {
   Null: 0, // default value, counted as abstention
   Yes: 1,
-  No: 2
+  No: 2,
 };
 
 const MemberAvatar = ({ member }) => {
   return (
-    <Grid.Column mobile={4} tablet={3} computer={3} textAlign="center" className="member_avatar" title={member}>
+    <Grid.Column
+      mobile={4}
+      tablet={3}
+      computer={3}
+      textAlign="center"
+      className="member_avatar"
+      title={member}
+    >
       <Link to={`/members/${member}`} className="uncolored">
         <Image src={hood} centered />
-        <p className="name">{!member ? "" : member.length > 10 ? member.substring(0, 10) + "..." : member}</p>
+        <p className="name">
+          {!member ? "" : member.length > 10 ? member.substring(0, 10) + "..." : member}
+        </p>
       </Link>
     </Grid.Column>
   );
@@ -78,207 +87,206 @@ const GET_PROPOSAL_DETAIL = gql`
   }
 `;
 
-export default class ProposalDetail extends Component {
-  state = {
-    proposal: {
-      tokenTribute: 0,
-      sharesRequested: 0,
-      votingEnded: true,
-      graceEnded: true,
-      yesVotes: 0,
-      noVotes: 0,
-      status: ProposalStatus.InQueue,
-      votes: []
+const ProposalDetail = ({ loggedInUser, match }) => {
+  const [moloch, setMoloch] = useState();
+
+  useEffect(() => {
+    async function init() {
+      const m = await getMoloch(loggedInUser);
+      setMoloch(m);
+    }
+    init();
+  });
+  const handleNo = useCallback(
+    async proposal => {
+      monitorTx(moloch.submitVote(proposal.proposalIndex, Vote.No));
     },
-    user: {
-      id: 0,
-      shares: 0,
-      isActive: false
+    [moloch],
+  );
+
+  const handleYes = useCallback(
+    async proposal => {
+      monitorTx(moloch.submitVote(proposal.proposalIndex, Vote.Yes));
     },
-    moloch: null,
-    shareValue: "0",
-    exchangeRate: "0",
-    tx: {},
-    txStatus: "submitted"
-  };
+    [moloch],
+  );
 
-  async componentDidMount() {
-    const { loggedInUser } = this.props;
-    const moloch = await getMoloch(loggedInUser);
-    this.setState({
-      moloch
-    });
-  }
+  const handleProcess = useCallback(
+    async proposal => {
+      monitorTx(moloch.processProposal(proposal.proposalIndex));
+    },
+    [moloch],
+  );
 
-  handleNo = async proposal => {
-    const { moloch } = this.state;
-    monitorTx(moloch.submitVote(proposal.proposalIndex, Vote.No));
-  };
+  const { loading, error, data } = useQuery(GET_PROPOSAL_DETAIL, {
+    variables: { id: match.params.id, delegateKey: loggedInUser },
+  });
+  console.log("proposalDetail: ", data);
+  if (loading) return <Loader size="massive" active />;
+  if (error) throw new Error(`Error!: ${error}`);
 
-  handleYes = async proposal => {
-    const { moloch } = this.state;
-    monitorTx(moloch.submitVote(proposal.proposalIndex, Vote.Yes));
-  };
+  const { proposal, exchangeRate, totalShares, guildBankValue, members } = data;
 
-  handleProcess = async proposal => {
-    const { moloch } = this.state;
-    monitorTx(moloch.processProposal(proposal.proposalIndex));
-  };
+  const shareValue = getShareValue(totalShares, guildBankValue);
 
-  render() {
-    const { loggedInUser } = this.props;
+  const yesShares = proposal.votes.reduce((totalVotes, vote) => {
+    if (vote.uintVote === Vote.Yes) {
+      return (totalVotes += parseInt(vote.member.shares));
+    } else {
+      return totalVotes;
+    }
+  }, 0);
 
-    return (
-      <Query query={GET_PROPOSAL_DETAIL} variables={{ id: this.props.match.params.id, delegateKey: loggedInUser }}>
-        {({ loading, error, data }) => {
-          console.log("proposalDetail: ", data);
-          if (loading) return <Loader size="massive" active />;
-          if (error) throw new Error(`Error!: ${error}`);
+  const noShares = proposal.votes.reduce((totalVotes, vote) => {
+    if (vote.uintVote === Vote.No) {
+      return (totalVotes += parseInt(vote.member.shares));
+    } else {
+      return totalVotes;
+    }
+  }, 0);
 
-          const { proposal, exchangeRate, totalShares, guildBankValue, members } = data;
+  const user = members.length > 0 ? members[0] : null;
+  const userHasVoted = proposal.votes.find(vote => vote.member.id === loggedInUser) ? true : false;
+  const cannotVote =
+    proposal.aborted ||
+    userHasVoted ||
+    proposal.status !== ProposalStatus.VotingPeriod ||
+    (!(user && user.shares) || !(user && user.isActive));
 
-          const shareValue = getShareValue(totalShares, guildBankValue);
-
-          const yesShares = proposal.votes.reduce((totalVotes, vote) => {
-            if (vote.uintVote === Vote.Yes) {
-              return (totalVotes += parseInt(vote.member.shares));
-            } else {
-              return totalVotes;
-            }
-          }, 0);
-
-          const noShares = proposal.votes.reduce((totalVotes, vote) => {
-            if (vote.uintVote === Vote.No) {
-              return (totalVotes += parseInt(vote.member.shares));
-            } else {
-              return totalVotes;
-            }
-          }, 0);
-
-          const user = members.length > 0 ? members[0] : null;
-          const userHasVoted = proposal.votes.find(vote => vote.member.id === loggedInUser) ? true : false;
-          const cannotVote =
-            proposal.aborted ||
-            userHasVoted ||
-            proposal.status !== ProposalStatus.VotingPeriod ||
-            (!(user && user.shares) || !(user && user.isActive));
-
-          return (
-            <div id="proposal_detail">
-              <Grid container>
+  return (
+    <div id="proposal_detail">
+      <Grid container>
+        <Grid.Column>
+          <Grid.Row>
+            <span className="title">{proposal.title ? proposal.title : "N/A"}</span>
+          </Grid.Row>
+          <Grid.Row>
+            <Linkify properties={{ target: "_blank" }}>
+              <div className="subtext description wordwrap">
+                {proposal.description ? proposal.description : "N/A"}
+              </div>
+            </Linkify>
+          </Grid.Row>
+        </Grid.Column>
+      </Grid>
+      <Grid container stackable columns={2} divided>
+        <Grid.Column>
+          <Grid container>
+            <Grid container stackable columns={2} doubling>
+              <Grid.Column>
+                <p className="subtext">Applicant/Beneficiary</p>
+                <ProfileHover address={proposal.applicantAddress} displayFull="true" />
+              </Grid.Column>
+              <Grid.Column>
+                <p className="subtext">Proposer</p>
+                <ProfileHover
+                  address={proposal.memberAddress}
+                  displayFull="true"
+                  url={`https://molochdao.com/members/${proposal.memberAddress}}`}
+                />
+              </Grid.Column>
+            </Grid>
+            <Grid.Row className="tributes">
+              <Segment className="pill" textAlign="center">
+                <Icon name="ethereum" />
+                {utils.formatEther(proposal.tokenTribute)} ETH
+              </Segment>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid container columns={2}>
                 <Grid.Column>
-                  <Grid.Row>
-                    <span className="title">{proposal.title ? proposal.title : "N/A"}</span>
-                  </Grid.Row>
-                  <Grid.Row>
-                    <Linkify properties={{ target: "_blank" }}>
-                      <div className="subtext description wordwrap">{proposal.description ? proposal.description : "N/A"}</div>
-                    </Linkify>
-                  </Grid.Row>
+                  <p className="subtext voting">Shares</p>
+                  <p className="amount">{proposal.sharesRequested}</p>
+                </Grid.Column>
+                <Grid.Column textAlign="right">
+                  <p className="subtext">Total USD Value</p>
+                  <p className="amount">
+                    {convertWeiToDollars(
+                      utils
+                        .bigNumberify(proposal.sharesRequested)
+                        .mul(shareValue)
+                        .toString(),
+                      exchangeRate,
+                    )}
+                  </p>
                 </Grid.Column>
               </Grid>
-              <Grid container stackable columns={2} divided>
-                <Grid.Column>
-                  <Grid container>
-                    <Grid container stackable columns={2} doubling>
-                      <Grid.Column>
-                        <p className="subtext">Applicant/Beneficiary</p>
-                        <ProfileHover address={proposal.applicantAddress} displayFull="true" />
-                      </Grid.Column>
-                      <Grid.Column>
-                        <p className="subtext">Proposer</p>
-                        <ProfileHover
-                          address={proposal.memberAddress}
-                          displayFull="true"
-                          url={`https://molochdao.com/members/${proposal.memberAddress}}`}
+            </Grid.Row>
+          </Grid>
+        </Grid.Column>
+        <Grid.Column>
+          <Grid container>
+            <Grid.Row textAlign="center" className="pill_column">
+              <Grid.Column textAlign="center" className="pill_column">
+                <span className="pill">{getProposalCountdownText(proposal)}</span>
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column className="member_list">
+                {proposal.votes.length > 0 ? (
+                  <Grid>
+                    <Grid.Row className="members_row">
+                      {/* centered */}
+                      {proposal.votes.map((vote, idx) => (
+                        <MemberAvatar
+                          member={vote.member.id}
+                          shares={vote.member.shares}
+                          key={idx}
                         />
-                      </Grid.Column>
-                    </Grid>
-                    <Grid.Row className="tributes">
-                      <Segment className="pill" textAlign="center">
-                        <Icon name="ethereum" />
-                        {utils.formatEther(proposal.tokenTribute)} ETH
-                      </Segment>
-                    </Grid.Row>
-                    <Grid.Row>
-                      <Grid container columns={2}>
-                        <Grid.Column>
-                          <p className="subtext voting">Shares</p>
-                          <p className="amount">{proposal.sharesRequested}</p>
-                        </Grid.Column>
-                        <Grid.Column textAlign="right">
-                          <p className="subtext">Total USD Value</p>
-                          <p className="amount">
-                            {convertWeiToDollars(
-                              utils
-                                .bigNumberify(proposal.sharesRequested)
-                                .mul(shareValue)
-                                .toString(),
-                              exchangeRate
-                            )}
-                          </p>
-                        </Grid.Column>
-                      </Grid>
+                      ))}
                     </Grid.Row>
                   </Grid>
+                ) : null}
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column textAlign="center">
+                {proposal.aborted ? (
+                  <p className="amount">Aborted</p>
+                ) : (
+                  <ProgressBar yes={yesShares} no={noShares} />
+                )}
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid container stackable columns={3}>
+                <Grid.Column textAlign="center">
+                  <Button
+                    className="btn"
+                    color="green"
+                    disabled={cannotVote}
+                    onClick={() => handleYes(proposal)}
+                  >
+                    Vote Yes
+                  </Button>
                 </Grid.Column>
-                <Grid.Column>
-                  <Grid container>
-                    <Grid.Row textAlign="center" className="pill_column">
-                      <Grid.Column textAlign="center" className="pill_column">
-                        <span className="pill">{getProposalCountdownText(proposal)}</span>
-                      </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                      <Grid.Column className="member_list">
-                        {proposal.votes.length > 0 ? (
-                          <Grid>
-                            <Grid.Row className="members_row">
-                              {/* centered */}
-                              {proposal.votes.map((vote, idx) => (
-                                <MemberAvatar member={vote.member.id} shares={vote.member.shares} key={idx} />
-                              ))}
-                            </Grid.Row>
-                          </Grid>
-                        ) : null}
-                      </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                      <Grid.Column textAlign="center">
-                        {proposal.aborted ? <p className="amount">Aborted</p> : <ProgressBar yes={yesShares} no={noShares} />}
-                      </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                      <Grid container stackable columns={3}>
-                        <Grid.Column textAlign="center">
-                          <Button className="btn" color="green" disabled={cannotVote} onClick={() => this.handleYes(proposal)}>
-                            Vote Yes
-                          </Button>
-                        </Grid.Column>
-                        <Grid.Column textAlign="center">
-                          <Button className="btn" color="red" disabled={cannotVote} onClick={() => this.handleNo(proposal)}>
-                            Vote No
-                          </Button>
-                        </Grid.Column>
-                        <Grid.Column textAlign="center">
-                          <Button
-                            className="btn"
-                            color="grey"
-                            onClick={() => this.handleProcess(proposal)}
-                            disabled={proposal.status !== ProposalStatus.ReadyForProcessing}
-                          >
-                            Process Proposal
-                          </Button>
-                        </Grid.Column>
-                      </Grid>
-                    </Grid.Row>
-                  </Grid>
+                <Grid.Column textAlign="center">
+                  <Button
+                    className="btn"
+                    color="red"
+                    disabled={cannotVote}
+                    onClick={() => handleNo(proposal)}
+                  >
+                    Vote No
+                  </Button>
+                </Grid.Column>
+                <Grid.Column textAlign="center">
+                  <Button
+                    className="btn"
+                    color="grey"
+                    onClick={() => handleProcess(proposal)}
+                    disabled={proposal.status !== ProposalStatus.ReadyForProcessing}
+                  >
+                    Process Proposal
+                  </Button>
                 </Grid.Column>
               </Grid>
-            </div>
-          );
-        }}
-      </Query>
-    );
-  }
-}
+            </Grid.Row>
+          </Grid>
+        </Grid.Column>
+      </Grid>
+    </div>
+  );
+};
+
+export default ProposalDetail;

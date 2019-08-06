@@ -6,7 +6,7 @@ import ProfileHover from "profile-hover";
 import bull from "assets/bull.png";
 import hood from "assets/hood.png";
 
-import { Query } from "react-apollo";
+import { useQuery } from "react-apollo";
 import { Vote } from "./ProposalDetail";
 import { utils } from "ethers";
 import { convertWeiToDollars, getShareValue } from "../helpers/currency";
@@ -71,7 +71,7 @@ const MemberDetail = ({ loggedInUser, member, shareValue, exchangeRate }) => (
                   .bigNumberify(member.shares)
                   .mul(shareValue)
                   .toString(),
-                exchangeRate
+                exchangeRate,
               )}
             </p>
           </Grid.Column>
@@ -79,7 +79,11 @@ const MemberDetail = ({ loggedInUser, member, shareValue, exchangeRate }) => (
       </Grid.Row>
       <Grid.Row>
         <Grid.Column textAlign="center" className="avatar">
-          <Image centered src={loggedInUser === member.id || loggedInUser === member.delegateKey ? bull : hood} size="tiny" />
+          <Image
+            centered
+            src={loggedInUser === member.id || loggedInUser === member.delegateKey ? bull : hood}
+            size="tiny"
+          />
         </Grid.Column>
       </Grid.Row>
       <Grid.Row>
@@ -144,14 +148,20 @@ const ProposalDetail = ({ proposals }) => (
               <Grid.Row verticalAlign="middle">
                 <Grid.Column textAlign="center">
                   <Link to={{ pathname: `/proposals/${p.proposal.id}` }} className="uncolored">
-                    {p.uintVote === Vote.Yes && <Label className="dot" circular color="green" empty />}
+                    {p.uintVote === Vote.Yes && (
+                      <Label className="dot" circular color="green" empty />
+                    )}
                     {/* TODO: is this right? */}
-                    {(p.uintVote === Vote.No || p.uintVote === Vote.Null) && <Label className="dot" circular color="red" empty />}
+                    {(p.uintVote === Vote.No || p.uintVote === Vote.Null) && (
+                      <Label className="dot" circular color="red" empty />
+                    )}
                     {p.proposal.title}
                   </Link>
                 </Grid.Column>
                 <Grid.Column textAlign="center">
-                  <p className="subtext date">{new Date(p.proposal.timestamp * 1000).toISOString().slice(0, 10)}</p>
+                  <p className="subtext date">
+                    {new Date(p.proposal.timestamp * 1000).toISOString().slice(0, 10)}
+                  </p>
                 </Grid.Column>
                 <Grid.Column textAlign="center">
                   <p className="subtext date">{p.proposal.sharesRequested}</p>
@@ -160,7 +170,12 @@ const ProposalDetail = ({ proposals }) => (
                   <p className="subtext date">{utils.formatEther(p.proposal.tokenTribute)}</p>
                 </Grid.Column>
                 <Grid.Column textAlign="center">
-                  <Header as="p" color={p.uintVote === Vote.Yes ? "green" : p.uintVote === Vote.No ? "red" : null}>
+                  <Header
+                    as="p"
+                    color={
+                      p.uintVote === Vote.Yes ? "green" : p.uintVote === Vote.No ? "red" : null
+                    }
+                  >
                     {p.uintVote === Vote.Yes ? "Y" : p.uintVote === Vote.No ? "N" : ""}
                   </Header>
                 </Grid.Column>
@@ -174,48 +189,56 @@ const ProposalDetail = ({ proposals }) => (
         })
       ) : (
         <Grid.Row verticalAlign="middle">
-          <Grid.Column textAlign="center">This member hasn't voted on any proposals yet.</Grid.Column>
+          <Grid.Column textAlign="center">
+            {`This member hasn't voted on any proposals yet.`}
+          </Grid.Column>
         </Grid.Row>
       )}
     </Grid>
   </Segment>
 );
 
-const MemberDetailView = ({ loggedInUser, match }) => (
-  <Query query={GET_MEMBER_DETAIL_WITH_VOTES} variables={{ address: match.params.name }}>
-    {({ loading, error, data }) => {
-      if (loading) return <Loader size="massive" active />;
-      if (error) throw new Error(`Error!: ${error}`);
+const MemberDetailView = ({ loggedInUser, match }) => {
+  const { loading, error, data } = useQuery(GET_MEMBER_DETAIL_WITH_VOTES);
+  if (loading) return <Loader size="massive" active />;
+  if (error) throw new Error(`Error!: ${error}`);
 
-      const { totalShares, guildBankValue, member, exchangeRate } = data;
+  const { totalShares, guildBankValue, member, exchangeRate } = data;
 
-      const shareValue = getShareValue(totalShares, guildBankValue);
-      return (
-        <div id="member_detail">
-          <Divider />
-          <Grid container>
-            <Grid.Row>
-              <Grid.Column mobile={16} tablet={16} computer={6}>
-                <p className="title">
-                  <a href={`https://etherscan.io/address/${match.params.name}`} target="_blank" rel="noopener noreferrer">
-                    {formatEthAddress(match.params.name)}
-                  </a>
-                </p>
-              </Grid.Column>
-            </Grid.Row>
-            <Grid.Row className="details">
-              <Grid.Column mobile={16} tablet={16} computer={6} className="user">
-                <MemberDetail loggedInUser={loggedInUser} member={member} shareValue={shareValue} exchangeRate={exchangeRate} />
-              </Grid.Column>
-              <Grid.Column mobile={16} tablet={16} computer={10} className="proposals">
-                <ProposalDetail proposals={member.votes} />
-              </Grid.Column>
-            </Grid.Row>
-          </Grid>
-        </div>
-      );
-    }}
-  </Query>
-);
+  const shareValue = getShareValue(totalShares, guildBankValue);
+  return (
+    <div id="member_detail">
+      <Divider />
+      <Grid container>
+        <Grid.Row>
+          <Grid.Column mobile={16} tablet={16} computer={6}>
+            <p className="title">
+              <a
+                href={`https://etherscan.io/address/${match.params.name}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {formatEthAddress(match.params.name)}
+              </a>
+            </p>
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row className="details">
+          <Grid.Column mobile={16} tablet={16} computer={6} className="user">
+            <MemberDetail
+              loggedInUser={loggedInUser}
+              member={member}
+              shareValue={shareValue}
+              exchangeRate={exchangeRate}
+            />
+          </Grid.Column>
+          <Grid.Column mobile={16} tablet={16} computer={10} className="proposals">
+            <ProposalDetail proposals={member.votes} />
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
+    </div>
+  );
+};
 
 export default MemberDetailView;

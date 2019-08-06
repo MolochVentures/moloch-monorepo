@@ -1,8 +1,4 @@
-import React from 'react';
+import React from "react";
 
-
-export default ({ children }) => (
-  <div id="wrapper">
-    { children }
-  </div>
-)
+const Wrapper = ({ children }) => <div id="wrapper">{children}</div>;
+export default Wrapper;

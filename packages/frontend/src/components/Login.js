@@ -11,7 +11,7 @@ export default class Login extends Component {
   loginWithMetamask = async client => {
     const web3 = await initMetamask();
     if (!web3) {
-      return
+      return;
     }
     await this.doLoginBypassAuth(client, web3);
   };
@@ -19,7 +19,7 @@ export default class Login extends Component {
   loginWithGnosisSafe = async client => {
     const web3 = initGnosisSafe();
     if (!web3) {
-      return
+      return;
     }
     await this.doLoginBypassAuth(client, web3);
   };
@@ -28,16 +28,18 @@ export default class Login extends Component {
     coinbase = (await web3.listAccounts())[0];
 
     if (!coinbase) {
-      alert("Could not retrieve address from Gnosis Safe/MetaMask, is it configured and this domain whitelisted?");
+      alert(
+        "Could not retrieve address from Gnosis Safe/MetaMask, is it configured and this domain whitelisted?",
+      );
     } else {
       // Try getting a user by their public address.
       client.writeData({
         data: {
-          loggedInUser: coinbase.toLowerCase()
-        }
+          loggedInUser: coinbase.toLowerCase(),
+        },
       });
-      this.props.loginComplete()
-      window.localStorage.setItem("loggedInUser", coinbase.toLowerCase())
+      this.props.loginComplete();
+      window.localStorage.setItem("loggedInUser", coinbase.toLowerCase());
       this.props.history.push("/");
     }
   };

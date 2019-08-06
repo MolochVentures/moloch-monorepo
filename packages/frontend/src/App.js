@@ -1,24 +1,25 @@
+import { useQuery } from "@apollo/react-hooks";
+import { HttpLink, ApolloClient, InMemoryCache } from "apollo-boost";
+import { utils } from "ethers";
 import gql from "graphql-tag";
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
-import { ApolloProvider, Query } from "react-apollo";
-import { utils } from "ethers";
+import { ApolloProvider } from "react-apollo";
 import { ToastMessage } from "rimble-ui";
+import { Dimmer, Loader } from "semantic-ui-react";
 
 import Background from "./components/Background";
 import Header from "./components/Header";
-import Wrapper from "./components/Wrapper";
 import Home from "./components/Home";
-import ProposalList from "./components/ProposalList";
 import MemberList from "./components/MemberList";
 import Pool from "./components/Pool";
+import PoolMemberListView from "./components/PoolMemberList";
+import ProposalList from "./components/ProposalList";
 import ProposalSubmission from "./components/ProposalSubmission";
+import Wrapper from "./components/Wrapper";
 import { resolvers } from "./resolvers";
 import { typeDefs } from "./schema";
 import { getMedianizer, getMoloch, getToken, initWeb3, getMolochPool } from "./web3";
-import PoolMemberListView from "components/PoolMemberList";
-import { Dimmer, Loader } from "semantic-ui-react";
-import { HttpLink, ApolloClient, InMemoryCache } from "apollo-boost";
 
 console.log(process.env);
 
@@ -27,11 +28,11 @@ const cache = new InMemoryCache();
 const client = new ApolloClient({
   cache,
   link: new HttpLink({
-    uri: process.env.REACT_APP_GRAPH_NODE_URI
+    uri: process.env.REACT_APP_GRAPH_NODE_URI,
   }),
   resolvers,
   typeDefs,
-  connectToDevTools: true
+  connectToDevTools: true,
 });
 
 const defaults = {
@@ -44,10 +45,10 @@ const defaults = {
   proposalQueueLength: "0",
   totalPoolShares: "0",
   poolValue: "0",
-  poolShareValue: "0"
+  poolShareValue: "0",
 };
 cache.writeData({
-  data: { ...defaults, loggedInUser: window.localStorage.getItem("loggedInUser") || "" }
+  data: { ...defaults, loggedInUser: window.localStorage.getItem("loggedInUser") || "" },
 });
 client.onResetStore(() => cache.writeData({ data: defaults }));
 
@@ -87,19 +88,73 @@ function getLocalResolvers(medianizer, moloch, molochPool, token) {
       poolValue: async () => {
         const value = (await token.balanceOf(process.env.REACT_APP_MOLOCH_POOL_ADDRESS)).toString();
         return value;
-      }
-    }
+      },
+    },
   };
 }
 
-export default () => {
+const Routes = () => {
+  const { loading, error, data } = useQuery(IS_LOGGED_IN);
+  if (loading) {
+    return (
+      <Dimmer active>
+        <Loader size="massive" />
+      </Dimmer>
+    );
+  }
+
+  if (error) throw new Error(error);
+
+  const { loggedInUser } = data;
+  return (
+    <>
+      <Background />
+      <Header loggedInUser={loggedInUser} client={client} />
+      <Wrapper>
+        <Switch>
+          <Route exact path="/" render={props => <Home {...props} loggedInUser={loggedInUser} />} />
+          <Route
+            path="/proposals"
+            render={props => <ProposalList {...props} loggedInUser={loggedInUser} />}
+          />
+          <Route
+            path="/members"
+            render={props => <MemberList {...props} loggedInUser={loggedInUser} />}
+          />
+          <Route
+            path="/proposalsubmission"
+            render={props =>
+              loggedInUser ? (
+                <ProposalSubmission {...props} loggedInUser={loggedInUser} />
+              ) : (
+                <Redirect to={{ pathname: "/" }} />
+              )
+            }
+          />
+          <Route
+            path="/pool"
+            component={props => <Pool {...props} loggedInUser={loggedInUser} />}
+          />
+          <Route
+            path="/pool-members"
+            render={props => <PoolMemberListView {...props} loggedInUser={loggedInUser} />}
+          />
+          <Route component={props => <Home {...props} loggedInUser={loggedInUser} />} />
+        </Switch>
+      </Wrapper>
+      <ToastMessage.Provider ref={node => (window.toastProvider = node)} />
+    </>
+  );
+};
+
+const App = () => {
   const [restored, setRestored] = useState(false);
   useEffect(() => {
     async function init() {
       let {
-        data: { loggedInUser }
+        data: { loggedInUser },
       } = await client.query({
-        query: IS_LOGGED_IN
+        query: IS_LOGGED_IN,
       });
 
       // make sure logged in metamask user is the one that's saved to storage
@@ -122,57 +177,7 @@ export default () => {
   return restored ? (
     <ApolloProvider client={client}>
       <Router basename={process.env.PUBLIC_URL}>
-        <Query query={IS_LOGGED_IN}>
-          {loggedInUserData => {
-            return (
-              <>
-                <Background />
-                <Header loggedInUser={loggedInUserData.data.loggedInUser} client={client} />
-                <Wrapper>
-                  <Switch>
-                    <Route
-                      exact
-                      path="/"
-                      render={props => <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
-                    />
-                    <Route
-                      path="/proposals"
-                      render={props => <ProposalList {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
-                    />
-                    <Route
-                      path="/members"
-                      render={props => <MemberList {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
-                    />
-                    <Route
-                      path="/proposalsubmission"
-                      render={props =>
-                        loggedInUserData.data.loggedInUser ? (
-                          <ProposalSubmission {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
-                        ) : (
-                          <Redirect to={{ pathname: "/" }} />
-                        )
-                      }
-                    />
-                    <Route
-                      path="/pool"
-                      component={props => <Pool {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
-                    />
-                    <Route
-                      path="/pool-members"
-                      render={props => (
-                        <PoolMemberListView {...props} loggedInUser={loggedInUserData.data.loggedInUser} />
-                      )}
-                    />
-                    <Route
-                      component={props => <Home {...props} loggedInUser={loggedInUserData.data.loggedInUser} />}
-                    />
-                  </Switch>
-                </Wrapper>
-                <ToastMessage.Provider ref={node => (window.toastProvider = node)} />
-              </>
-            );
-          }}
-        </Query>
+        <Routes />
       </Router>
     </ApolloProvider>
   ) : (
@@ -184,3 +189,5 @@ export default () => {
     </>
   );
 };
+
+export default App;
