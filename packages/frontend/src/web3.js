@@ -12,12 +12,12 @@ let token;
 let medianizer;
 let eth;
 
-export async function initWeb3(client) {
+export async function initWeb3(client, loggedInUser) {
   const loginMethod = localStorage.getItem("loginType");
   if (loginMethod === "gnosis") {
     await initGnosisSafe(client);
   } else {
-    await initMetamask(client);
+    await initMetamask(client, loggedInUser);
   }
 }
 
@@ -31,7 +31,7 @@ async function checkNetwork(eth) {
   return true;
 }
 
-export async function initMetamask(client) {
+export async function initMetamask(client, loggedInUser) {
   if (!window.ethereum && !window.web3) {
     // Non-DApp browsers won't work.
     alert("Web3 not detected.");
@@ -47,12 +47,14 @@ export async function initMetamask(client) {
       coinbase = (await eth.listAccounts())[0].toLowerCase();
     }
   }
-  client.writeData({
-    data: {
-      loggedInUser: coinbase
-    }
-  });
-  window.localStorage.setItem("loggedInUser", coinbase);
+  if (client && loggedInUser !== coinbase) {
+    client.writeData({
+      data: {
+        loggedInUser: coinbase
+      }
+    });
+    window.localStorage.setItem("loggedInUser", coinbase);
+  }
   return eth;
 }
 

@@ -141,8 +141,8 @@ class App extends React.Component {
     });
 
     // make sure logged in metamask user is the one that's saved to storage
-    if (loggedInUser) {
-      await initWeb3(client);
+    if (loggedInUser && client) {
+      await initWeb3(client, loggedInUser);
     }
 
     const medianizer = await getMedianizer(loggedInUser);
