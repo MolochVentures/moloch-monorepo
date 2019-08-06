@@ -1,5 +1,5 @@
 import React from "react";
-import { Divider, Grid, Segment, Image, Icon, Label, Header } from "semantic-ui-react";
+import { Divider, Grid, Segment, Image, Icon, Label, Header, Loader } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import ProfileHover from "profile-hover";
 
@@ -9,41 +9,73 @@ import hood from "assets/hood.png";
 import { Query } from "react-apollo";
 import { Vote } from "./ProposalDetail";
 import { utils } from "ethers";
-import { convertWeiToDollars } from "../helpers/currency";
-import { adopt } from "react-adopt";
-import { GET_METADATA, GET_MEMBER_DETAIL_WITH_VOTES } from "../helpers/graphQlQueries";
+import { convertWeiToDollars, getShareValue } from "../helpers/currency";
 import { getProposalCountdownText } from "../helpers/proposals";
 import { formatEthAddress } from "../helpers/address";
+import gql from "graphql-tag";
 
-const Composed = adopt({
-  memberDetail: ({ render, name }) => (
-    <Query query={GET_MEMBER_DETAIL_WITH_VOTES} variables={{ address: name }}>
-      {render}
-    </Query>
-  ),
-  metadata: ({ render }) => <Query query={GET_METADATA}>{render}</Query>
-});
+const GET_MEMBER_DETAIL_WITH_VOTES = gql`
+  query Member($address: String!) {
+    member(id: $address) {
+      id
+      shares
+      isActive
+      tokenTribute
+      delegateKey
+      votes {
+        uintVote
+        proposal {
+          id
+          timestamp
+          tokenTribute
+          sharesRequested
+          processed
+          didPass
+          aborted
+          yesVotes
+          noVotes
+          proposalIndex
+          details
+          status @client
+          title @client
+          description @client
+          gracePeriod @client
+          votingEnds @client
+          votingStarts @client
+          readyForProcessing @client
+        }
+      }
+    }
+    exchangeRate @client
+    totalShares @client
+    guildBankValue @client
+    currentPeriod @client
+    proposalQueueLength @client
+  }
+`;
 
 const MemberDetail = ({ loggedInUser, member, shareValue, exchangeRate }) => (
   <Segment className="blurred box">
-    <Grid columns="equal">
+    <Grid container columns={1}>
       <Grid.Row>
-        <Grid.Column>
-          <p className="subtitle">Shares</p>
-          <p className="amount">{member.shares}</p>
-        </Grid.Column>
-        <Grid.Column textAlign="right">
-          <p className="subtitle">Total Value</p>
-          <p className="amount">
-            {convertWeiToDollars(
-              utils
-                .bigNumberify(member.shares)
-                .mul(shareValue)
-                .toString(),
-              exchangeRate
-            )}
-          </p>
-        </Grid.Column>
+        <Grid container columns={2}>
+          <Grid.Column>
+            <p className="subtitle">Shares</p>
+            <p className="amount">{member.shares}</p>
+          </Grid.Column>
+          <Grid.Column textAlign="right">
+            <p className="subtitle">Total Value</p>
+            <p className="amount">
+              {convertWeiToDollars(
+                utils
+                  .bigNumberify(member.shares)
+                  .mul(shareValue)
+                  .toString(),
+                exchangeRate
+              )}
+            </p>
+          </Grid.Column>
+        </Grid>
       </Grid.Row>
       <Grid.Row>
         <Grid.Column textAlign="center" className="avatar">
@@ -64,15 +96,13 @@ const MemberDetail = ({ loggedInUser, member, shareValue, exchangeRate }) => (
         </Grid.Column>
       </Grid.Row>
       <Grid.Row>
-        <Grid.Column mobile={16} tablet={4}>
+        <Grid.Column>
           <p className="subtitle">Delegate Key</p>
         </Grid.Column>
-        <Grid.Column tablet={8}>
-          <p className="subtitle">
-            <a href={`https://etherscan.io/address/${member.delegateKey}`} target="_blank" rel="noopener noreferrer">
-              {formatEthAddress(member.delegateKey)}
-            </a>
-          </p>
+        <Grid.Column>
+          <ProfileHover address={member.delegateKey} displayFull="true">
+            <p className="title">{member.delegateKey}</p>
+          </ProfileHover>
         </Grid.Column>
       </Grid.Row>
     </Grid>
@@ -151,41 +181,41 @@ const ProposalDetail = ({ proposals }) => (
   </Segment>
 );
 
-const MemberDetailView = props => (
-  <Composed name={props.match.params.name}>
-    {({ memberDetail, metadata }) => {
-      if (memberDetail.loading || metadata.loading) return <Segment className="blurred box">Loading...</Segment>;
-      if (memberDetail.error) throw new Error(`Error!: ${memberDetail.error}`);
-      if (metadata.error) throw new Error(`Error!: ${metadata.error}`);
+const MemberDetailView = ({ loggedInUser, match }) => (
+  <Query query={GET_MEMBER_DETAIL_WITH_VOTES} variables={{ address: match.params.name }}>
+    {({ loading, error, data }) => {
+      if (loading) return <Loader size="massive" active />;
+      if (error) throw new Error(`Error!: ${error}`);
+
+      const { totalShares, guildBankValue, member, exchangeRate } = data;
+
+      const shareValue = getShareValue(totalShares, guildBankValue);
       return (
         <div id="member_detail">
           <Divider />
           <Grid container>
             <Grid.Row>
               <Grid.Column mobile={16} tablet={16} computer={6}>
-                <ProfileHover address={props.match.params.name} displayFull="true">
-                  <p className="title">{props.match.params.name}</p>
-                </ProfileHover>
+                <p className="title">
+                  <a href={`https://etherscan.io/address/${match.params.name}`} target="_blank" rel="noopener noreferrer">
+                    {formatEthAddress(match.params.name)}
+                  </a>
+                </p>
               </Grid.Column>
             </Grid.Row>
             <Grid.Row className="details">
               <Grid.Column mobile={16} tablet={16} computer={6} className="user">
-                <MemberDetail
-                  loggedInUser={props.loggedInUser}
-                  member={memberDetail.data.member}
-                  shareValue={metadata.data.shareValue}
-                  exchangeRate={metadata.data.exchangeRate}
-                />
+                <MemberDetail loggedInUser={loggedInUser} member={member} shareValue={shareValue} exchangeRate={exchangeRate} />
               </Grid.Column>
               <Grid.Column mobile={16} tablet={16} computer={10} className="proposals">
-                <ProposalDetail proposals={memberDetail.data.member.votes} />
+                <ProposalDetail proposals={member.votes} />
               </Grid.Column>
             </Grid.Row>
           </Grid>
         </div>
       );
     }}
-  </Composed>
+  </Query>
 );
 
 export default MemberDetailView;
