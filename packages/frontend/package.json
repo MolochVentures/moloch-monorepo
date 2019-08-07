@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@apollo/react-hooks": "^3.0.0",
+    "@apollo/react-hooks": "3.0.0",
     "@nivo/line": "0.59.3",
     "apollo-boost": "0.4.3",
     "apollo-cache-persist": "0.1.1",
     "ethers": "4.0.33",
     "graphql": "14.4.2",
-    "graphql-resolvers": "^0.3.3",
-    "graphql-tag": "^2.10.1",
+    "graphql-resolvers": "0.3.3",
+    "graphql-tag": "2.10.1",
     "moment": "2.24.0",
     "node-sass": "4.12.0",
     "profile-hover": "1.0.2",
@@ -48,15 +48,15 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "eslint": "^5.16.0",
-    "eslint-config-airbnb": "^17.1.1",
-    "eslint-config-prettier": "^6.0.0",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-prettier": "^3.1.0",
-    "eslint-plugin-react": "^7.14.3",
+    "eslint": "5.16.0",
+    "eslint-config-airbnb": "17.1.1",
+    "eslint-config-prettier": "6.0.0",
+    "eslint-plugin-import": "2.18.2",
+    "eslint-plugin-jsx-a11y": "6.2.3",
+    "eslint-plugin-prettier": "3.1.0",
+    "eslint-plugin-react": "7.14.3",
     "gh-pages": "2.0.1",
-    "prettier": "^1.18.2"
+    "prettier": "1.18.2"
   },
   "homepage": "https://molochdao.com"
 }
