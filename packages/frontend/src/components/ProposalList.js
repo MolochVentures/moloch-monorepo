@@ -6,7 +6,6 @@ import ProposalDetail, { Vote } from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
 import { useQuery, Query } from "react-apollo";
 import { ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
-import { GET_MEMBER_BY_DELEGATE_KEY } from "../helpers/graphQlQueries";
 import { utils } from "ethers";
 import gql from "graphql-tag";
 import { getShareValue } from "helpers/currency";
@@ -156,6 +155,7 @@ const GET_ACTIVE_PROPOSAL_LIST = gql`
     exchangeRate @client
     totalShares @client
     guildBankValue @client
+    currentPeriod @client
   }
 `;
 
@@ -307,6 +307,23 @@ const ProposalList = ({ isActive }) => {
     </div>
   );
 };
+
+const GET_MEMBER_BY_DELEGATE_KEY = gql`
+  query Member($delegateKey: String!) {
+    members(where: { delegateKey: $delegateKey }) {
+      id
+      shares
+      isActive
+      tokenTribute
+      delegateKey
+    }
+    exchangeRate @client
+    totalShares @client
+    guildBankValue @client
+    currentPeriod @client
+    proposalQueueLength @client
+  }
+`;
 
 const ProposalListView = ({ loggedInUser }) => {
   const { loading, error, data } = useQuery(GET_MEMBER_BY_DELEGATE_KEY, {
