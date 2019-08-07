@@ -35,16 +35,13 @@ const GET_METADATA = gql`
   {
     poolValue @client
     exchangeRate @client
-    proposals(first: 1, where: { processed: true }, orderBy: proposalIndex, orderDirection: desc) {
-      proposalIndex
-    }
     totalShares @client
     guildBankValue @client
   }
 `;
 
 const Home = () => {
-  const { loading, error, data } = useQuery(GET_METADATA);
+  const { loading, error, data } = useQuery(GET_METADATA, { fetchPolicy: "no-cache" });
   if (loading) return <Loader size="massive" active />;
   if (error) throw new Error(error);
   const { guildBankValue, exchangeRate, totalShares, poolValue } = data;
