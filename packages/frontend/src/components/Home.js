@@ -41,7 +41,7 @@ const GET_METADATA = gql`
 `;
 
 const Home = () => {
-  const { loading, error, data } = useQuery(GET_METADATA, { fetchPolicy: "no-cache" });
+  const { loading, error, data } = useQuery(GET_METADATA);
   if (loading) return <Loader size="massive" active />;
   if (error) throw new Error(error);
   const { guildBankValue, exchangeRate, totalShares, poolValue } = data;
