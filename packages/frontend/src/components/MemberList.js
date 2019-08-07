@@ -29,8 +29,10 @@ const MemberAvatar = ({ address, shares }) => (
   </Grid.Column>
 );
 
-const LoggedInUser = () => {
-  const { loading, error, data } = useQuery(GET_MEMBER_DETAIL);
+const LoggedInUser = ({ loggedInUser }) => {
+  const { loading, error, data } = useQuery(GET_MEMBER_DETAIL, {
+    variables: { address: loggedInUser },
+  });
   if (loading) return "...";
   if (error) throw new Error(error);
 

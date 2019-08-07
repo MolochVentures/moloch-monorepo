@@ -199,9 +199,11 @@ const ProposalDetail = ({ proposals }) => (
 );
 
 const MemberDetailView = ({ loggedInUser, match }) => {
-  const { loading, error, data } = useQuery(GET_MEMBER_DETAIL_WITH_VOTES);
+  const { loading, error, data } = useQuery(GET_MEMBER_DETAIL_WITH_VOTES, {
+    variables: { address: loggedInUser },
+  });
   if (loading) return <Loader size="massive" active />;
-  if (error) throw new Error(`Error!: ${error}`);
+  if (error) throw new Error(error);
 
   const { totalShares, guildBankValue, member, exchangeRate } = data;
 
