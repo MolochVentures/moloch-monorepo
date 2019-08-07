@@ -47,9 +47,9 @@ const defaults = {
   poolShareValue: "0",
 };
 cache.writeData({
-  data: { ...defaults, loggedInUser: window.localStorage.getItem("loggedInUser") || "" },
+  data: { loggedInUser: window.localStorage.getItem("loggedInUser") || "" },
 });
-client.onResetStore(() => cache.writeData({ data: defaults }));
+client.onResetStore(() => cache.writeData());
 
 const IS_LOGGED_IN = gql`
   query IsUserLoggedIn {
