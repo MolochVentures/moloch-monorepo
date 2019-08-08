@@ -55,7 +55,7 @@
     "eslint-plugin-jsx-a11y": "6.2.3",
     "eslint-plugin-prettier": "3.1.0",
     "eslint-plugin-react": "7.14.3",
-    "gh-pages": "2.0.1",
+    "gh-pages": "2.1.1",
     "prettier": "1.18.2"
   },
   "homepage": "https://molochdao.com"
