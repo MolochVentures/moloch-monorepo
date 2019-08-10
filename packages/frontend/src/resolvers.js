@@ -97,7 +97,7 @@ export const resolvers = {
           proposal.details ===
           "{title:Member Proposal: Anon,description:https://etherpad.net/p/anon_moloch_proposal}"
         ) {
-          return "https://etherpad.net/p/anon_moloch_proposal";
+          return "https://paper.dropbox.com/doc/Moloch-Membership-Proposal-Anon--AikVeiZ0g9W9RmVffxagvno1AQ-9iJOOAxRinM6KwWWKSJpG";
         }
         console.log(
           `Could not parse description from proposal.proposalIndex: ${proposal.proposalIndex} proposal.details: ${proposal.details}`,
