@@ -18,7 +18,7 @@ import gql from "graphql-tag";
 import { getMolochPool } from "web3";
 import { monitorTx } from "helpers/transaction";
 import { getToken } from "web3";
-import { formatEther } from "ethers/utils";
+import { formatEther, parseEther } from "ethers/utils";
 import { EtherSymbol } from "ethers/constants";
 
 const NumMembers = () => (
@@ -42,8 +42,8 @@ const Donate = ({ token, molochPool, loggedInUser }) => {
   }, [token, loggedInUser]);
 
   const donate = useCallback(() => {
-    console.log("Calling molochPool.deposit with ", donation);
-    monitorTx(molochPool.deposit(donation));
+    console.log("Calling molochPool.deposit with ", parseEther(donation));
+    monitorTx(molochPool.deposit(parseEther(donation)));
   }, [donation, molochPool]);
 
   return (
