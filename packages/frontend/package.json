@@ -5,7 +5,7 @@
   "dependencies": {
     "@apollo/react-hooks": "3.0.0",
     "@nivo/line": "0.59.3",
-    "apollo-boost": "0.4.3",
+    "apollo-boost": "0.4.4",
     "apollo-cache-persist": "0.1.1",
     "ethers": "4.0.33",
     "graphql": "14.4.2",
@@ -21,7 +21,7 @@
     "react-linkify": "1.0.0-alpha",
     "react-redux": "7.1.0",
     "react-router-dom": "5.0.1",
-    "react-scripts": "3.0.1",
+    "react-scripts": "3.1.0",
     "redux": "4.0.4",
     "redux-thunk": "2.3.0",
     "rimble-ui": "0.9.6",
@@ -49,7 +49,7 @@
   ],
   "devDependencies": {
     "eslint": "6.1.0",
-    "eslint-config-airbnb": "17.1.1",
+    "eslint-config-airbnb": "18.0.0",
     "eslint-config-prettier": "6.0.0",
     "eslint-plugin-import": "2.18.2",
     "eslint-plugin-jsx-a11y": "6.2.3",
