@@ -70,7 +70,7 @@ const Home = () => {
             </Grid.Row>
           </Grid.Column>
           <Grid.Column width={9}>
-            <Grid container stackable columns={3} padded textAlign="center">
+            <Grid container doubling stackable columns={3} padded textAlign="center">
               <Grid.Column>
                 <NumMembers />
               </Grid.Column>
@@ -92,7 +92,7 @@ const Home = () => {
             <Statistic
               inverted
               label="Total ETH"
-              value={parseFloat(utils.formatEther(guildBankValue)).toFixed(2)}
+              value={parseFloat(utils.formatEther(guildBankValue)).toFixed(0)}
             />
           </Grid.Column>
           <Grid.Column textAlign="center">
