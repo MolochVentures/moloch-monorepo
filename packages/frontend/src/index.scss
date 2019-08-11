@@ -22,7 +22,7 @@ body {
 }
 
 .ui.statistic>.value, .ui.statistics .statistic>.value {
-  @media screen and (max-width: 376px) {
+  @media screen and (max-width: 475px) {
     font-size: 2.5rem !important;
   }
 }
