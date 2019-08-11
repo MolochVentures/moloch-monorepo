@@ -4,7 +4,7 @@ import { Route, Switch, Link } from "react-router-dom";
 
 import ProposalDetail, { Vote } from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
-import { useQuery, Query } from "react-apollo";
+import { useQuery } from "react-apollo";
 import { ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
 import { utils } from "ethers";
 import gql from "graphql-tag";
@@ -161,11 +161,20 @@ const GET_ACTIVE_PROPOSAL_LIST = gql`
 
 const ProposalList = ({ isActive }) => {
   const { loading, error, data } = useQuery(GET_ACTIVE_PROPOSAL_LIST);
+  const { loading: completedLoading, error: completedError, data: completedData } = useQuery(
+    GET_COMPLETED_PROPOSAL_LIST,
+  );
+
   if (loading) return <Loader size="massive" active />;
   if (error) throw new Error(error);
-
+  if (completedError) throw new Error(completedError);
   const { proposals, exchangeRate, totalShares, guildBankValue } = data;
   const shareValue = getShareValue(totalShares, guildBankValue);
+
+  let completedProposals = [];
+  if (!completedLoading) {
+    completedProposals = completedData.proposals;
+  }
 
   // sort in descending order of index
   const sortProposals = (a, b) => b.proposalIndex - a.proposalIndex;
@@ -255,29 +264,24 @@ const ProposalList = ({ isActive }) => {
       ),
     },
     {
-      menuItem: `Completed`,
+      menuItem: `Completed (${completedLoading ? "..." : completedProposals.length})`,
       render: () => (
         <Tab.Pane attached={false}>
-          <Query query={GET_COMPLETED_PROPOSAL_LIST}>
-            {({ loading, error, data }) => {
-              if (loading) return <Loader size="massive" active />;
-              if (error) throw new Error(error);
-              const { proposals: completedProposals } = data;
-              return (
-                <Grid columns={3}>
-                  {completedProposals.map((p, index) => (
-                    <ProposalCard
-                      exchangeRate={exchangeRate}
-                      shareValue={shareValue}
-                      totalShares={+totalShares}
-                      proposal={p}
-                      key={index}
-                    />
-                  ))}
-                </Grid>
-              );
-            }}
-          </Query>
+          {completedLoading ? (
+            <Loader size="massive" active />
+          ) : (
+            <Grid columns={3}>
+              {completedProposals.map((p, index) => (
+                <ProposalCard
+                  exchangeRate={exchangeRate}
+                  shareValue={shareValue}
+                  totalShares={+totalShares}
+                  proposal={p}
+                  key={index}
+                />
+              ))}
+            </Grid>
+          )}
         </Tab.Pane>
       ),
     },
