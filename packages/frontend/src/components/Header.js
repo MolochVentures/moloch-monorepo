@@ -171,6 +171,7 @@ class WithdrawLootTokenMenu extends React.Component {
 function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
   const [approval, setApproval] = useState("");
   const [wrap, setWrap] = useState("");
+  const [unwrap, setUnwrap] = useState("");
   const [myWeth, setMyWeth] = useState("...");
   const [myEth, setMyEth] = useState("...");
 
@@ -205,10 +206,10 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
     console.log(
       "Unwrapping wETH: ",
       process.env.REACT_APP_TOKEN_ADDRESS,
-      utils.parseEther(approval).toString(),
+      utils.parseEther(unwrap).toString(),
     );
-    monitorTx(token.withdraw({ value: utils.parseEther(approval) }));
-  }, [approval, token]);
+    monitorTx(token.withdraw(utils.parseEther(unwrap)));
+  }, [unwrap, token]);
 
   useEffect(() => {
     async function fetchMyWeth() {
@@ -248,7 +249,6 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
         <Button.Group>
           <Button onClick={approve}>Approve Moloch</Button>
           <Button onClick={approvePool}>Approve Pool</Button>
-          <Button onClick={unwrapWeth}>Unwrap</Button>
         </Button.Group>
         <Form.Input
           placeholder={`${myEth} ETH available`}
@@ -256,6 +256,14 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
           value={wrap}
         />
         <Button onClick={wrapEth}>Wrap</Button>
+        <Form.Input
+          placeholder={`${myWeth} wETH available`}
+          onChange={event => setUnwrap(event.target.value)}
+          value={unwrap}
+        />
+        <Button.Group>
+          <Button onClick={unwrapWeth}>Unwrap</Button>
+        </Button.Group>
       </Dropdown.Item>
     </>
   );
