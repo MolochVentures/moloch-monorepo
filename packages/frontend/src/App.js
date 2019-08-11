@@ -34,18 +34,6 @@ const client = new ApolloClient({
   connectToDevTools: true,
 });
 
-const defaults = {
-  loggedInUser: "",
-  guildBankValue: "0",
-  shareValue: "0",
-  totalShares: "0",
-  currentPeriod: "0",
-  exchangeRate: "0",
-  proposalQueueLength: "0",
-  totalPoolShares: "0",
-  poolValue: "0",
-  poolShareValue: "0",
-};
 cache.writeData({
   data: { loggedInUser: window.localStorage.getItem("loggedInUser") || "" },
 });
