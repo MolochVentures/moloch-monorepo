@@ -68,4 +68,5 @@ type PoolMember @entity {
 type PoolMeta @entity {
   id: ID!
   currentPoolIndex: BigInt!
+  totalPoolShares: BigInt!
 }

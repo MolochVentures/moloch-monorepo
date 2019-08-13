@@ -16,6 +16,8 @@ import {
   Withdraw,
   KeeperWithdraw,
   Sync,
+  SharesMinted,
+  SharesBurned,
 } from "./types/MolochPool/MolochPool";
 import { Proposal, Member, Vote, Applicant, PoolMember, PoolMeta } from "./types/schema";
 
@@ -197,31 +199,38 @@ export function handleUpdateDelegateKey(event: UpdateDelegateKey): void {
   member.save();
 }
 
-export function handlePoolDeposit(event: Deposit): void {
-  let id = event.params.donor.toHex();
+export function handlePoolSharesMinted(event: SharesMinted): void {
+  let id = event.params.recipient.toHex();
   let member = PoolMember.load(id);
 
   if (member == null) {
     member = new PoolMember(id);
-    member.shares = event.params.sharesMinted;
+    member.shares = event.params.sharesToMint;
     member.keepers = [];
   } else {
-    member.shares.plus(event.params.sharesMinted);
+    member.shares.plus(event.params.sharesToMint);
   }
-
   member.save();
+
+  let meta = PoolMeta.load("");
+  if (!meta) {
+    meta = new PoolMeta("");
+  }
+  meta.totalPoolShares = event.params.totalPoolShares;
+  meta.save();
 }
 
-export function handlePoolWithdraw(event: Withdraw): void {
-  let member = PoolMember.load(event.params.donor.toHex());
-  member.shares.minus(event.params.sharesBurned);
+export function handlePoolSharesBurned(event: SharesBurned): void {
+  let member = PoolMember.load(event.params.recipient.toHex());
+  member.shares.minus(event.params.sharesToBurn);
   member.save();
-}
 
-export function handlePoolKeeperWithdraw(event: KeeperWithdraw): void {
-  let member = PoolMember.load(event.params.donor.toHex());
-  member.shares.minus(event.params.sharesBurned);
-  member.save();
+  let meta = PoolMeta.load("");
+  if (!meta) {
+    meta = new PoolMeta("");
+  }
+  meta.totalPoolShares = event.params.totalPoolShares;
+  meta.save();
 }
 
 export function handlePoolAddKeepers(event: AddKeepers): void {
