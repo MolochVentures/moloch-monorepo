@@ -4,7 +4,7 @@ import { bigNumberify } from "ethers/utils";
 export const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
-  minimumFractionDigits: 2
+  minimumFractionDigits: 2,
 });
 
 /**
@@ -20,7 +20,9 @@ export function convertWeiToDollars(weiAmount, exchangeRate) {
 }
 
 export function getShareValue(totalShares, totalValue) {
-  const ethPerShare = bigNumberify(totalShares).toNumber() > 0 ? parseFloat(utils.formatEther(totalValue)) / bigNumberify(totalShares).toNumber() : 0; // in eth
+  const ethPerShare = bigNumberify(totalShares).gt(0)
+    ? parseFloat(utils.formatEther(totalValue)) / bigNumberify(totalShares).toNumber()
+    : 0; // in eth
   const value = utils.parseEther(ethPerShare.toString()); // in wei
   return value;
 }
