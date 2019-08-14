@@ -35,7 +35,7 @@ const Donate = ({ token, molochPool, loggedInUser }) => {
 
   useEffect(() => {
     async function fetchMyWeth() {
-      if (token) {
+      if (token && typeof token.balanceOf === "function") {
         const weth = await token.balanceOf(loggedInUser);
         setMyWeth(parseFloat(formatEther(weth)).toFixed(2));
       }
@@ -146,7 +146,6 @@ export default function Pool({ pageQueriesLoading, loggedInUser }) {
     proposals: [lastProcessedProposal],
     poolMetas: [poolMeta],
   } = data;
-  console.log("data: ", data);
 
   const { currentPoolIndex, totalPoolShares } = poolMeta;
 
