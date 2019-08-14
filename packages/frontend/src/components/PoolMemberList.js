@@ -6,8 +6,9 @@ import MemberDetail from "./MemberDetail";
 import bull from "assets/bull.png";
 import hood from "assets/hood.png";
 
-import { Query, useQuery } from "react-apollo";
-import { GET_POOL_MEMBER_DETAIL, GET_POOL_METADATA } from "../helpers/graphQlQueries";
+import { useQuery } from "react-apollo";
+import { GET_POOL_MEMBER_DETAIL } from "../helpers/graphQlQueries";
+import gql from "graphql-tag";
 
 const MemberAvatar = ({ address, shares }) => (
   <Grid.Column
@@ -28,32 +29,41 @@ const MemberAvatar = ({ address, shares }) => (
   </Grid.Column>
 );
 
-const LoggedInUser = props => (
-  <Query query={GET_POOL_MEMBER_DETAIL} variables={{ address: props.loggedInUser }}>
-    {({ loading, error, data }) => {
-      if (loading) return "...";
-      if (error) throw new Error(`Error!: ${error}`);
-      return data.member ? (
-        <Link to={`/members/${data.member.id}`} className="uncolored">
-          <Image centered src={bull} size="tiny" />
-          <p className="name">
-            {!data.member.id
-              ? ""
-              : data.member.id.length > 10
-              ? data.member.id.substring(0, 10) + "..."
-              : data.member.id}
-          </p>
-          <p className="subtext">{data.member.shares ? data.member.shares : 0} shares</p>
-        </Link>
-      ) : (
-        <div />
-      );
-    }}
-  </Query>
-);
+const LoggedInUser = props => {
+  const { loading, error, data } = useQuery(GET_POOL_MEMBER_DETAIL, {
+    variables: { address: props.loggedInUser },
+  });
+  if (loading) return "...";
+  if (error) throw new Error(`Error!: ${error}`);
+  return data.member ? (
+    <Link to={`/members/${data.member.id}`} className="uncolored">
+      <Image centered src={bull} size="tiny" />
+      <p className="name">
+        {!data.member.id
+          ? ""
+          : data.member.id.length > 10
+          ? data.member.id.substring(0, 10) + "..."
+          : data.member.id}
+      </p>
+      <p className="subtext">{data.member.shares ? data.member.shares : 0} shares</p>
+    </Link>
+  ) : (
+    <div />
+  );
+};
+
+const GET_POOL_MEMBERS = gql`
+  {
+    poolMembers(where: { shares_gt: 0 }, first: 100, orderBy: shares, orderDirection: desc) {
+      id
+      shares
+      keepers
+    }
+  }
+`;
 
 const PoolMemberList = props => {
-  const { loading, error, data } = useQuery(GET_POOL_METADATA);
+  const { loading, error, data } = useQuery(GET_POOL_MEMBERS);
   let members;
   if (error) {
     members = "NA";
@@ -61,7 +71,7 @@ const PoolMemberList = props => {
   } else if (loading) {
     members = "-";
   } else {
-    members = data.members ? data.members.length : 0;
+    members = data.poolMembers ? data.poolMembers.length : 0;
   }
   return (
     <div id="member_list">
@@ -88,8 +98,8 @@ const PoolMemberList = props => {
         </Grid.Row>
         <Divider />
         <Grid.Row className="members_row" centered>
-          {data.members && data.members.length > 0 ? (
-            data.members.map((elder, idx) => (
+          {data.poolMembers && data.poolMembers.length > 0 ? (
+            data.poolMembers.map((elder, idx) => (
               <MemberAvatar address={elder.id} shares={elder.shares} key={idx} />
             ))
           ) : (
