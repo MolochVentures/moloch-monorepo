@@ -30,7 +30,6 @@ const MolochPool = () => (
   </Link>
 );
 
-// TODO: why do we need the proposal query??
 const GET_METADATA = gql`
   {
     poolValue @client
