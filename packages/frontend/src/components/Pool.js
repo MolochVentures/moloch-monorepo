@@ -35,8 +35,10 @@ const Donate = ({ token, molochPool, loggedInUser }) => {
 
   useEffect(() => {
     async function fetchMyWeth() {
-      const weth = await token.balanceOf(loggedInUser);
-      setMyWeth(parseFloat(formatEther(weth)).toFixed(2));
+      if (token) {
+        const weth = await token.balanceOf(loggedInUser);
+        setMyWeth(parseFloat(formatEther(weth)).toFixed(2));
+      }
     }
     fetchMyWeth();
   }, [token, loggedInUser]);
@@ -114,6 +116,7 @@ const GET_POOL_METADATA = gql`
     }
     poolMetas {
       currentPoolIndex
+      totalPoolShares
     }
   }
 `;
@@ -138,13 +141,14 @@ export default function Pool({ pageQueriesLoading, loggedInUser }) {
   if (error) throw new Error(error);
 
   const {
-    totalPoolShares,
     poolValue,
     exchangeRate,
     proposals: [lastProcessedProposal],
-    poolMetas: [currentPoolIndex],
+    poolMetas: [poolMeta],
   } = data;
   console.log("data: ", data);
+
+  const { currentPoolIndex, totalPoolShares } = poolMeta;
 
   const poolShareValue = getShareValue(totalPoolShares, poolValue);
 
@@ -164,12 +168,17 @@ export default function Pool({ pageQueriesLoading, loggedInUser }) {
                 <NumMembers />
               </Grid.Column>
               <Grid.Column>
-                <Donate token={token} molochPool={molochPool} loggedInUser={loggedInUser} />
+                <Donate
+                  token={token}
+                  molochPool={molochPool}
+                  loggedInUser={loggedInUser}
+                  disabled={!loggedInUser}
+                />
               </Grid.Column>
               <Grid.Column>
                 <Sync
                   lastProcessedProposalIndex={lastProcessedProposal.proposalIndex}
-                  currentPoolIndex={currentPoolIndex.currentPoolIndex}
+                  currentPoolIndex={currentPoolIndex}
                   molochPool={molochPool}
                 />
               </Grid.Column>
