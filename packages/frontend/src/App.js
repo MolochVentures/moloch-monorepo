@@ -37,7 +37,7 @@ const client = new ApolloClient({
 cache.writeData({
   data: { loggedInUser: window.localStorage.getItem("loggedInUser") || "" },
 });
-client.onResetStore(() => cache.writeData());
+client.onResetStore(() => cache.writeData({ data: { loggedInUser: "" } }));
 
 const IS_LOGGED_IN = gql`
   query IsUserLoggedIn {
