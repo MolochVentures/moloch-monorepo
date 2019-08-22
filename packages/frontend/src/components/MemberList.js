@@ -10,6 +10,8 @@ import { useQuery } from "react-apollo";
 import gql from "graphql-tag";
 import { GET_MEMBERS, GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 
+import ProfileHover from "profile-hover";
+
 const MemberAvatar = ({ address, shares }) => (
   <Grid.Column
     mobile={5}
@@ -19,13 +21,15 @@ const MemberAvatar = ({ address, shares }) => (
     className="member_avatar"
     title={address}
   >
-    <Link to={`/members/${address}`} className="uncolored">
-      <Image src={hood} centered size="tiny" />
-      <p className="name">
-        {!address ? "" : address.length > 10 ? address.substring(0, 10) + "..." : address}
-      </p>
-      <p className="subtext">{shares} shares</p>
-    </Link>
+    <ProfileHover address={address} noTheme>
+      <Link to={`/members/${address}`} className="uncolored">
+        <Image src={hood} centered size="tiny" />
+        <p className="name">
+          {!address ? "" : address.length > 10 ? address.substring(0, 10) + "..." : address}
+        </p>
+        <p className="subtext">{shares} shares</p>
+      </Link>
+    </ProfileHover>
   </Grid.Column>
 );
 
@@ -38,13 +42,15 @@ const LoggedInUser = ({ loggedInUser }) => {
 
   const { member } = data;
   return member && member.isActive ? (
-    <Link to={`/members/${member.id}`} className="uncolored">
-      <Image centered src={bull} size="tiny" />
-      <p className="name">
-        {!member.id ? "" : member.id.length > 10 ? member.id.substring(0, 10) + "..." : member.id}
-      </p>
-      <p className="subtext">{member.shares ? member.shares : 0} shares</p>
-    </Link>
+    <ProfileHover address={loggedInUser} noTheme>
+      <Link to={`/members/${member.id}`} className="uncolored">
+        <Image centered src={bull} size="tiny" />
+        <p className="name">
+          {!member.id ? "" : member.id.length > 10 ? member.id.substring(0, 10) + "..." : member.id}
+        </p>
+        <p className="subtext">{member.shares ? member.shares : 0} shares</p>
+      </Link>
+    </ProfileHover>
   ) : (
     <div />
   );

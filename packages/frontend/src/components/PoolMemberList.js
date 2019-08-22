@@ -10,6 +10,8 @@ import { useQuery } from "react-apollo";
 import { GET_POOL_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 import gql from "graphql-tag";
 
+import ProfileHover from "profile-hover";
+
 const MemberAvatar = ({ address, shares }) => (
   <Grid.Column
     mobile={5}
@@ -19,13 +21,15 @@ const MemberAvatar = ({ address, shares }) => (
     className="member_avatar"
     title={address}
   >
-    <Link to={`/members/${address}`} className="uncolored">
-      <Image src={hood} centered size="tiny" />
-      <p className="name">
-        {!address ? "" : address.length > 10 ? address.substring(0, 10) + "..." : address}
-      </p>
-      <p className="subtext">{shares} shares</p>
-    </Link>
+    <ProfileHover address={address} noTheme>
+      <Link to={`/members/${address}`} className="uncolored">
+        <Image src={hood} centered size="tiny" />
+        <p className="name">
+          {!address ? "" : address.length > 10 ? address.substring(0, 10) + "..." : address}
+        </p>
+        <p className="subtext">{shares} shares</p>
+      </Link>
+    </ProfileHover>
   </Grid.Column>
 );
 
