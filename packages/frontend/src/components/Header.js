@@ -3,10 +3,18 @@ import { Link } from "react-router-dom";
 import { Grid, Icon, Dropdown, Form, Button, Loader } from "semantic-ui-react";
 import { withApollo, useQuery } from "react-apollo";
 import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
-import { getMoloch, initMetamask, initGnosisSafe, getToken, getEthSigner } from "../web3";
+import {
+  getMoloch,
+  initMetamask,
+  initGnosisSafe,
+  getToken,
+  getEthSigner,
+  getMolochPool,
+} from "../web3";
 import { utils } from "ethers";
 import { monitorTx } from "../helpers/transaction";
 import { formatEther } from "ethers/utils";
+import gql from "graphql-tag";
 
 const MainMenu = ({
   _handleOpenDropdown,
@@ -15,7 +23,9 @@ const MainMenu = ({
   _handleCloseDropdown,
   onLoadChangeDelegateKey,
   onLoadWithdrawLootToken,
+  onLoadWithdrawPoolToken,
   client,
+  poolMember,
 }) => (
   <div className="dropdownItems">
     <Dropdown.Item
@@ -60,7 +70,25 @@ const MainMenu = ({
         />
         <Dropdown.Divider />
       </>
-    ) : null}
+    ) : (
+      <></>
+    )}
+    {poolMember && poolMember.shares > 0 ? (
+      <>
+        <Dropdown.Item
+          icon="dollar"
+          className="item"
+          content="Withdraw Pool Shares"
+          onClick={() => {
+            _handleOpenDropdown();
+            onLoadWithdrawPoolToken();
+          }}
+        />
+        <Dropdown.Divider />
+      </>
+    ) : (
+      <></>
+    )}
     <Dropdown.Item className="item">
       <Link
         to="/login"
@@ -82,91 +110,106 @@ const MainMenu = ({
 );
 const MainMenuWrapped = withApollo(MainMenu);
 
-class ChangeDelegateKeyMenu extends React.Component {
-  state = {
-    newDelegateKey: "",
-  };
-
-  submitChangeDelegateKey = async () => {
-    const { newDelegateKey } = this.state;
-    const { moloch } = this.props;
-
+const ChangeDelegateKeyMenu = ({ moloch, onLoadMain }) => {
+  const [newDelegateKey, setNewDelegateKey] = useState("");
+  const submitChangeDelegateKey = useCallback(() => {
     console.log(`Sending moloch.updateDelegateKey(${newDelegateKey})`);
 
     monitorTx(moloch.updateDelegateKey(newDelegateKey));
-  };
+  }, [newDelegateKey, moloch]);
 
-  render() {
-    const { newDelegateKey } = this.state;
-    const { onLoadMain } = this.props;
-    return (
-      <div>
-        <Dropdown.Item
-          icon="arrow left"
-          className="item"
-          content="Back to Menu"
-          onClick={() => onLoadMain()}
+  return (
+    <div>
+      <Dropdown.Item
+        icon="arrow left"
+        className="item"
+        content="Back to Menu"
+        onClick={() => onLoadMain()}
+      />
+      <Dropdown.Divider />
+      <Dropdown.Item className="item submenu">
+        <p>
+          <Icon name="key" />
+          Change Delegate Key
+        </p>
+        <Form.Input
+          placeholder="Enter new key address"
+          onChange={event => setNewDelegateKey(event.target.value)}
+          value={newDelegateKey}
         />
-        <Dropdown.Divider />
-        <Dropdown.Item className="item submenu">
-          <p>
-            <Icon name="key" />
-            Change Delegate Key
-          </p>
-          <Form.Input
-            placeholder="Enter new key address"
-            onChange={event => this.setState({ newDelegateKey: event.target.value })}
-            value={newDelegateKey}
-          />
-          <Button onClick={this.submitChangeDelegateKey}>Save</Button>
-        </Dropdown.Item>
-      </div>
-    );
-  }
-}
+        <Button onClick={submitChangeDelegateKey}>Save</Button>
+      </Dropdown.Item>
+    </div>
+  );
+};
 
-class WithdrawLootTokenMenu extends React.Component {
-  state = {
-    ragequitAmount: "",
-  };
-
-  submitRagequit = async () => {
-    const { ragequitAmount } = this.state;
-    const { moloch } = this.props;
-
+const WithdrawLootTokenMenu = ({ moloch, member, onLoadMain }) => {
+  const [ragequitAmount, setRagequitAmount] = useState("");
+  const submitRagequit = useCallback(() => {
     console.log(`Sending moloch.ragequit(${ragequitAmount})`);
 
     monitorTx(moloch.ragequit(ragequitAmount));
-  };
+  }, [ragequitAmount, moloch]);
 
-  render() {
-    const { ragequitAmount } = this.state;
-    const { onLoadMain } = this.props;
-    return (
-      <div>
-        <Dropdown.Item
-          icon="arrow left"
-          className="item"
-          content="Back to Menu"
-          onClick={() => onLoadMain()}
+  return (
+    <div>
+      <Dropdown.Item
+        icon="arrow left"
+        className="item"
+        content="Back to Menu"
+        onClick={() => onLoadMain()}
+      />
+      <Dropdown.Divider />
+      <Dropdown.Item className="item submenu">
+        <p>
+          <Icon name="dollar" />
+          Ragequit
+        </p>
+        {`${member.shares} Shares Available`}
+        <Form.Input
+          placeholder={`Number of shares`}
+          onChange={event => setRagequitAmount(event.target.value)}
+          value={ragequitAmount}
         />
-        <Dropdown.Divider />
-        <Dropdown.Item className="item submenu">
-          <p>
-            <Icon name="dollar" />
-            Ragequit
-          </p>
-          <Form.Input
-            placeholder="Number of shares"
-            onChange={event => this.setState({ ragequitAmount: event.target.value })}
-            value={ragequitAmount}
-          />
-          <Button onClick={this.submitRagequit}>Withdraw</Button>
-        </Dropdown.Item>
-      </div>
-    );
-  }
-}
+        <Button onClick={submitRagequit}>Withdraw</Button>
+      </Dropdown.Item>
+    </div>
+  );
+};
+
+const WithdrawPoolTokenMenu = ({ pool, poolMember, onLoadMain }) => {
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const submitPoolWithdraw = useCallback(() => {
+    console.log(`Sending moloch.ragequit(${withdrawAmount})`);
+
+    monitorTx(pool.withdraw(withdrawAmount));
+  }, [withdrawAmount, pool]);
+
+  return (
+    <div>
+      <Dropdown.Item
+        icon="arrow left"
+        className="item"
+        content="Back to Menu"
+        onClick={() => onLoadMain()}
+      />
+      <Dropdown.Divider />
+      <Dropdown.Item className="item submenu">
+        <p>
+          <Icon name="dollar" />
+          Withdraw
+        </p>
+        {`${poolMember.shares} Shares Available`}
+        <Form.Input
+          placeholder={`Number of shares`}
+          onChange={event => setWithdrawAmount(event.target.value)}
+          value={withdrawAmount}
+        />
+        <Button onClick={submitPoolWithdraw}>Withdraw</Button>
+      </Dropdown.Item>
+    </div>
+  );
+};
 
 function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
   const [approval, setApproval] = useState("");
@@ -269,18 +312,30 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
   );
 }
 
+const GET_POOL_MEMBER = gql`
+  query PoolMembers($address: String!) {
+    poolMember(id: $address) {
+      id
+      shares
+      keepers
+    }
+  }
+`;
+
 export default ({ loggedInUser, client }) => {
   const [visibleRightMenu, setVisibleRightMenu] = useState(false);
   const [visibleMenu, setVisibleMenu] = useState("main");
   const [moloch, setMoloch] = useState({});
   const [token, setToken] = useState({});
   const [eth, setEth] = useState({});
+  const [pool, setPool] = useState({});
 
   useEffect(() => {
     async function init() {
       setMoloch(await getMoloch(loggedInUser));
       setToken(await getToken(loggedInUser));
       setEth(await getEthSigner());
+      setPool(await getMolochPool(loggedInUser));
     }
     init();
   }, [loggedInUser]);
@@ -306,7 +361,7 @@ export default ({ loggedInUser, client }) => {
     setMoloch(molochInstance);
   };
 
-  const getTopRightMenuContent = member => {
+  const getTopRightMenuContent = (member, poolMember) => {
     let topRightMenuContent;
     if (loggedInUser) {
       switch (visibleMenu) {
@@ -314,10 +369,12 @@ export default ({ loggedInUser, client }) => {
           topRightMenuContent = (
             <MainMenuWrapped
               member={member}
+              poolMember={poolMember}
               _handleOpenDropdown={() => _handleOpenDropdown()}
               _handleCloseDropdown={() => _handleCloseDropdown()}
               onLoadChangeDelegateKey={() => setVisibleMenu("changeDelegateKey")}
               onLoadWithdrawLootToken={() => setVisibleMenu("withdrawLootToken")}
+              onLoadWithdrawPoolToken={() => setVisibleMenu("withdrawPoolToken")}
               onLoadApproveWeth={() => setVisibleMenu("approveWeth")}
             />
           );
@@ -341,6 +398,19 @@ export default ({ loggedInUser, client }) => {
                 setVisibleMenu("main");
               }}
               moloch={moloch}
+              member={member}
+            />
+          );
+          break;
+        case "withdrawPoolToken":
+          topRightMenuContent = (
+            <WithdrawPoolTokenMenu
+              onLoadMain={() => {
+                _handleOpenDropdown();
+                setVisibleMenu("main");
+              }}
+              pool={pool}
+              poolMember={poolMember}
             />
           );
           break;
@@ -382,11 +452,23 @@ export default ({ loggedInUser, client }) => {
     return topRightMenuContent;
   };
 
-  const { loading, error, data } = useQuery(GET_MEMBER_DETAIL, {
-    variables: { address: loggedInUser },
-  });
-  if (loading) return <Loader active />;
-  if (error) throw new Error(`Error!: ${error}`);
+  const { loading: memberLoading, error: memberError, data: memberData } = useQuery(
+    GET_MEMBER_DETAIL,
+    {
+      variables: { address: loggedInUser },
+    },
+  );
+
+  const { loading: poolLoading, error: poolError, data: poolMemberData } = useQuery(
+    GET_POOL_MEMBER,
+    {
+      variables: { address: loggedInUser },
+    },
+  );
+
+  if (memberLoading || poolLoading) return <Loader active />;
+  if (memberError || poolError) throw new Error(`Error!: ${memberError} ${poolError}`);
+  console.log("poolData: ", poolMemberData);
   return (
     <div id="header">
       <Grid container columns={3} stackable verticalAlign="middle">
@@ -403,7 +485,7 @@ export default ({ loggedInUser, client }) => {
             text={loggedInUser ? `${loggedInUser.substring(0, 6)}...` : "Web3 Login"}
           >
             <Dropdown.Menu className="menu blurred" direction="left">
-              {getTopRightMenuContent(data.member)}
+              {getTopRightMenuContent(memberData.member, poolMemberData.poolMember)}
             </Dropdown.Menu>
           </Dropdown>
         </Grid.Column>
