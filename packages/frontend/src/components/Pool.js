@@ -29,13 +29,13 @@ const NumMembers = () => (
   </Link>
 );
 
-const Donate = ({ token, molochPool, loggedInUser }) => {
+const Donate = ({ token, molochPool, loggedInUser, disabled }) => {
   const [donation, setDonation] = useState("");
   const [myWeth, setMyWeth] = useState();
 
   useEffect(() => {
     async function fetchMyWeth() {
-      if (token && typeof token.balanceOf === "function") {
+      if (token && typeof token.balanceOf === "function" && loggedInUser) {
         const weth = await token.balanceOf(loggedInUser);
         setMyWeth(parseFloat(formatEther(weth)).toFixed(2));
       }
@@ -51,7 +51,7 @@ const Donate = ({ token, molochPool, loggedInUser }) => {
   return (
     <Modal
       trigger={
-        <Button color="grey" size="medium" fluid>
+        <Button color="grey" size="medium" fluid disabled={disabled}>
           Donate
         </Button>
       }
@@ -80,13 +80,15 @@ const Donate = ({ token, molochPool, loggedInUser }) => {
   );
 };
 
-const Sync = ({ molochPool, lastProcessedProposalIndex, currentPoolIndex }) => {
+const Sync = ({ molochPool, lastProcessedProposalIndex, currentPoolIndex, loggedInUser }) => {
   const synced = currentPoolIndex >= lastProcessedProposalIndex;
   return (
     <Popup
       inverted
       content={
-        synced ? "Fully synced" : `Sync to last processed proposal ${lastProcessedProposalIndex}`
+        synced
+          ? `Fully synced to current proposal ${lastProcessedProposalIndex}`
+          : `Currently synced to ${currentPoolIndex}`
       }
       trigger={
         <Button
@@ -97,7 +99,7 @@ const Sync = ({ molochPool, lastProcessedProposalIndex, currentPoolIndex }) => {
           onClick={() => {
             monitorTx(molochPool.sync(lastProcessedProposalIndex));
           }}
-          disabled={currentPoolIndex >= lastProcessedProposalIndex}
+          disabled={synced || !loggedInUser}
         >
           Sync
         </Button>
@@ -121,7 +123,7 @@ const GET_POOL_METADATA = gql`
   }
 `;
 
-export default function Pool({ pageQueriesLoading, loggedInUser }) {
+export default function Pool({ loggedInUser }) {
   const [molochPool, setMolochPool] = useState({});
   const [token, setToken] = useState({});
 
@@ -137,7 +139,7 @@ export default function Pool({ pageQueriesLoading, loggedInUser }) {
 
   const { loading, error, data } = useQuery(GET_POOL_METADATA);
 
-  if (loading || pageQueriesLoading) return <Loader size="massive" active />;
+  if (loading) return <Loader size="massive" active />;
   if (error) throw new Error(error);
 
   const {
@@ -179,6 +181,7 @@ export default function Pool({ pageQueriesLoading, loggedInUser }) {
                   lastProcessedProposalIndex={lastProcessedProposal.proposalIndex}
                   currentPoolIndex={currentPoolIndex}
                   molochPool={molochPool}
+                  loggedInUser={loggedInUser}
                 />
               </Grid.Column>
             </Grid>

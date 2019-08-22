@@ -256,16 +256,20 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
 
   useEffect(() => {
     async function fetchMyWeth() {
-      const weth = await token.balanceOf(loggedInUser);
-      setMyWeth(parseFloat(formatEther(weth)).toFixed(2));
+      if (loggedInUser) {
+        const weth = await token.balanceOf(loggedInUser);
+        setMyWeth(parseFloat(formatEther(weth)).toFixed(2));
+      }
     }
     fetchMyWeth();
   }, [token, loggedInUser]);
 
   useEffect(() => {
     async function fetchMyEth() {
-      const e = await eth.getBalance(loggedInUser);
-      setMyEth(parseFloat(formatEther(e)).toFixed(2));
+      if (loggedInUser) {
+        const e = await eth.getBalance(loggedInUser);
+        setMyEth(parseFloat(formatEther(e)).toFixed(2));
+      }
     }
     fetchMyEth();
   }, [eth, loggedInUser]);
@@ -468,7 +472,6 @@ export default ({ loggedInUser, client }) => {
 
   if (memberLoading || poolLoading) return <Loader active />;
   if (memberError || poolError) throw new Error(`Error!: ${memberError} ${poolError}`);
-  console.log("poolData: ", poolMemberData);
   return (
     <div id="header">
       <Grid container columns={3} stackable verticalAlign="middle">
