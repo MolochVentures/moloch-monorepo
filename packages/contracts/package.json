@@ -22,7 +22,7 @@
     "web3-eth-abi": "^1.0.0-beta.36"
   },
   "devDependencies": {
-    "standard": "14.0.0"
+    "standard": "14.0.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
