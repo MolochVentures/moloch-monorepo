@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import { ApolloProvider } from "react-apollo";
 import { ToastMessage } from "rimble-ui";
-import { Dimmer, Loader } from "semantic-ui-react";
+import { Dimmer, Loader, Grid } from "semantic-ui-react";
 
 import Background from "./components/Background";
 import Header from "./components/Header";
@@ -61,39 +61,49 @@ const Routes = () => {
   return (
     <>
       <Background />
-      <Header loggedInUser={loggedInUser} client={client} />
-      <Wrapper>
-        <Switch>
-          <Route exact path="/" render={props => <Home {...props} loggedInUser={loggedInUser} />} />
-          <Route
-            path="/proposals"
-            render={props => <ProposalList {...props} loggedInUser={loggedInUser} />}
-          />
-          <Route
-            path="/members"
-            render={props => <MemberList {...props} loggedInUser={loggedInUser} />}
-          />
-          <Route
-            path="/proposalsubmission"
-            render={props =>
-              loggedInUser ? (
-                <ProposalSubmission {...props} loggedInUser={loggedInUser} />
-              ) : (
-                <Redirect to={{ pathname: "/" }} />
-              )
-            }
-          />
-          <Route
-            path="/pool"
-            component={props => <Pool {...props} loggedInUser={loggedInUser} />}
-          />
-          <Route
-            path="/pool-members"
-            render={props => <PoolMemberListView {...props} loggedInUser={loggedInUser} />}
-          />
-          <Route component={props => <Home {...props} loggedInUser={loggedInUser} />} />
-        </Switch>
-      </Wrapper>
+      <Grid container>
+        <Grid.Row>
+          <Header loggedInUser={loggedInUser} client={client} />
+        </Grid.Row>
+        <Grid.Row>
+          <Wrapper>
+            <Switch>
+              <Route
+                exact
+                path="/"
+                render={props => <Home {...props} loggedInUser={loggedInUser} />}
+              />
+              <Route
+                path="/proposals"
+                render={props => <ProposalList {...props} loggedInUser={loggedInUser} />}
+              />
+              <Route
+                path="/members"
+                render={props => <MemberList {...props} loggedInUser={loggedInUser} />}
+              />
+              <Route
+                path="/proposalsubmission"
+                render={props =>
+                  loggedInUser ? (
+                    <ProposalSubmission {...props} loggedInUser={loggedInUser} />
+                  ) : (
+                    <Redirect to={{ pathname: "/" }} />
+                  )
+                }
+              />
+              <Route
+                path="/pool"
+                component={props => <Pool {...props} loggedInUser={loggedInUser} />}
+              />
+              <Route
+                path="/pool-members"
+                render={props => <PoolMemberListView {...props} loggedInUser={loggedInUser} />}
+              />
+              <Route component={props => <Home {...props} loggedInUser={loggedInUser} />} />
+            </Switch>
+          </Wrapper>
+        </Grid.Row>
+      </Grid>
       <ToastMessage.Provider ref={node => (window.toastProvider = node)} />
     </>
   );
