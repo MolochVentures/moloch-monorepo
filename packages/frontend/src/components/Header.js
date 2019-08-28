@@ -338,8 +338,10 @@ export default ({ loggedInUser, client }) => {
     async function init() {
       setMoloch(await getMoloch(loggedInUser));
       setToken(await getToken(loggedInUser));
-      setEth(await getEthSigner());
       setPool(await getMolochPool(loggedInUser));
+      if (loggedInUser) {
+        setEth(await getEthSigner());
+      }
     }
     init();
   }, [loggedInUser]);
@@ -361,6 +363,7 @@ export default ({ loggedInUser, client }) => {
       return;
     }
 
+    setEth(eth);
     const molochInstance = await getMoloch(loggedInUser);
     setMoloch(molochInstance);
   };
@@ -475,7 +478,14 @@ export default ({ loggedInUser, client }) => {
   return (
     <div id="header">
       <Grid container columns={3} stackable verticalAlign="middle">
-        <Grid.Column textAlign="center" only="computer tablet" />
+        <Grid.Column textAlign="center">
+          <a href="https://molochdao.discourse.group" target="_blank" rel="noopener noreferrer">
+            <Icon name="discourse" size="big" />
+          </a>
+          <a href="https://twitter.com/MolochDAO" target="_blank" rel="noopener noreferrer">
+            <Icon name="twitter" size="big" />
+          </a>
+        </Grid.Column>
         <Grid.Column textAlign="center" className="logo">
           <Link to="/">MOLOCH</Link>
         </Grid.Column>
