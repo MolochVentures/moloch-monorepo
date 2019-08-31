@@ -4,7 +4,7 @@ import { Switch, Route, Link } from "react-router-dom";
 
 import MemberDetail from "./MemberDetail";
 import bull from "assets/bull.png";
-import hood from "assets/hood.png";
+import hood from "assets/black-flower.jpg";
 
 import { useQuery } from "react-apollo";
 import { GET_POOL_MEMBER_DETAIL } from "../helpers/graphQlQueries";

@@ -59,7 +59,7 @@ const Donate = ({ token, molochPool, loggedInUser, disabled }) => {
       size="small"
       closeIcon
     >
-      <Header content="Donate to the Moloch Pool" />
+      <Header content="Donate to the Trojan Pool" />
       <Modal.Content>
         <p>Thank you for your donation! Use the wETH Center to wrap and approve.</p>
         <Input
@@ -159,7 +159,7 @@ export default function Pool({ loggedInUser }) {
         <Grid container doubling stackable columns="equal" verticalAlign="bottom">
           <Grid.Column>
             <Statistic inverted>
-              <Statistic.Label>Moloch Pool Value</Statistic.Label>
+              <Statistic.Label>Trojan Pool Value</Statistic.Label>
               <Statistic.Value>{convertWeiToDollars(poolValue, exchangeRate)}</Statistic.Value>
             </Statistic>
           </Grid.Column>

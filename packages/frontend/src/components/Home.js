@@ -63,7 +63,7 @@ const Home = () => {
             </Grid.Row>
             <Grid.Row className="pool_value" textAlign="center">
               <Statistic size="tiny" inverted>
-                <Statistic.Label>Moloch Pool Value</Statistic.Label>
+                <Statistic.Label>Trojan Pool Value</Statistic.Label>
                 <Statistic.Value>{convertWeiToDollars(poolValue, exchangeRate)}</Statistic.Value>
               </Statistic>
             </Grid.Row>
