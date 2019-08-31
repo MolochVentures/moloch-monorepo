@@ -1,6 +1,6 @@
 # moloch-monorepo
 
-**install ganche-cli**
+**install ganache-cli**
 1. npm install -g ganache-cli
 2. ganache-cli -m \"fetch local valve black attend double eye excite planet primary install allow\" -a 100
 
