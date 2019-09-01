@@ -17,6 +17,13 @@ If this did not work try this command:
 
 `yarn global add @graphprotocol/graph-cli`
 
+**install truffle**
+To install Truffle globally, run one the following two commands from a terminal:
+NPM
+`npm install -g truffle`
+Yarn
+`yarn global add truffle`
+
 **install graph protocol**
 1. clone repo https://github.com/graphprotocol/graph-node
 2. go to docker/docker-compose.yml and replace :
