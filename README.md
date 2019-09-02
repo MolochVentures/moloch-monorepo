@@ -6,7 +6,7 @@
   To install it we use npm like that:
   
 1. `npm install -g ganache-cli`
-2. `ganache-cli -m \"fetch local valve black attend double eye excite planet primary install allow\" -a 100`
+2. `ganache-cli -h 0.0.0.0 -m \"fetch local valve black attend double eye excite planet primary install allow\" -a 100`
   
   With this command we use the seed to create 100 accounts with 100 ETH each. 
 
