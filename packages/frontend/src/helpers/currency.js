@@ -21,8 +21,7 @@ export function convertWeiToDollars(weiAmount, exchangeRate) {
 
 export function getShareValue(totalShares, totalValue) {
   const ethPerShare = bigNumberify(totalShares).gt(0)
-    ? parseFloat(utils.formatEther(totalValue)) / bigNumberify(totalShares).toNumber()
+    ? bigNumberify(totalValue).div(bigNumberify(totalShares))
     : 0; // in eth
-  const value = utils.parseEther(ethPerShare.toString()); // in wei
-  return value;
+  return ethPerShare;
 }
