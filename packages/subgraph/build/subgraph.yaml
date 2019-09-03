@@ -42,7 +42,7 @@ dataSources:
     name: MolochPool
     network: mainnet
     source:
-      address: "0x97eC917BFD947A138aC615426504DDc305aa1766"
+      address: "0x9FEb49aC78eC80838665d7Ab75E43CFBdC4f4277"
       abi: MolochPool
     mapping:
       kind: ethereum/events
