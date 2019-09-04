@@ -4,7 +4,7 @@ const privateKeys = ["659c..."]; // insert full PK here
 module.exports = {
   networks: {
     development: {
-      host: 'localhost',
+      host: '0.0.0.0',
       port: 8545,
       gas: 4700000,
       network_id: '*' // Match any network id
