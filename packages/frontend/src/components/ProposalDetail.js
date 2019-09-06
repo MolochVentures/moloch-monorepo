@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { Grid, Icon, Segment, Button, Image, Loader } from "semantic-ui-react";
 import { Link } from "react-router-dom";
-import hood from "assets/black-flower.jpg";
+import hood from "assets/eye.png";
 import ProgressBar from "./ProgressBar";
 import { useQuery } from "react-apollo";
 import { ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
