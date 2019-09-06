@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@apollo/react-hooks": "3.0.1",
+    "@apollo/react-hooks": "3.1.0",
     "@nivo/line": "0.59.3",
     "apollo-boost": "0.4.4",
     "apollo-cache-persist": "0.1.1",
@@ -16,7 +16,7 @@
     "profile-hover": "1.0.2",
     "react": "16.9.0",
     "react-adopt": "0.6.0",
-    "react-apollo": "3.0.1",
+    "react-apollo": "3.1.0",
     "react-dom": "16.9.0",
     "react-linkify": "1.0.0-alpha",
     "react-redux": "7.1.1",
