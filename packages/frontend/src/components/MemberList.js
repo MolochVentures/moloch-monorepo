@@ -3,7 +3,7 @@ import { Grid, Image, Divider } from "semantic-ui-react";
 import { Switch, Route, Link } from "react-router-dom";
 
 import MemberDetail from "./MemberDetail";
-import bull from "assets/bull.png";
+import bull from "assets/network.png";
 import hood from "assets/eye.png";
 
 import { useQuery } from "react-apollo";

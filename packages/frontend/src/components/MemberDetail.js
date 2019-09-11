@@ -3,7 +3,7 @@ import { Divider, Grid, Segment, Image, Icon, Label, Header, Loader } from "sema
 import { Link } from "react-router-dom";
 import ProfileHover from "profile-hover";
 
-import bull from "assets/bull.png";
+import bull from "assets/network.png";
 import hood from "assets/eye.png";
 
 import { useQuery } from "react-apollo";
