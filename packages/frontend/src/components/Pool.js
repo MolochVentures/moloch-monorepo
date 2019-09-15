@@ -21,9 +21,9 @@ import { getToken } from "web3";
 import { formatEther, parseEther } from "ethers/utils";
 import { EtherSymbol } from "ethers/constants";
 
-const NumMembers = () => (
+const NumMembers = ({ disabled }) => (
   <Link to="/pool-members" className="link">
-    <Button color="grey" size="medium" fluid>
+    <Button color="grey" size="medium" fluid disabled={disabled}>
       Members
     </Button>
   </Link>
@@ -80,7 +80,7 @@ const Donate = ({ token, molochPool, loggedInUser, disabled }) => {
   );
 };
 
-const Sync = ({ molochPool, lastProcessedProposalIndex, currentPoolIndex, loggedInUser }) => {
+const Sync = ({ molochPool, lastProcessedProposalIndex, currentPoolIndex, loggedInUser, disabled }) => {
   const synced = currentPoolIndex >= lastProcessedProposalIndex;
   return (
     <Popup
@@ -99,7 +99,7 @@ const Sync = ({ molochPool, lastProcessedProposalIndex, currentPoolIndex, logged
           onClick={() => {
             monitorTx(molochPool.sync(lastProcessedProposalIndex));
           }}
-          disabled={synced || !loggedInUser}
+          disabled={synced || !loggedInUser || disabled}
         >
           Sync
         </Button>
@@ -146,8 +146,19 @@ export default function Pool({ loggedInUser }) {
     poolValue,
     exchangeRate,
     proposals: [lastProcessedProposal],
-    poolMetas: [poolMeta],
+    poolMetas,
   } = data;
+
+  let poolMeta = {
+    currentPoolIndex: 0,
+    totalPoolShares: 0
+  }
+
+  let disablePool = true;
+  if (poolMetas.length > 0) {
+    poolMeta = poolMetas[0];
+    disablePool = false;
+  }
 
   const { currentPoolIndex, totalPoolShares } = poolMeta;
 
@@ -166,22 +177,23 @@ export default function Pool({ loggedInUser }) {
           <Grid.Column width={9}>
             <Grid container stackable columns={3}>
               <Grid.Column>
-                <NumMembers />
+                <NumMembers disabled={disablePool} />
               </Grid.Column>
               <Grid.Column>
                 <Donate
                   token={token}
                   molochPool={molochPool}
                   loggedInUser={loggedInUser}
-                  disabled={!loggedInUser}
+                  disabled={!loggedInUser || disablePool}
                 />
               </Grid.Column>
               <Grid.Column>
                 <Sync
-                  lastProcessedProposalIndex={lastProcessedProposal.proposalIndex}
+                  lastProcessedProposalIndex={lastProcessedProposal ? lastProcessedProposal.proposalIndex : 0}
                   currentPoolIndex={currentPoolIndex}
                   molochPool={molochPool}
                   loggedInUser={loggedInUser}
+                  disabled={disablePool}
                 />
               </Grid.Column>
             </Grid>

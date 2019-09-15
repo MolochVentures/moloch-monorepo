@@ -102,7 +102,7 @@ const PoolMemberList = props => {
         </Grid.Row>
         <Divider />
         <Grid.Row className="members_row" centered>
-          {data.poolMembers && data.poolMembers.length > 0 ? (
+          {data && data.poolMembers && data.poolMembers.length > 0 ? (
             data.poolMembers.map((elder, idx) => (
               <MemberAvatar address={elder.id} shares={elder.shares} key={idx} />
             ))
