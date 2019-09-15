@@ -15,7 +15,7 @@ import { getMoloch, getToken } from "../web3";
 import { utils } from "ethers";
 import { monitorTx } from "helpers/transaction";
 
-const DEPOSIT_WETH = "10";
+const DEPOSIT_WETH = process.env.REACT_APP_DEPOSIT_WETH || "10";
 
 class SubmitModal extends Component {
   state = {
@@ -63,7 +63,6 @@ class SubmitModal extends Component {
   render() {
     const { loading, beneficiaryApproved, depositApproved, open } = this.state;
     const { handleSubmit, submittedTx } = this.props;
-    console.log("open: ", open);
     return (
       <Modal
         trigger={
@@ -86,7 +85,7 @@ class SubmitModal extends Component {
               ) : (
                 <List.Icon name="x" />
               )}
-              <List.Content>10 wETH Deposit Approved</List.Content>
+              <List.Content>{DEPOSIT_WETH} wETH Deposit Approved</List.Content>
             </List.Item>
             <List.Item>
               {loading ? (
