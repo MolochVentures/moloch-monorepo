@@ -64,8 +64,10 @@ const ProposalCard = ({ proposal }) => {
 };
 
 const GET_COMPLETED_PROPOSAL_LIST = gql`
-  {
+  query Feed($offset: Int, $limit: Int) {
     proposals(
+      first: $limit
+      skip: $offset
       orderBy: proposalIndex
       orderDirection: desc
       where: { processed: true }
@@ -146,11 +148,21 @@ const GET_ACTIVE_PROPOSAL_LIST = gql`
   }
 `;
 
+let finishedLoadingRecords = false;
 const ProposalList = ({ isActive }) => {
   const { loading, error, data } = useQuery(GET_ACTIVE_PROPOSAL_LIST);
-  const { loading: completedLoading, error: completedError, data: completedData } = useQuery(
-    GET_COMPLETED_PROPOSAL_LIST,
-  );
+  const {
+    loading: completedLoading,
+    error: completedError,
+    data: completedData,
+    fetchMore: completedFetchMore,
+  } = useQuery(GET_COMPLETED_PROPOSAL_LIST, {
+    variables: {
+      offset: 0,
+      limit: 100,
+    },
+    notifyOnNetworkStatusChange: true,
+  });
 
   if (loading) return <Loader size="massive" active />;
   if (error) throw new Error(error);
@@ -161,6 +173,25 @@ const ProposalList = ({ isActive }) => {
   let completedProposals = [];
   if (!completedLoading) {
     completedProposals = completedData.proposals;
+    console.log('completedData.proposals: ', completedData.proposals);
+    if (!finishedLoadingRecords) {
+      completedFetchMore({
+        variables: {
+          offset: completedData.proposals.length,
+        },
+        updateQuery: (prev, { fetchMoreResult }) => {
+          console.log('fetchMoreResult: ', fetchMoreResult);
+          console.log('prev: ', prev);
+          if (!fetchMoreResult) {
+            finishedLoadingRecords = true;
+            return prev;
+          }
+          return Object.assign({}, prev, {
+            proposals: [...prev.proposals, ...fetchMoreResult.proposals],
+          });
+        },
+      });
+    }
   }
 
   // sort in descending order of index
