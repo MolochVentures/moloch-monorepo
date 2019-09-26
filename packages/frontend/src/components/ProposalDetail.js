@@ -53,6 +53,8 @@ const GET_PROPOSAL_DETAIL = gql`
       aborted
       yesVotes
       noVotes
+      yesShares
+      noShares
       proposalIndex
       votes(first: 100) {
         member {
@@ -125,25 +127,17 @@ const ProposalDetail = ({ loggedInUser, match }) => {
   if (loading) return <Loader size="massive" active />;
   if (error) throw new Error(`Error!: ${error}`);
 
-  const { proposal, exchangeRate, totalShares, guildBankValue, members } = data;
+  const {
+    proposal,
+    exchangeRate,
+    totalShares,
+    guildBankValue,
+    members,
+    yesShares,
+    noShares,
+  } = data;
 
   const shareValue = getShareValue(totalShares, guildBankValue);
-
-  const yesShares = proposal.votes.reduce((totalVotes, vote) => {
-    if (vote.uintVote === Vote.Yes) {
-      return (totalVotes += parseInt(vote.member.shares));
-    } else {
-      return totalVotes;
-    }
-  }, 0);
-
-  const noShares = proposal.votes.reduce((totalVotes, vote) => {
-    if (vote.uintVote === Vote.No) {
-      return (totalVotes += parseInt(vote.member.shares));
-    } else {
-      return totalVotes;
-    }
-  }, 0);
 
   const user = members.length > 0 ? members[0] : null;
   const userHasVoted = proposal.votes.find(vote => vote.member.id === loggedInUser) ? true : false;
@@ -244,7 +238,7 @@ const ProposalDetail = ({ loggedInUser, match }) => {
                 {proposal.aborted ? (
                   <p className="amount">Aborted</p>
                 ) : (
-                  <ProgressBar yes={yesShares} no={noShares} />
+                  <ProgressBar yes={proposal.yesShares} no={proposal.noShares} />
                 )}
               </Grid.Column>
             </Grid.Row>

@@ -13,22 +13,6 @@ import { getShareValue } from "helpers/currency";
 const ProposalCard = ({ proposal }) => {
   let id = proposal.id;
 
-  const yesShares = proposal.votes.reduce((totalVotes, vote) => {
-    if (vote.uintVote === Vote.Yes) {
-      return (totalVotes += parseInt(vote.member.shares));
-    } else {
-      return totalVotes;
-    }
-  }, 0);
-
-  const noShares = proposal.votes.reduce((totalVotes, vote) => {
-    if (vote.uintVote === Vote.No) {
-      return (totalVotes += parseInt(vote.member.shares));
-    } else {
-      return totalVotes;
-    }
-  }, 0);
-
   return (
     <Grid.Column mobile={16} tablet={8} computer={5}>
       <Link to={{ pathname: `/proposals/${id}` }} className="uncolored">
@@ -71,7 +55,7 @@ const ProposalCard = ({ proposal }) => {
               </Grid.Row>
             </Grid>
           ) : (
-            <ProgressBar yes={yesShares} no={noShares} />
+            <ProgressBar yes={proposal.yesShares} no={proposal.noShares} />
           )}
         </Segment>
       </Link>
@@ -82,7 +66,6 @@ const ProposalCard = ({ proposal }) => {
 const GET_COMPLETED_PROPOSAL_LIST = gql`
   {
     proposals(
-      first: 100
       orderBy: proposalIndex
       orderDirection: desc
       where: { processed: true }
@@ -96,6 +79,8 @@ const GET_COMPLETED_PROPOSAL_LIST = gql`
       aborted
       yesVotes
       noVotes
+      yesShares
+      noShares
       proposalIndex
       votes(first: 100) {
         member {
@@ -134,6 +119,8 @@ const GET_ACTIVE_PROPOSAL_LIST = gql`
       aborted
       yesVotes
       noVotes
+      yesShares
+      noShares
       proposalIndex
       votes(first: 100) {
         member {
