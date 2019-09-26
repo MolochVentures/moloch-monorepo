@@ -23,6 +23,8 @@ type Proposal @entity {
   sharesRequested:BigInt!
   yesVotes: BigInt!
   noVotes: BigInt!
+  yesShares: BigInt!
+  noShares: BigInt!
   processed: Boolean!
   didPass: Boolean!
   aborted: Boolean!

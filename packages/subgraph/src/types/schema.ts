@@ -244,6 +244,24 @@ export class Proposal extends Entity {
     this.set("noVotes", Value.fromBigInt(value));
   }
 
+  get yesShares(): BigInt {
+    let value = this.get("yesShares");
+    return value.toBigInt();
+  }
+
+  set yesShares(value: BigInt) {
+    this.set("yesShares", Value.fromBigInt(value));
+  }
+
+  get noShares(): BigInt {
+    let value = this.get("noShares");
+    return value.toBigInt();
+  }
+
+  set noShares(value: BigInt) {
+    this.set("noShares", Value.fromBigInt(value));
+  }
+
   get processed(): boolean {
     let value = this.get("processed");
     return value.toBoolean();

@@ -68,6 +68,8 @@ export function handleSubmitProposal(event: SubmitProposal): void {
   proposal.sharesRequested = event.params.sharesRequested;
   proposal.yesVotes = BigInt.fromI32(0);
   proposal.noVotes = BigInt.fromI32(0);
+  proposal.yesShares = BigInt.fromI32(0);
+  proposal.noShares = BigInt.fromI32(0);
   proposal.processed = false;
   proposal.didPass = false;
   proposal.aborted = false;
@@ -115,11 +117,15 @@ export function handleSubmitVote(event: SubmitVote): void {
   vote.save();
 
   let proposal = Proposal.load(event.params.proposalIndex.toString());
+  let member = Member.load(event.params.memberAddress.toHex());
+
   if (event.params.uintVote == 1) {
     proposal.yesVotes = proposal.yesVotes.plus(BigInt.fromI32(1));
+    proposal.yesShares = proposal.yesShares.plus(member.shares);
   }
   if (event.params.uintVote == 2) {
     proposal.noVotes = proposal.noVotes.plus(BigInt.fromI32(1));
+    proposal.noShares = proposal.noShares.plus(member.shares);
   }
 
   let proposalVotes = proposal.votes;
@@ -133,7 +139,6 @@ export function handleSubmitVote(event: SubmitVote): void {
   applicant.votes = applicantVotes;
   applicant.save();
 
-  let member = Member.load(event.params.memberAddress.toHex());
   let memberVotes = member.votes;
   memberVotes.push(voteID);
   member.votes = memberVotes;
