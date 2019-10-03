@@ -24,7 +24,7 @@
     "react-scripts": "3.1.2",
     "redux": "4.0.4",
     "redux-thunk": "2.3.0",
-    "rimble-ui": "0.9.8",
+    "rimble-ui": "0.10.0",
     "safe-web3-provider": "gnosis/safe-web3-provider#dac23b8",
     "semantic-ui-css": "2.4.1",
     "semantic-ui-react": "0.88.1",
