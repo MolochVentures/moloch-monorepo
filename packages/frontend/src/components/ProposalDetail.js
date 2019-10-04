@@ -133,8 +133,6 @@ const ProposalDetail = ({ loggedInUser, match }) => {
     totalShares,
     guildBankValue,
     members,
-    yesShares,
-    noShares,
   } = data;
 
   const shareValue = getShareValue(totalShares, guildBankValue);
