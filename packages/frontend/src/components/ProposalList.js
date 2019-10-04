@@ -2,7 +2,7 @@ import React from "react";
 import { Segment, Grid, Button, Tab, Icon, Loader } from "semantic-ui-react";
 import { Route, Switch, Link } from "react-router-dom";
 
-import ProposalDetail, { Vote } from "./ProposalDetail";
+import ProposalDetail from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
 import { useQuery } from "react-apollo";
 import { ProposalStatus, getProposalCountdownText } from "../helpers/proposals";
@@ -173,18 +173,21 @@ const ProposalList = ({ isActive }) => {
   let completedProposals = [];
   if (!completedLoading) {
     completedProposals = completedData.proposals;
-    console.log('completedData.proposals: ', completedData.proposals);
     if (!finishedLoadingRecords) {
+      console.log(
+        `Loading more completed proposal records... offset: ${completedData.proposals.length}`,
+      );
       completedFetchMore({
         variables: {
           offset: completedData.proposals.length,
         },
         updateQuery: (prev, { fetchMoreResult }) => {
-          console.log('fetchMoreResult: ', fetchMoreResult);
-          console.log('prev: ', prev);
-          if (!fetchMoreResult) {
+          console.log(
+            `fetchMoreResult.proposals.length: ${fetchMoreResult.proposals.length}, prev.proposals.length: ${prev.proposals.length}`,
+          );
+          if (fetchMoreResult.proposals.length === 0) {
+            console.log(`Finished loading`);
             finishedLoadingRecords = true;
-            return prev;
           }
           return Object.assign({}, prev, {
             proposals: [...prev.proposals, ...fetchMoreResult.proposals],
