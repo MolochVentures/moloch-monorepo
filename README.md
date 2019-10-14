@@ -1,5 +1,7 @@
 # moloch-monorepo
 
+## Local Dev Instructions
+
 **install ganache-cli**
   
   Ganache can create a personal blockchain for us that we can use it create accounts and do tests easier.+
@@ -36,6 +38,8 @@ with :
 
 NOTE: every time ganache-cli is restarted, the name of the network (mainnet in this reference) needs to be changed with a new name
 
+NOTE 2: For Linux users, please refer to this: https://github.com/graphprotocol/graph-node/issues/1149
+
 3. run `docker-compose up`
 
 **create subgraph**
@@ -55,7 +59,7 @@ NOTE: every time ganache-cli is restarted, the name of the network (mainnet in t
 1. go to moloch-monorepo/packages/subgraph
 2. run `yarn codegen`
 3. go to  moloch-monorepo/packages/subgraph/subgraph.yaml
-4. update dataSources.source.address with output from running test. You should see something like this "moloch.address 0x9463308d1C9032cC464E395e54E55EDA77495c00". cut and paste the address, "0x9463308d1C9032cC464E395e54E55EDA77495c00" in this example.
+4. update dataSources.source.address with output from running test. You should see something like this `moloch.address 0x9463308d1C9032cC464E395e54E55EDA77495c00`. cut and paste the address, `0x9463308d1C9032cC464E395e54E55EDA77495c00` in this example.
 5. run `graph deploy moloch --debug --ipfs http://localhost:5001/ --node http://127.0.0.1:8020`
 
 **run front-end**
