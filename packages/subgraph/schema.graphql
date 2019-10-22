@@ -1,7 +1,7 @@
 type Vote @entity {
   id: ID!
-  timestamp:String!
-  proposalIndex:BigInt!
+  timestamp: String!
+  proposalIndex: BigInt!
   delegateKey: Bytes!
   memberAddress: Bytes!
   uintVote: Int!
@@ -11,7 +11,7 @@ type Vote @entity {
 
 type Proposal @entity {
   id: ID!
-  timestamp:String!
+  timestamp: String!
   proposalIndex: BigInt!
   startingPeriod: BigInt!
   delegateKey: Bytes!
@@ -20,7 +20,7 @@ type Proposal @entity {
   applicant: Applicant!
   applicantAddress: Bytes!
   tokenTribute: BigInt!
-  sharesRequested:BigInt!
+  sharesRequested: BigInt!
   yesVotes: BigInt!
   noVotes: BigInt!
   yesShares: BigInt!
@@ -35,17 +35,17 @@ type Proposal @entity {
 
 type Applicant @entity {
   id: ID!
-  timestamp:String!
+  timestamp: String!
   proposalIndex: BigInt!
   delegateKey: Bytes!
   member: Member!
   memberAddress: Bytes!
   applicantAddress: Bytes!
   tokenTribute: BigInt!
-  sharesRequested:BigInt!
+  sharesRequested: BigInt!
   didPass: Boolean!
   aborted: Boolean!
-  votes: [Vote!]! 
+  votes: [Vote!]!
   proposal: Proposal!
 }
 
@@ -69,6 +69,6 @@ type PoolMember @entity {
 
 type PoolMeta @entity {
   id: ID!
-  currentPoolIndex: BigInt!
+  currentPoolIndex: BigInt
   totalPoolShares: BigInt!
 }

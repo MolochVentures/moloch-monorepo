@@ -30,6 +30,7 @@ export function handleSummonComplete(event: SummonComplete): void {
   member.didRagequit = false;
   member.votes = new Array<string>();
   member.submissions = new Array<string>();
+  member.highestIndexYesVote = BigInt.fromI32(0);
   member.save();
 }
 
@@ -70,6 +71,7 @@ export function handleSubmitProposal(event: SubmitProposal): void {
   proposal.noVotes = BigInt.fromI32(0);
   proposal.yesShares = BigInt.fromI32(0);
   proposal.noShares = BigInt.fromI32(0);
+  proposal.maxTotalSharesAtYesVote = BigInt.fromI32(0);
   proposal.processed = false;
   proposal.didPass = false;
   proposal.aborted = false;
@@ -146,7 +148,7 @@ export function handleSubmitVote(event: SubmitVote): void {
 }
 
 export function handleProcessProposal(event: ProcessProposal): void {
-  let proposal = Proposal.load(event.params.proposalIndex.toString());
+  let proposal = new Proposal(event.params.proposalIndex.toString());
   proposal.applicant = event.params.applicant.toHex();
   proposal.memberAddress = event.params.memberAddress;
   proposal.tokenTribute = event.params.tokenTribute;
@@ -170,6 +172,7 @@ export function handleProcessProposal(event: ProcessProposal): void {
       newMember.didRagequit = false;
       newMember.votes = new Array<string>();
       newMember.submissions = new Array<string>();
+      newMember.highestIndexYesVote = BigInt.fromI32(0);
       newMember.save();
     } else {
       member.shares = member.shares.plus(event.params.sharesRequested);
