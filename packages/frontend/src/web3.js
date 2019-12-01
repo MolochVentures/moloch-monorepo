@@ -15,7 +15,7 @@ let eth;
 export async function initWeb3(client, loggedInUser) {
   const loginMethod = localStorage.getItem("loginType");
   if (loginMethod === "gnosis") {
-    await initGnosisSafe(client);
+    await initGnosisSafe(client, loggedInUser);
   } else {
     await initMetamask(client, loggedInUser);
   }
@@ -44,7 +44,12 @@ export async function initMetamask(client, loggedInUser) {
     eth = new ethers.providers.Web3Provider(web3Provider);
     if (await checkNetwork(eth)) {
       localStorage.setItem("loginType", "metamask");
-      coinbase = (await eth.listAccounts())[0].toLowerCase();
+      const accounts = await eth.listAccounts();
+      if (accounts) {
+        coinbase = accounts[0].toLowerCase();
+      } else {
+        console.error("Could not retrieve accounts...");
+      }
     }
   }
   if (client && loggedInUser !== coinbase) {
@@ -58,7 +63,7 @@ export async function initMetamask(client, loggedInUser) {
   return eth;
 }
 
-export async function initGnosisSafe(client) {
+export async function initGnosisSafe(client, loggedInUser) {
   /**
    *  Create Safe Provider
    */
@@ -74,14 +79,21 @@ export async function initGnosisSafe(client) {
   eth = new ethers.providers.Web3Provider(provider);
   if (await checkNetwork(eth)) {
     localStorage.setItem("loginType", "gnosis");
-    coinbase = (await eth.listAccounts())[0].toLowerCase();
+    const accounts = await eth.listAccounts();
+    if (accounts) {
+      coinbase = accounts[0].toLowerCase();
+    } else {
+      console.error("Could not retrieve accounts...");
+    }
   }
-  client.writeData({
-    data: {
-      loggedInUser: coinbase,
-    },
-  });
-  window.localStorage.setItem("loggedInUser", coinbase);
+  if (client && loggedInUser !== coinbase) {
+    client.writeData({
+      data: {
+        loggedInUser: coinbase,
+      },
+    });
+    window.localStorage.setItem("loggedInUser", coinbase);
+  }
 }
 
 export async function getEthSigner() {
