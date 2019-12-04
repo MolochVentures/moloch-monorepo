@@ -45,7 +45,7 @@ export async function initMetamask(client, loggedInUser) {
     if (await checkNetwork(eth)) {
       localStorage.setItem("loginType", "metamask");
       const accounts = await eth.listAccounts();
-      if (accounts) {
+      if (accounts.length > 0) {
         coinbase = accounts[0].toLowerCase();
       } else {
         console.error("Could not retrieve accounts...");
@@ -80,7 +80,7 @@ export async function initGnosisSafe(client, loggedInUser) {
   if (await checkNetwork(eth)) {
     localStorage.setItem("loginType", "gnosis");
     const accounts = await eth.listAccounts();
-    if (accounts) {
+    if (accounts.length > 0) {
       coinbase = accounts[0].toLowerCase();
     } else {
       console.error("Could not retrieve accounts...");
