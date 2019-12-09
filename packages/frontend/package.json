@@ -25,7 +25,7 @@
     "rimble-ui": "0.10.0",
     "safe-web3-provider": "gnosis/safe-web3-provider#dac23b8",
     "semantic-ui-css": "2.4.1",
-    "semantic-ui-react": "0.88.1",
+    "semantic-ui-react": "0.88.2",
     "styled-components": "4.4.0"
   },
   "scripts": {
