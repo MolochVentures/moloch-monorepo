@@ -1,4 +1,4 @@
-import { BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { BigInt, Bytes, EthereumBlock, Address } from "@graphprotocol/graph-ts";
 import {
   Moloch,
   SummonComplete,
@@ -19,7 +19,23 @@ import {
   SharesMinted,
   SharesBurned,
 } from "./types/MolochPool/MolochPool";
-import { Proposal, Member, Vote, Applicant, PoolMember, PoolMeta } from "./types/schema";
+import { Proposal, Member, Vote, Applicant, PoolMember, PoolMeta, Meta } from "./types/schema";
+
+// TODO: can we get this from the subgraph.yaml?
+const molochAddress = Address.fromString("0x1fd169A4f5c59ACf79d0Fd5d91D1201EF1Bce9f1");
+
+// update meta on every block
+export function handleBlock(block: EthereumBlock): void {
+  let contract = Moloch.bind(molochAddress);
+  let currentPeriod = contract.getCurrentPeriod();
+
+  let meta = Meta.load("");
+  if (!meta) {
+    meta = new Meta("");
+  }
+  meta.currentPeriod = currentPeriod;
+  meta.save();
+}
 
 export function handleSummonComplete(event: SummonComplete): void {
   let member = new Member(event.params.summoner.toHex());
@@ -178,6 +194,15 @@ export function handleProcessProposal(event: ProcessProposal): void {
       member.shares = member.shares.plus(event.params.sharesRequested);
       member.tokenTribute = member.tokenTribute.plus(event.params.tokenTribute);
       member.save();
+    }
+
+    // update total shares
+    let meta = Meta.load("");
+    if (!meta) {
+      meta = new Meta("");
+      meta.totalShares = event.params.sharesRequested;
+    } else {
+      meta.totalShares = meta.totalShares.plus(event.params.sharesRequested);
     }
   }
 }

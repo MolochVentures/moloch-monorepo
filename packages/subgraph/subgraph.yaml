@@ -10,6 +10,7 @@ dataSources:
     source:
       address: '0x1fd169A4f5c59ACf79d0Fd5d91D1201EF1Bce9f1'
       abi: Moloch
+      startBlock: 7218566
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -34,6 +35,8 @@ dataSources:
           handler: handleAbort
         - event: UpdateDelegateKey(indexed address,address)
           handler: handleUpdateDelegateKey       
+      blockHandlers:
+        - handler: handleBlock
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: MolochPool

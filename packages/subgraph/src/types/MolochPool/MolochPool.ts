@@ -11,7 +11,8 @@ import {
   EthereumTuple,
   Bytes,
   Address,
-  BigInt
+  BigInt,
+  CallResult
 } from "@graphprotocol/graph-ts";
 
 export class Sync extends EthereumEvent {
@@ -209,27 +210,77 @@ export class MolochPool extends SmartContract {
 
   currentProposalIndex(): BigInt {
     let result = super.call("currentProposalIndex", []);
+
     return result[0].toBigInt();
+  }
+
+  try_currentProposalIndex(): CallResult<BigInt> {
+    let result = super.tryCall("currentProposalIndex", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   moloch(): Address {
     let result = super.call("moloch", []);
+
     return result[0].toAddress();
+  }
+
+  try_moloch(): CallResult<Address> {
+    let result = super.tryCall("moloch", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toAddress());
   }
 
   totalPoolShares(): BigInt {
     let result = super.call("totalPoolShares", []);
+
     return result[0].toBigInt();
+  }
+
+  try_totalPoolShares(): CallResult<BigInt> {
+    let result = super.tryCall("totalPoolShares", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   approvedToken(): Address {
     let result = super.call("approvedToken", []);
+
     return result[0].toAddress();
+  }
+
+  try_approvedToken(): CallResult<Address> {
+    let result = super.tryCall("approvedToken", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toAddress());
   }
 
   donors(param0: Address): BigInt {
     let result = super.call("donors", [EthereumValue.fromAddress(param0)]);
+
     return result[0].toBigInt();
+  }
+
+  try_donors(param0: Address): CallResult<BigInt> {
+    let result = super.tryCall("donors", [EthereumValue.fromAddress(param0)]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 }
 

@@ -61,6 +61,12 @@ type Member @entity {
   submissions: [Proposal!]!
 }
 
+type Meta @entity {
+  id: ID!
+  currentPeriod: BigInt!
+  totalShares: BigInt!
+}
+
 type PoolMember @entity {
   id: ID!
   shares: BigInt!
@@ -69,6 +75,6 @@ type PoolMember @entity {
 
 type PoolMeta @entity {
   id: ID!
-  currentPoolIndex: BigInt
+  currentPoolIndex: BigInt!
   totalPoolShares: BigInt!
 }

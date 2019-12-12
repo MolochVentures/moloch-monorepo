@@ -11,7 +11,8 @@ import {
   EthereumTuple,
   Bytes,
   Address,
-  BigInt
+  BigInt,
+  CallResult
 } from "@graphprotocol/graph-ts";
 
 export class SubmitProposal extends EthereumEvent {
@@ -303,11 +304,22 @@ export class Moloch extends SmartContract {
 
   processingReward(): BigInt {
     let result = super.call("processingReward", []);
+
     return result[0].toBigInt();
+  }
+
+  try_processingReward(): CallResult<BigInt> {
+    let result = super.tryCall("processingReward", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   members(param0: Address): Moloch__membersResult {
     let result = super.call("members", [EthereumValue.fromAddress(param0)]);
+
     return new Moloch__membersResult(
       result[0].toAddress(),
       result[1].toBigInt(),
@@ -316,20 +328,57 @@ export class Moloch extends SmartContract {
     );
   }
 
+  try_members(param0: Address): CallResult<Moloch__membersResult> {
+    let result = super.tryCall("members", [EthereumValue.fromAddress(param0)]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(
+      new Moloch__membersResult(
+        value[0].toAddress(),
+        value[1].toBigInt(),
+        value[2].toBoolean(),
+        value[3].toBigInt()
+      )
+    );
+  }
+
   totalSharesRequested(): BigInt {
     let result = super.call("totalSharesRequested", []);
+
     return result[0].toBigInt();
+  }
+
+  try_totalSharesRequested(): CallResult<BigInt> {
+    let result = super.tryCall("totalSharesRequested", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   totalShares(): BigInt {
     let result = super.call("totalShares", []);
+
     return result[0].toBigInt();
+  }
+
+  try_totalShares(): CallResult<BigInt> {
+    let result = super.tryCall("totalShares", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   proposalQueue(param0: BigInt): Moloch__proposalQueueResult {
     let result = super.call("proposalQueue", [
       EthereumValue.fromUnsignedBigInt(param0)
     ]);
+
     return new Moloch__proposalQueueResult(
       result[0].toAddress(),
       result[1].toAddress(),
@@ -346,75 +395,237 @@ export class Moloch extends SmartContract {
     );
   }
 
+  try_proposalQueue(param0: BigInt): CallResult<Moloch__proposalQueueResult> {
+    let result = super.tryCall("proposalQueue", [
+      EthereumValue.fromUnsignedBigInt(param0)
+    ]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(
+      new Moloch__proposalQueueResult(
+        value[0].toAddress(),
+        value[1].toAddress(),
+        value[2].toBigInt(),
+        value[3].toBigInt(),
+        value[4].toBigInt(),
+        value[5].toBigInt(),
+        value[6].toBoolean(),
+        value[7].toBoolean(),
+        value[8].toBoolean(),
+        value[9].toBigInt(),
+        value[10].toString(),
+        value[11].toBigInt()
+      )
+    );
+  }
+
   memberAddressByDelegateKey(param0: Address): Address {
     let result = super.call("memberAddressByDelegateKey", [
       EthereumValue.fromAddress(param0)
     ]);
+
     return result[0].toAddress();
+  }
+
+  try_memberAddressByDelegateKey(param0: Address): CallResult<Address> {
+    let result = super.tryCall("memberAddressByDelegateKey", [
+      EthereumValue.fromAddress(param0)
+    ]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toAddress());
   }
 
   gracePeriodLength(): BigInt {
     let result = super.call("gracePeriodLength", []);
+
     return result[0].toBigInt();
+  }
+
+  try_gracePeriodLength(): CallResult<BigInt> {
+    let result = super.tryCall("gracePeriodLength", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   abortWindow(): BigInt {
     let result = super.call("abortWindow", []);
+
     return result[0].toBigInt();
+  }
+
+  try_abortWindow(): CallResult<BigInt> {
+    let result = super.tryCall("abortWindow", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   summoningTime(): BigInt {
     let result = super.call("summoningTime", []);
+
     return result[0].toBigInt();
+  }
+
+  try_summoningTime(): CallResult<BigInt> {
+    let result = super.tryCall("summoningTime", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   votingPeriodLength(): BigInt {
     let result = super.call("votingPeriodLength", []);
+
     return result[0].toBigInt();
+  }
+
+  try_votingPeriodLength(): CallResult<BigInt> {
+    let result = super.tryCall("votingPeriodLength", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   proposalDeposit(): BigInt {
     let result = super.call("proposalDeposit", []);
+
     return result[0].toBigInt();
+  }
+
+  try_proposalDeposit(): CallResult<BigInt> {
+    let result = super.tryCall("proposalDeposit", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   guildBank(): Address {
     let result = super.call("guildBank", []);
+
     return result[0].toAddress();
+  }
+
+  try_guildBank(): CallResult<Address> {
+    let result = super.tryCall("guildBank", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toAddress());
   }
 
   dilutionBound(): BigInt {
     let result = super.call("dilutionBound", []);
+
     return result[0].toBigInt();
+  }
+
+  try_dilutionBound(): CallResult<BigInt> {
+    let result = super.tryCall("dilutionBound", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   periodDuration(): BigInt {
     let result = super.call("periodDuration", []);
+
     return result[0].toBigInt();
+  }
+
+  try_periodDuration(): CallResult<BigInt> {
+    let result = super.tryCall("periodDuration", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   approvedToken(): Address {
     let result = super.call("approvedToken", []);
+
     return result[0].toAddress();
+  }
+
+  try_approvedToken(): CallResult<Address> {
+    let result = super.tryCall("approvedToken", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toAddress());
   }
 
   getCurrentPeriod(): BigInt {
     let result = super.call("getCurrentPeriod", []);
+
     return result[0].toBigInt();
+  }
+
+  try_getCurrentPeriod(): CallResult<BigInt> {
+    let result = super.tryCall("getCurrentPeriod", []);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBigInt());
   }
 
   canRagequit(highestIndexYesVote: BigInt): boolean {
     let result = super.call("canRagequit", [
       EthereumValue.fromUnsignedBigInt(highestIndexYesVote)
     ]);
+
     return result[0].toBoolean();
+  }
+
+  try_canRagequit(highestIndexYesVote: BigInt): CallResult<boolean> {
+    let result = super.tryCall("canRagequit", [
+      EthereumValue.fromUnsignedBigInt(highestIndexYesVote)
+    ]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBoolean());
   }
 
   hasVotingPeriodExpired(startingPeriod: BigInt): boolean {
     let result = super.call("hasVotingPeriodExpired", [
       EthereumValue.fromUnsignedBigInt(startingPeriod)
     ]);
+
     return result[0].toBoolean();
+  }
+
+  try_hasVotingPeriodExpired(startingPeriod: BigInt): CallResult<boolean> {
+    let result = super.tryCall("hasVotingPeriodExpired", [
+      EthereumValue.fromUnsignedBigInt(startingPeriod)
+    ]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toBoolean());
   }
 
   getMemberProposalVote(memberAddress: Address, proposalIndex: BigInt): i32 {
@@ -422,7 +633,23 @@ export class Moloch extends SmartContract {
       EthereumValue.fromAddress(memberAddress),
       EthereumValue.fromUnsignedBigInt(proposalIndex)
     ]);
+
     return result[0].toI32();
+  }
+
+  try_getMemberProposalVote(
+    memberAddress: Address,
+    proposalIndex: BigInt
+  ): CallResult<i32> {
+    let result = super.tryCall("getMemberProposalVote", [
+      EthereumValue.fromAddress(memberAddress),
+      EthereumValue.fromUnsignedBigInt(proposalIndex)
+    ]);
+    if (result.reverted) {
+      return new CallResult();
+    }
+    let value = result.value;
+    return CallResult.fromValue(value[0].toI32());
   }
 }
 
