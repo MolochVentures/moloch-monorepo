@@ -4,7 +4,7 @@ import { Switch, Route, Link } from "react-router-dom";
 
 import MemberDetail from "./MemberDetail";
 import bull from "assets/bull.png";
-import hood from "assets/hood.png";
+import user from "assets/user.png";
 
 import { useQuery } from "react-apollo";
 import { GET_POOL_MEMBER_DETAIL } from "../helpers/graphQlQueries";
@@ -23,7 +23,7 @@ const MemberAvatar = ({ address, shares }) => (
   >
     <ProfileHover address={address} noTheme>
       <Link to={`/members/${address}`} className="uncolored">
-        <Image src={hood} centered size="tiny" />
+        <Image src={user} centered size="tiny" />
         <p className="name">
           {!address ? "" : address.length > 10 ? address.substring(0, 10) + "..." : address}
         </p>

@@ -11,7 +11,6 @@ import Background from "./components/Background";
 import Header from "./components/Header";
 import Home from "./components/Home";
 import MemberList from "./components/MemberList";
-import Pool from "./components/Pool";
 import PoolMemberListView from "./components/PoolMemberList";
 import ProposalList from "./components/ProposalList";
 import ProposalSubmission from "./components/ProposalSubmission";
@@ -90,10 +89,6 @@ const Routes = () => {
                     <Redirect to={{ pathname: "/" }} />
                   )
                 }
-              />
-              <Route
-                path="/pool"
-                component={props => <Pool {...props} loggedInUser={loggedInUser} />}
               />
               <Route
                 path="/pool-members"

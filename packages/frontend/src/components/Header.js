@@ -477,19 +477,11 @@ export default ({ loggedInUser, client }) => {
   if (memberError || poolError) throw new Error(`Error!: ${memberError} ${poolError}`);
   return (
     <div id="header">
-      <Grid container columns={3} stackable verticalAlign="middle">
-        <Grid.Column textAlign="center">
-          <a href="https://molochdao.discourse.group" target="_blank" rel="noopener noreferrer">
-            <Icon name="discourse" size="big" />
-          </a>
-          <a href="https://twitter.com/MolochDAO" target="_blank" rel="noopener noreferrer">
-            <Icon name="twitter" size="big" />
-          </a>
+      <Grid container columns={3} stackable verticalAlign="center">
+        <Grid.Column textAlign="right" className="logo">
+          <Link to="/">ROSEBUD DAO</Link>
         </Grid.Column>
-        <Grid.Column textAlign="center" className="logo">
-          <Link to="/">MOLOCH</Link>
-        </Grid.Column>
-        <Grid.Column textAlign="center" className="dropdown">
+        <Grid.Column textAlign="right" className="dropdown">
           <Dropdown
             className="right_dropdown"
             open={visibleRightMenu}
