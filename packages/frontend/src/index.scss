@@ -1,20 +1,22 @@
 body {
-  color: white;
+  color: rgb(10, 1, 48);
   font-weight: bold;
-  font-family: "GT Haptik", sans-serif !important;
+  font-family: 'Open Sans', sans-serif !important;
+  background-color: #ececec;
 }
 
 .amount {
-  font-family: "Cartograph Mono CF", sans-serif;
+  font-family: 'Open Sans', sans-serif;
+  color: rgb(10, 1, 48) !important;
 }
 
 .subtext {
-  opacity: 0.5;
+  color: rgb(10, 1, 48) !important;
 }
 
 .subtitle {
-  opacity: 0.5;
   font-size: 15px;
+  color: rgb(10, 1, 48) !important;
 }
 
 .threeboxProfileHover__style_boxShortAddress {
@@ -24,18 +26,22 @@ body {
 .ui.statistic>.value, .ui.statistics .statistic>.value {
   @media screen and (max-width: 475px) {
     font-size: 2.5rem !important;
+    color: rgb(10, 1, 48) !important;
   }
 }
 
 .title {
   font-size: 30px;
   line-height: 15px;
+  color: rgb(10, 1, 48) !important;
 }
 
 .button {
-  padding: 20px 45px !important;
+  padding: 20px 5px !important;
+  color: whitesmoke !important;
   &.grey {
-    background: rgba(50, 50, 50, 0.9) !important;
+    background: rgb(10, 1, 48) !important;
+    border-radius: 5px;
   }
 }
 
@@ -51,11 +57,11 @@ body {
 }
 
 .uncolored {
-  color: inherit !important;
+  color: rgb(49, 25, 155) !important;
 }
 
 .blurred {
-  background: rgba(100, 100, 100, 0.9) !important;
+  background: #ececec !important;
 }
 
 .transparent {
@@ -63,81 +69,68 @@ body {
 }
 
 .blurred.box {
-  background: rgba(100, 100, 100, 0.4) !important;
   padding: 30px;
 }
 
 #background {
-  .blurred_image {
+  .white {
+    background-color: #ececec;
     position: fixed;
     top: 0;
     left: 0;
     height: 100%;
     width: 100%;
     z-index: -2;
-    background: url("assets/moloch_owl.jpg") 0 / cover fixed;
+    background: url("assets/rosebudBg.jpg") 0 / cover fixed;
     background-repeat: repeat !important;
-    filter: blur(12px);
-  }
-
-  .dark_overlay {
-    position: fixed;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    z-index: -1;
-    background: rgba(0, 0, 0, 0.5);
   }
 }
 
 #header {
   height: 80px;
+  width: 100%;
+  color: rgb(10, 1, 48) !important;
   margin-top: 20px;
-  margin-left: 50px;
-  margin-right: 50px;
   .menu {
     font-size: 20px;
+    color: rgb(10, 1, 48) !important
   }
   .right_dropdown>.text {
-    background-color: teal !important;
-    padding: 8px 12px !important;
-    border-radius: 50px !important;
+    color: rgb(10, 1, 48) !important;
+    padding: 15px !important;
   }
   .logo {
-    font-size: 20px;
-    letter-spacing: 2px;
+    font-size: 25px;
     text-decoration: none;
     a {
       color: inherit;
     }
-    padding-left: 0;
-    padding-right: 0;
+    padding: 20px 0 20px 50px;
+    margin: auto;
   }
   .dropdown {
     .label {
       font-size: 15px;
-      margin-right: 0;
     }
     .menu {
-      margin-top: 10px;
-      padding: 10px;
+      background-color: whitesmoke !important;
+      box-shadow: inset;
+      padding: 20px 30px;
       font-size: 15px;
-      font-weight: normal;
+      border-radius: 5px;
       input {
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
+        color: rgb(10, 1, 48);
         margin-bottom: 5px;
       }
       .button {
         padding: 10px 20px !important;
       }
       .item {
-        padding: 20px 10px !important;
-        color: inherit;
+        padding: 15px 10px !important;
+        color: rgb(10, 1, 48);;
       }
       .item:hover:not(.submenu) {
-        background-color: rgba(0,0,0,.1);
+        color:  rgb(53, 36, 133);
         cursor: pointer;
       }
       .link {
@@ -169,15 +162,28 @@ body {
   .graph_values {
     padding-left: 20px;
     padding-right: 20px;
+
     .amount {
       font-size: 30px;
       line-height: 15px;
     }
   }
   .text_link {
-    color: #fff !important;
+    color: rgb(10, 1, 48) !important;
   }
 
+#homeSegment1 {
+  height: 260px;
+  width: 88%;
+}
+
+#homeSegment2 {
+  margin-top: 30px;
+  padding: 40px;
+  height: 155px;
+  text-align: center;
+  width: 88%;
+}
   
   @media screen and (min-width: 320px) and (max-width: 375px) { 
     .btn_link {
@@ -229,13 +235,59 @@ body {
   }
 }
 
+
+#mainHeader {
+  padding: 28px;
+  margin-bottom: 0;
+  letter-spacing: .10em;
+}
+
+#bankBalance {
+  font-weight: bold;
+  letter-spacing: .15em;
+  color: rgb(10, 1, 48) !important;
+
+  text-shadow: 
+    -1px 2px 1px #bdbdbd1c, 
+    -2px 4px 1px #bdbdbd1c, 
+    -3px 6px 1px #bdbdbd1c,
+}
+
+#navElement1 {
+  margin-left: 80px;
+  width: 17%;
+}
+
+#navElement2 {
+  width: 17%;
+}
+
+#ethExchange {
+  color: rgba(144, 145, 151, 0.507);
+  font-weight: 500;
+  margin: 25px;
+  letter-spacing: .15em;
+}
+
+#subValue {
+  font-weight: 600;
+  color: rgb(10, 1, 48) !important;
+}
+
+#subText {
+  margin-top: 5px;
+  color: rgba(144, 145, 151, 0.507);
+}
+
 #member_list {
   .name {
     margin-top: 10px;
     margin-bottom: 0;
+    color: rgb(10, 1, 48) !important;
   }
   .divider {
     margin: 0;
+    color: rgb(10, 1, 48) !important; 
   }
   .members_row {
     .member {
@@ -294,7 +346,7 @@ body {
     }
     p {
       font-size: 1rem;
-      color: inherit;
+      color: rgb(10, 1, 48);
     }
     .dot {
       margin-right: 10px;
@@ -378,11 +430,11 @@ body {
     }
 
     .item {
-      color: #fff;
+      color: rgb(10, 1, 48);
     }
 
     .active.item {
-      border-color: #fff;
+      border-color: rgb(6, 1, 32);
     }
   }
 

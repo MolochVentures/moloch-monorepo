@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Grid, Icon, Dropdown, Form, Button, Loader } from "semantic-ui-react";
+import { Grid, Icon, Dropdown, Form, Button, Loader, Menu } from "semantic-ui-react";
 import { withApollo, useQuery } from "react-apollo";
 import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 import {
@@ -15,6 +15,47 @@ import { utils } from "ethers";
 import { monitorTx } from "../helpers/transaction";
 import { formatEther } from "ethers/utils";
 import gql from "graphql-tag";
+
+export default class MenuExampleSecondary extends Component {
+  state = { activeItem: 'home' }
+
+  handleItemClick = (e, { name }) => this.setState({ activeItem: name })
+
+  render() {
+    const { activeItem } = this.state
+
+    return (
+      <Menu secondary>
+        <Menu.Item
+          name='home'
+          active={activeItem === 'home'}
+          onClick={this.handleItemClick}
+        />
+        <Menu.Item
+          name='messages'
+          active={activeItem === 'messages'}
+          onClick={this.handleItemClick}
+        />
+        <Menu.Item
+          name='friends'
+          active={activeItem === 'friends'}
+          onClick={this.handleItemClick}
+        />
+        <Menu.Menu position='right'>
+          <Menu.Item>
+            <Input icon='search' placeholder='Search...' />
+          </Menu.Item>
+          <Menu.Item
+            name='logout'
+            active={activeItem === 'logout'}
+            onClick={this.handleItemClick}
+          />
+        </Menu.Menu>
+      </Menu>
+    )
+  }
+}
+
 
 const MainMenu = ({
   _handleOpenDropdown,
@@ -346,6 +387,23 @@ export default ({ loggedInUser, client }) => {
     init();
   }, [loggedInUser]);
 
+
+  const NumMembers = () => (
+    <Link to="/members" className="link">
+      <Button color="grey" size="medium" fluid>
+        Members
+      </Button>
+    </Link>
+  );
+  
+  const NumProposals = () => (
+    <Link to="/proposals" className="link">
+      <Button color="grey" size="medium" fluid>
+        Proposals
+      </Button>
+    </Link>
+  );
+
   const _handleOpenDropdown = () => setVisibleRightMenu(true);
 
   const _handleCloseDropdown = () => setVisibleRightMenu(false);
@@ -477,19 +535,11 @@ export default ({ loggedInUser, client }) => {
   if (memberError || poolError) throw new Error(`Error!: ${memberError} ${poolError}`);
   return (
     <div id="header">
-      <Grid container columns={3} stackable verticalAlign="middle">
-        <Grid.Column textAlign="center">
-          <a href="https://molochdao.discourse.group" target="_blank" rel="noopener noreferrer">
-            <Icon name="discourse" size="big" />
-          </a>
-          <a href="https://twitter.com/MolochDAO" target="_blank" rel="noopener noreferrer">
-            <Icon name="twitter" size="big" />
-          </a>
+      <Grid container columns={2} stackable verticalAlign="center">
+        <Grid.Column textAlign="left" className="logo">
+          <Link to="/">ROSEBUD DAO</Link>
         </Grid.Column>
-        <Grid.Column textAlign="center" className="logo">
-          <Link to="/">MOLOCH</Link>
-        </Grid.Column>
-        <Grid.Column textAlign="center" className="dropdown">
+        <Grid.Column textAlign="right" className="dropdown">
           <Dropdown
             className="right_dropdown"
             open={visibleRightMenu}

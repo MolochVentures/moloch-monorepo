@@ -43,7 +43,7 @@ export default class GuildBank extends React.Component {
                   <p className="amount">$53,640,918</p>
                   <Button
                     size="large"
-                    color="grey"
+                    color="gray"
                     disabled={data.member.isActive && this.state.isActive ? false : true}
                     onClick={this.redeemToken}
                   >

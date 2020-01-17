@@ -1,15 +1,20 @@
 html, body {
-  margin: 0;
+  margin: auto;
   height: 100%;
+  color: rgb(10, 1, 48);
 }
 
 p {
-  color: gray !important;
-  font-weight: 500 !important;
+  color: rgb(10, 1, 48) !important;
+  font-weight: normal !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: white !important;
+  color: rgb(10, 1, 48) !important;
+}
+
+h4 {
+  font-weight: bold;
 }
 
 .ContainerMoloch {
@@ -19,7 +24,9 @@ h1, h2, h3, h4, h5, h6 {
   flex-direction: column;
 }
 
+
 .NavbarMoloch {
+  background-color: rgb(10, 1, 48);
   height: 75px;
   border-radius: 0px !important;
   font-size: 20px;
@@ -81,7 +88,7 @@ h1, h2, h3, h4, h5, h6 {
 .GraphContainer {
   height: 600px;
   width: 100%;
-  background: #463034;
+  background: whitesmoke;
   border-radius: 10px;
 }
 
@@ -94,6 +101,7 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: center;
   padding-top: 50px;
   padding-bottom: 30px;
+  border-radius: 15px;
 }
 
 .Proposal {

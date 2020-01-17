@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import ProfileHover from "profile-hover";
 
 import bull from "assets/bull.png";
-import hood from "assets/hood.png";
+import user from "assets/user.png";
 
 import { useQuery } from "react-apollo";
 import { Vote } from "./ProposalDetail";
@@ -103,7 +103,7 @@ const MemberDetail = ({ loggedInUser, memberAddress, shareValue, exchangeRate })
           <Grid.Column textAlign="center" className="avatar">
             <Image
               centered
-              src={loggedInUser === member.id || loggedInUser === member.delegateKey ? bull : hood}
+              src={loggedInUser === member.id || loggedInUser === member.delegateKey ? bull : user}
               size="tiny"
             />
           </Grid.Column>
