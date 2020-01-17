@@ -1,3 +1,5 @@
 packages/subgraph/dist/
 packages/backend/data/db.json
 packages/subgraph/build/
+packages/.DS_Store
+.DS_Store

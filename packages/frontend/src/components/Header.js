@@ -16,46 +16,21 @@ import { monitorTx } from "../helpers/transaction";
 import { formatEther } from "ethers/utils";
 import gql from "graphql-tag";
 
-export default class MenuExampleSecondary extends Component {
-  state = { activeItem: 'home' }
+const NumMembers = () => (
+  <Link to="/members" className="link">
+    <Button color="grey" size="medium" fluid>
+      Members
+    </Button>
+  </Link>
+);
 
-  handleItemClick = (e, { name }) => this.setState({ activeItem: name })
-
-  render() {
-    const { activeItem } = this.state
-
-    return (
-      <Menu secondary>
-        <Menu.Item
-          name='home'
-          active={activeItem === 'home'}
-          onClick={this.handleItemClick}
-        />
-        <Menu.Item
-          name='messages'
-          active={activeItem === 'messages'}
-          onClick={this.handleItemClick}
-        />
-        <Menu.Item
-          name='friends'
-          active={activeItem === 'friends'}
-          onClick={this.handleItemClick}
-        />
-        <Menu.Menu position='right'>
-          <Menu.Item>
-            <Input icon='search' placeholder='Search...' />
-          </Menu.Item>
-          <Menu.Item
-            name='logout'
-            active={activeItem === 'logout'}
-            onClick={this.handleItemClick}
-          />
-        </Menu.Menu>
-      </Menu>
-    )
-  }
-}
-
+const NumProposals = () => (
+  <Link to="/proposals" className="link">
+    <Button color="grey" size="medium" fluid>
+      Proposals
+    </Button>
+  </Link>
+);
 
 const MainMenu = ({
   _handleOpenDropdown,
@@ -553,6 +528,20 @@ export default ({ loggedInUser, client }) => {
           </Dropdown>
         </Grid.Column>
       </Grid>
+
+      <Grid.Column width={4}>
+            <Grid container doubling stackable columns={4} padded textAlign="center" >
+              <Grid.Column></Grid.Column>
+              <Grid.Column></Grid.Column>
+              <Grid.Column id="navElement1">
+                <NumMembers />
+              </Grid.Column>
+              <Grid.Column id="navElement2">
+                <NumProposals />
+              </Grid.Column>
+            </Grid>
+      </Grid.Column>
+
     </div>
   );
 };
