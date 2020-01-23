@@ -98,7 +98,7 @@ const ProposalDetail = ({ loggedInUser, match }) => {
       setMoloch(m);
     }
     init();
-  });
+  }, []);
   const handleNo = useCallback(
     async proposal => {
       monitorTx(moloch.submitVote(proposal.proposalIndex, Vote.No));
