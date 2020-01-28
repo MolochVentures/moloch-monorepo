@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Grid, Icon, Dropdown, Form, Button, Loader, Menu } from "semantic-ui-react";
+import { Icon, Dropdown, Form, Button, Loader,Menu} from "semantic-ui-react";
 import { withApollo, useQuery } from "react-apollo";
 import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 import {
@@ -16,21 +16,6 @@ import { monitorTx } from "../helpers/transaction";
 import { formatEther } from "ethers/utils";
 import gql from "graphql-tag";
 
-const NumMembers = () => (
-  <Link to="/members" className="link">
-    <Button color="grey" size="medium" fluid>
-      Members
-    </Button>
-  </Link>
-);
-
-const NumProposals = () => (
-  <Link to="/proposals" className="link">
-    <Button color="grey" size="medium" fluid>
-      Proposals
-    </Button>
-  </Link>
-);
 
 const MainMenu = ({
   _handleOpenDropdown,
@@ -46,8 +31,8 @@ const MainMenu = ({
   <div className="dropdownItems">
     <Dropdown.Item
       icon="settings"
-      className="item"
-      content="wETH Center"
+      className="link item"
+      content="DAI Center"
       onClick={() => {
         _handleOpenDropdown();
         onLoadApproveWeth();
@@ -56,7 +41,7 @@ const MainMenu = ({
     <Dropdown.Divider />
     {member && member.isActive ? (
       <>
-        <Dropdown.Item className="item" onClick={() => _handleCloseDropdown()}>
+        <Dropdown.Item pointing className='item' onClick={() => _handleCloseDropdown()}>
           <Link to={`/members/${member.id}`} className="link">
             <p>
               <Icon name="user" />
@@ -77,7 +62,7 @@ const MainMenu = ({
         <Dropdown.Divider />
         <Dropdown.Item
           icon="dollar"
-          className="item"
+          className='item'
           content="Ragequit"
           onClick={() => {
             _handleOpenDropdown();
@@ -108,7 +93,6 @@ const MainMenu = ({
     <Dropdown.Item className="item">
       <Link
         to="/login"
-        className="link"
         onClick={async () => {
           _handleCloseDropdown();
           window.localStorage.setItem("loggedInUser", "");
@@ -116,7 +100,7 @@ const MainMenu = ({
           window.location.reload();
         }}
       >
-        <p>
+        <p className="link">
           <Icon name="power off" />
           Sign Out
         </p>
@@ -135,7 +119,7 @@ const ChangeDelegateKeyMenu = ({ moloch, onLoadMain }) => {
   }, [newDelegateKey, moloch]);
 
   return (
-    <div>
+    <>
       <Dropdown.Item
         icon="arrow left"
         className="item"
@@ -143,7 +127,7 @@ const ChangeDelegateKeyMenu = ({ moloch, onLoadMain }) => {
         onClick={() => onLoadMain()}
       />
       <Dropdown.Divider />
-      <Dropdown.Item className="item submenu">
+      <Dropdown.Item className="item">
         <p>
           <Icon name="key" />
           Change Delegate Key
@@ -153,9 +137,9 @@ const ChangeDelegateKeyMenu = ({ moloch, onLoadMain }) => {
           onChange={event => setNewDelegateKey(event.target.value)}
           value={newDelegateKey}
         />
-        <Button onClick={submitChangeDelegateKey}>Save</Button>
+        <Button className="grey" onClick={submitChangeDelegateKey}>Save</Button>
       </Dropdown.Item>
-    </div>
+    </>
   );
 };
 
@@ -168,7 +152,7 @@ const WithdrawLootTokenMenu = ({ moloch, member, onLoadMain }) => {
   }, [ragequitAmount, moloch]);
 
   return (
-    <div>
+    <>
       <Dropdown.Item
         icon="arrow left"
         className="item"
@@ -179,17 +163,16 @@ const WithdrawLootTokenMenu = ({ moloch, member, onLoadMain }) => {
       <Dropdown.Item className="item submenu">
         <p>
           <Icon name="dollar" />
-          Ragequit
+          Ragequit -  {`${member.shares} Shares Available`}
         </p>
-        {`${member.shares} Shares Available`}
         <Form.Input
           placeholder={`Number of shares`}
           onChange={event => setRagequitAmount(event.target.value)}
           value={ragequitAmount}
         />
-        <Button onClick={submitRagequit}>Withdraw</Button>
+        <Button className="grey" onClick={submitRagequit}>Withdraw</Button>
       </Dropdown.Item>
-    </div>
+    </>
   );
 };
 
@@ -202,7 +185,7 @@ const WithdrawPoolTokenMenu = ({ pool, poolMember, onLoadMain }) => {
   }, [withdrawAmount, pool]);
 
   return (
-    <div>
+    <>
       <Dropdown.Item
         icon="arrow left"
         className="item"
@@ -223,52 +206,22 @@ const WithdrawPoolTokenMenu = ({ pool, poolMember, onLoadMain }) => {
         />
         <Button onClick={submitPoolWithdraw}>Withdraw</Button>
       </Dropdown.Item>
-    </div>
+    </>
   );
 };
 
 function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
   const [approval, setApproval] = useState("");
-  const [wrap, setWrap] = useState("");
-  const [unwrap, setUnwrap] = useState("");
   const [myWeth, setMyWeth] = useState("...");
-  const [myEth, setMyEth] = useState("...");
 
   const approve = useCallback(() => {
     console.log(
-      "Approving wETH: ",
+      "Approving DAI: ",
       process.env.REACT_APP_MOLOCH_ADDRESS,
       utils.parseEther(approval).toString(),
     );
     monitorTx(token.approve(process.env.REACT_APP_MOLOCH_ADDRESS, utils.parseEther(approval)));
   }, [approval, token]);
-
-  const approvePool = useCallback(() => {
-    console.log(
-      "Approving wETH: ",
-      process.env.REACT_APP_MOLOCH_POOL_ADDRESS,
-      utils.parseEther(approval).toString(),
-    );
-    monitorTx(token.approve(process.env.REACT_APP_MOLOCH_POOL_ADDRESS, utils.parseEther(approval)));
-  }, [approval, token]);
-
-  const wrapEth = useCallback(() => {
-    console.log(
-      "Wrapping ETH: ",
-      process.env.REACT_APP_TOKEN_ADDRESS,
-      utils.parseEther(wrap).toString(),
-    );
-    monitorTx(token.deposit({ value: utils.parseEther(wrap) }));
-  }, [wrap, token]);
-
-  const unwrapWeth = useCallback(() => {
-    console.log(
-      "Unwrapping wETH: ",
-      process.env.REACT_APP_TOKEN_ADDRESS,
-      utils.parseEther(unwrap).toString(),
-    );
-    monitorTx(token.withdraw(utils.parseEther(unwrap)));
-  }, [unwrap, token]);
 
   useEffect(() => {
     async function fetchMyWeth() {
@@ -279,16 +232,6 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
     }
     fetchMyWeth();
   }, [token, loggedInUser]);
-
-  useEffect(() => {
-    async function fetchMyEth() {
-      if (loggedInUser) {
-        const e = await eth.getBalance(loggedInUser);
-        setMyEth(parseFloat(formatEther(e)).toFixed(2));
-      }
-    }
-    fetchMyEth();
-  }, [eth, loggedInUser]);
 
   return (
     <>
@@ -302,30 +245,15 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
       <Dropdown.Item className="item submenu">
         <p>
           <Icon name="settings" />
-          wETH Center
+          DAI Center
         </p>
         <Form.Input
-          placeholder={`${myWeth} wETH available`}
+          placeholder={`${myWeth} DAI available`}
           onChange={event => setApproval(event.target.value)}
           value={approval}
         />
         <Button.Group>
-          <Button onClick={approve}>Approve Moloch</Button>
-          <Button onClick={approvePool}>Approve Pool</Button>
-        </Button.Group>
-        <Form.Input
-          placeholder={`${myEth} ETH available`}
-          onChange={event => setWrap(event.target.value)}
-          value={wrap}
-        />
-        <Button onClick={wrapEth}>Wrap</Button>
-        <Form.Input
-          placeholder={`${myWeth} wETH available`}
-          onChange={event => setUnwrap(event.target.value)}
-          value={unwrap}
-        />
-        <Button.Group>
-          <Button onClick={unwrapWeth}>Unwrap</Button>
+          <Button className="grey" onClick={approve}>Approve Rosebud</Button>
         </Button.Group>
       </Dropdown.Item>
     </>
@@ -361,23 +289,6 @@ export default ({ loggedInUser, client }) => {
     }
     init();
   }, [loggedInUser]);
-
-
-  const NumMembers = () => (
-    <Link to="/members" className="link">
-      <Button color="grey" size="medium" fluid>
-        Members
-      </Button>
-    </Link>
-  );
-  
-  const NumProposals = () => (
-    <Link to="/proposals" className="link">
-      <Button color="grey" size="medium" fluid>
-        Proposals
-      </Button>
-    </Link>
-  );
 
   const _handleOpenDropdown = () => setVisibleRightMenu(true);
 
@@ -415,7 +326,7 @@ export default ({ loggedInUser, client }) => {
               onLoadChangeDelegateKey={() => setVisibleMenu("changeDelegateKey")}
               onLoadWithdrawLootToken={() => setVisibleMenu("withdrawLootToken")}
               onLoadWithdrawPoolToken={() => setVisibleMenu("withdrawPoolToken")}
-              onLoadApproveWeth={() => setVisibleMenu("approveWeth")}
+              onLoadApproveWeth={() => setVisibleMenu("approveDAI")}
             />
           );
           break;
@@ -454,7 +365,7 @@ export default ({ loggedInUser, client }) => {
             />
           );
           break;
-        case "approveWeth":
+        case "approveDAI":
           topRightMenuContent = (
             <ApproveWethMenu
               onLoadMain={() => {
@@ -506,16 +417,57 @@ export default ({ loggedInUser, client }) => {
     },
   );
 
+  const NumHome = () => (
+    <Link to="/" className="navElement" activeClassName='navElementActive'>
+      <p>
+        Home
+      </p>
+    </Link>
+  );
+
+
+  const NumMembers = () => (
+    <Link to="/members" className="navElement" activeClassName='navElementActive'>
+      <p>
+        Members
+      </p>
+    </Link>
+  );
+
+  const NumProposal = () => (
+    <Link to="/proposals" className="navElement" activeClassName='navElementActive'>
+      <p>
+        Proposals
+      </p>
+    </Link>
+  );
+
   if (memberLoading || poolLoading) return <Loader active />;
   if (memberError || poolError) throw new Error(`Error!: ${memberError} ${poolError}`);
   return (
     <div id="header">
-      <Grid container columns={2} stackable verticalAlign="center">
-        <Grid.Column textAlign="left" className="logo">
-          <Link to="/">ROSEBUD DAO</Link>
-        </Grid.Column>
-        <Grid.Column textAlign="right" className="dropdown">
-          <Dropdown
+      <Menu>
+        <Menu.Item header>
+          <Link to="/" className="logo"> ROSEBUD DAO</Link>
+        </Menu.Item>
+        <Menu.Item 
+          name='Home'
+        >
+          <NumHome />
+        </Menu.Item>
+        <Menu.Item 
+          name='Members'
+        >
+          <NumMembers />
+        </Menu.Item>
+        <Menu.Item  
+          name='Proposals'
+        >
+          <NumProposal />
+        </Menu.Item>
+
+        <Menu.Menu position='right'>
+        <Dropdown item
             className="right_dropdown"
             open={visibleRightMenu}
             onBlur={() => _handleCloseDropdown()}
@@ -526,22 +478,8 @@ export default ({ loggedInUser, client }) => {
               {getTopRightMenuContent(memberData.member, poolMemberData.poolMember)}
             </Dropdown.Menu>
           </Dropdown>
-        </Grid.Column>
-      </Grid>
-
-      <Grid.Column width={4}>
-            <Grid container doubling stackable columns={4} padded textAlign="center" >
-              <Grid.Column></Grid.Column>
-              <Grid.Column></Grid.Column>
-              <Grid.Column id="navElement1">
-                <NumMembers />
-              </Grid.Column>
-              <Grid.Column id="navElement2">
-                <NumProposals />
-              </Grid.Column>
-            </Grid>
-      </Grid.Column>
-
+        </Menu.Menu>
+      </Menu>
     </div>
   );
 };

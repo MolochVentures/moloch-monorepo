@@ -1,17 +1,13 @@
 import React from "react";
-import { Divider, Grid, Segment, Image, Icon, Label, Header, Loader } from "semantic-ui-react";
+import { Divider, Grid, Segment, Label, Header, Loader } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import ProfileHover from "profile-hover";
-
-import bull from "assets/bull.png";
-import user from "assets/user.png";
 
 import { useQuery } from "react-apollo";
 import { Vote } from "./ProposalDetail";
 import { utils } from "ethers";
 import { convertWeiToDollars, getShareValue } from "../helpers/currency";
 import { getProposalCountdownText } from "../helpers/proposals";
-import { formatEthAddress } from "../helpers/address";
 import gql from "graphql-tag";
 
 const GET_MEMBER_DETAIL = gql`
@@ -67,7 +63,7 @@ const GET_METADATA = gql`
   }
 `;
 
-const MemberDetail = ({ loggedInUser, memberAddress, shareValue, exchangeRate }) => {
+const MemberDetail = ({ memberAddress, shareValue, exchangeRate }) => {
   const { loading, error, data } = useQuery(GET_MEMBER_DETAIL, {
     variables: { address: memberAddress },
   });
@@ -76,63 +72,73 @@ const MemberDetail = ({ loggedInUser, memberAddress, shareValue, exchangeRate })
   }
   if (error) throw new Error(error);
   const { member } = data;
+
   return (
+    <div id="member_detail">
     <Segment className="blurred box">
-      <Grid container columns={1}>
+      <Grid columns={1}>
+      <Grid.Row>
+          <ProfileHover
+            address={memberAddress}
+            showName="true"
+            displayFull="true"
+            href="/members/${memberAddress}"
+          />
+        </Grid.Row>
         <Grid.Row>
-          <Grid container columns={2}>
-            <Grid.Column>
-              <p className="subtitle">Shares</p>
-              <p className="amount">{member.shares}</p>
-            </Grid.Column>
-            <Grid.Column textAlign="right">
-              <p className="subtitle">Total Value</p>
-              <p className="amount">
-                {convertWeiToDollars(
-                  utils
-                    .bigNumberify(member.shares)
-                    .mul(shareValue)
-                    .toString(),
-                  exchangeRate,
-                )}
-              </p>
-            </Grid.Column>
+        <Segment raised>
+          <Grid columns={2}>
+            <Grid.Row>
+              <Grid.Column>
+                <p className="subtitle">Shares</p>
+              </Grid.Column>
+              <Grid.Column textAlign="right">
+                <p className="amount">{member.shares}</p>
+              </Grid.Column>
+            </Grid.Row>
+            <Divider />
+            <Grid.Row>
+              <Grid.Column>
+                <p className="subtitle">Total Value</p>
+              </Grid.Column>
+              <Grid.Column textAlign="right">
+                <p className="amount">
+                  {convertWeiToDollars(
+                    utils
+                      .bigNumberify(member.shares)
+                      .mul(shareValue)
+                      .toString(),
+                    exchangeRate,
+                  )}
+                </p>
+              </Grid.Column>
+            </Grid.Row>
+            <Divider />
+            <Grid.Row>
+              <Grid.Column>
+                <p className="subtitle">Tribute</p>
+              </Grid.Column>
+              <Grid.Column textAlign="right">
+                <p className="amount"> 
+                  {utils.formatEther(member.tokenTribute)} DAI
+                </p>
+              </Grid.Column>
+            </Grid.Row>
           </Grid>
+          </Segment>
         </Grid.Row>
-        <Grid.Row>
-          <Grid.Column textAlign="center" className="avatar">
-            <Image
-              centered
-              src={loggedInUser === member.id || loggedInUser === member.delegateKey ? bull : user}
-              size="tiny"
-            />
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <p className="subtitle">Tribute</p>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <Segment className="pill" textAlign="center">
-              <Icon name="ethereum" />
-              {utils.formatEther(member.tokenTribute)} ETH
-            </Segment>
-          </Grid.Column>
-        </Grid.Row>
+
         <Grid.Row>
           <Grid.Column>
             <p className="subtitle">Delegate Key</p>
           </Grid.Column>
           <Grid.Column>
-            <ProfileHover address={member.delegateKey} displayFull="true">
-              <p className="title">{member.delegateKey}</p>
-            </ProfileHover>
+              <h4 className="delegateKey">{member.delegateKey}</h4>
           </Grid.Column>
         </Grid.Row>
       </Grid>
     </Segment>
+    </div>
   );
 };
 
@@ -150,10 +156,10 @@ const ProposalDetail = ({ memberAddress }) => {
     <Segment className="blurred box">
       <Grid columns="equal" textAlign="center">
         <Grid.Row className="subtext" style={{ fontSize: 20 }}>
-          History
+          <h1 className="Title">History</h1>
         </Grid.Row>
       </Grid>
-      <Grid columns="equal">
+      <Grid columns="6">
         <Grid.Row className="header">
           <Grid.Column textAlign="center">
             <p className="subtext">Proposal Title</p>
@@ -241,21 +247,7 @@ const MemberDetailView = ({ loggedInUser, match }) => {
   const shareValue = getShareValue(totalShares, guildBankValue);
   return (
     <div id="member_detail">
-      <Divider />
       <Grid container>
-        <Grid.Row>
-          <Grid.Column mobile={16} tablet={16} computer={6}>
-            <p className="title">
-              <a
-                href={`https://etherscan.io/address/${match.params.name}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {formatEthAddress(match.params.name)}
-              </a>
-            </p>
-          </Grid.Column>
-        </Grid.Row>
         <Grid.Row className="details">
           <Grid.Column mobile={16} tablet={16} computer={6} className="user">
             <MemberDetail

@@ -1,4 +1,4 @@
-# Moloch Front-End
+# Rosebud Front-End
 
 ## Local Development
 

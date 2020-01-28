@@ -54,7 +54,7 @@ export function getProposalCountdownText(proposal) {
         </>
       );
     case ProposalStatus.Passed:
-      return <span className="subtext">Passed</span>;
+      return <span className="subtext">Accepted</span>;
     case ProposalStatus.Failed:
       return <span className="subtext">Failed</span>;
     case ProposalStatus.Aborted:

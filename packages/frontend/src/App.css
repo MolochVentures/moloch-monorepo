@@ -1,5 +1,5 @@
 html, body {
-  margin: auto;
+  margin: 0px;
   height: 100%;
   color: rgb(10, 1, 48);
 }
@@ -18,7 +18,7 @@ h4 {
 }
 
 .ContainerMoloch {
-  background: #180307;
+  background: white;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -40,25 +40,8 @@ h4 {
 */
 
 .ContentMoloch {
-  margin-left: 10%;
-  width: 80%;
+  width: 100%;
   flex: 1;
-}
-
-.MarginRight10 {
-  margin-right: 10px;
-}
-
-.MarginRight40 {
-  margin-right: 40px;
-}
-
-.MarginTop30 {
-  margin-top: 30px;
-}
-
-.PullRight {
-  float: right;
 }
 
 .VerticalDivider {
@@ -88,7 +71,7 @@ h4 {
 .GraphContainer {
   height: 600px;
   width: 100%;
-  background: whitesmoke;
+  background: white;
   border-radius: 10px;
 }
 
@@ -106,7 +89,7 @@ h4 {
 
 .Proposal {
   flex: 1;
-  background: #463034;
+  background:white;
   border-radius: 10px;
   padding: 25px;
   cursor: pointer;

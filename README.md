@@ -1,4 +1,4 @@
-# RosebudDAO
+# Rosebud DAO
 
 ## Local Dev Instructions
 

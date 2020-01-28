@@ -3,6 +3,8 @@ body {
   font-weight: bold;
   font-family: 'Open Sans', sans-serif !important;
   background-color: #ececec;
+  margin: 0px;
+  padding: 0px;
 }
 
 .amount {
@@ -12,15 +14,16 @@ body {
 
 .subtext {
   color: rgb(10, 1, 48) !important;
+  width: 100% !important;
 }
 
 .subtitle {
-  font-size: 15px;
+  font-size: 20px;
   color: rgb(10, 1, 48) !important;
 }
 
 .threeboxProfileHover__style_boxShortAddress {
-  color: white;
+  color: rgb(10, 1, 48);
 }
 
 .ui.statistic>.value, .ui.statistics .statistic>.value {
@@ -37,11 +40,11 @@ body {
 }
 
 .button {
-  padding: 20px 5px !important;
+  padding: 10px 15px !important;
   color: whitesmoke !important;
   &.grey {
     background: rgb(10, 1, 48) !important;
-    border-radius: 5px;
+    border-radius: 3px;
   }
 }
 
@@ -57,11 +60,11 @@ body {
 }
 
 .uncolored {
-  color: rgb(49, 25, 155) !important;
+  color: rgb(10, 1, 48) !important;
 }
 
 .blurred {
-  background: #ececec !important;
+  background: white !important;
 }
 
 .transparent {
@@ -86,56 +89,74 @@ body {
   }
 }
 
+.navElement {
+  color: rgb(10, 1, 48) !important;
+    font-size: 18px !important;
+}
+
+.navElement:hover {
+  color:  rgb(53, 36, 133) !important;
+  cursor: pointer;
+}
+
 #header {
-  height: 80px;
+  height: 90px;
   width: 100%;
   color: rgb(10, 1, 48) !important;
-  margin-top: 20px;
+  margin-top: 50px;
+
   .menu {
-    font-size: 20px;
+    font-size: 18px;
     color: rgb(10, 1, 48) !important
   }
+
   .right_dropdown>.text {
     color: rgb(10, 1, 48) !important;
-    padding: 15px !important;
   }
   .logo {
-    font-size: 25px;
+    font-size: 20px;
     text-decoration: none;
+    color: rgb(10, 1, 48) !important;
+    font-weight: 600;
+    letter-spacing: 0.08em;
     a {
       color: inherit;
     }
-    padding: 20px 0 20px 50px;
-    margin: auto;
   }
   .dropdown {
     .label {
-      font-size: 15px;
+      font-size: 20px;
     }
     .menu {
-      background-color: whitesmoke !important;
-      box-shadow: inset;
-      padding: 20px 30px;
+      background-color: white !important;
+      padding: 10px 20px;
       font-size: 15px;
-      border-radius: 5px;
       input {
         color: rgb(10, 1, 48);
         margin-bottom: 5px;
+        border-color:lightgray;
       }
       .button {
         padding: 10px 20px !important;
+        margin-top: 5px;
       }
       .item {
         padding: 15px 10px !important;
-        color: rgb(10, 1, 48);;
+        color: rgb(10, 1, 48);
       }
       .item:hover:not(.submenu) {
         color:  rgb(53, 36, 133);
         cursor: pointer;
       }
       .link {
-        color: inherit;
+        color: rgb(10, 1, 48) !important;
       }
+
+      .link:hover {
+        color:  rgb(53, 36, 133);
+        cursor: pointer;
+      }
+
       .dropdownItems i {
         margin-right: 12px;
       }
@@ -143,8 +164,10 @@ body {
   }
 }
 
+
 #wrapper {
-  margin: 30px 50px;
+  margin: auto;
+  width: 100%;
 }
 
 #login {
@@ -155,6 +178,7 @@ body {
 }
 
 #homepage {
+  margin: auto;
   .graph {
     width: 100%;
     height: 60vh;
@@ -172,18 +196,24 @@ body {
     color: rgb(10, 1, 48) !important;
   }
 
-#homeSegment1 {
-  height: 260px;
-  width: 88%;
+  .text_link:hover {
+    color:  rgb(53, 36, 133);
+    cursor: pointer;
+  }
+
+#homeSegment {
+  height: 295px;
+  width: 100%;
 }
 
 #homeSegment2 {
-  margin-top: 30px;
-  padding: 40px;
-  height: 155px;
+  padding: 45px;
+  height: 170px;
   text-align: center;
-  width: 88%;
+  width: 100%;
+  margin-top: 25px;
 }
+
   
   @media screen and (min-width: 320px) and (max-width: 375px) { 
     .btn_link {
@@ -206,6 +236,7 @@ body {
     .blurred {
       padding-left: 10px !important;
       padding-right: 10px !important;
+      background-color: white;
     }
   }
   
@@ -237,29 +268,23 @@ body {
 
 
 #mainHeader {
-  padding: 28px;
+  padding: 20px;
   margin-bottom: 0;
   letter-spacing: .10em;
 }
 
 #bankBalance {
   font-weight: bold;
+  padding: 15px;
   letter-spacing: .15em;
   color: rgb(10, 1, 48) !important;
 
   text-shadow: 
-    -1px 2px 1px #bdbdbd1c, 
-    -2px 4px 1px #bdbdbd1c, 
-    -3px 6px 1px #bdbdbd1c,
-}
+    -1px 2px 1px #bdbdbd2c, 
+    -2px 4px 1px #bdbdbd2c, 
+    -3px 6px 1px #bdbdbd2c,
+    -4px 8px 1px #bdbdbd2c,
 
-#navElement1 {
-  margin-left: 80px;
-  width: 17%;
-}
-
-#navElement2 {
-  width: 17%;
 }
 
 #ethExchange {
@@ -280,9 +305,9 @@ body {
 }
 
 #member_list {
+  width: 100%;
   .name {
-    margin-top: 10px;
-    margin-bottom: 0;
+    margin: 10px 30px 0;
     color: rgb(10, 1, 48) !important;
   }
   .divider {
@@ -291,13 +316,15 @@ body {
   }
   .members_row {
     .member {
-      margin-bottom: 40px;
+      margin-bottom: 80px !important;
     }
   }
-  .member_avatar {
-    margin-top: 25px;
+
+  #shares {
+    margin-top: 15px !important;
+    padding-left: 22px;
   }
-  
+
   @media screen and (min-width: 320px) and (max-width: 375px) { 
   
     .submit_button, .member_list_header {
@@ -311,22 +338,32 @@ body {
       text-align: center !important;
     }
   }
+}
 
+#EldersSegment {
+  padding: 30px 20px 50px;
+  margin-top: -10px;
+}
+
+#ContributorsSegment {
+  padding: 30px 20px 50px;
 }
 
 #member_detail {
   .details {
-    margin-top: 20px;
+    margin-top: 10px;
+    color: rgb(10, 1, 48) !important;
   }
   .blurred.box {
-    padding: 30px 60px;
+    padding: 20px 60px;
   }
   .amount {
     font-size: 25px;
     line-height: 15px;
   }
   .avatar {
-    margin: 50px;
+    margin: 20px 0px;
+    font-size: 20px;
   }
   .user {
     .segment {
@@ -346,7 +383,7 @@ body {
     }
     p {
       font-size: 1rem;
-      color: rgb(10, 1, 48);
+      color: rgb(10, 1, 48) !important;
     }
     .dot {
       margin-right: 10px;
@@ -385,7 +422,9 @@ body {
 
 #proposal_list {
   .name {
-    font-size: 15px;
+    padding-top: 13px;
+    font-size: 23px;
+    color: rgb(10, 1, 48) !important;
     overflow-y: auto;
     -ms-overflow-style: none;  // IE 10+
     scrollbar-width: none;  // Firefox
@@ -394,31 +433,50 @@ body {
     display: none;  // Safari and Chrome
   }
   .description {
-    padding-top: 10px;
-    padding-bottom: 20px;
-    height: 25vh;
+    font-weight: 500;
+    font-size: 15px;
+    margin-bottom: 25px;
+    margin-top: -10px;
+    height: 9vh;
     overflow-y: auto;
   }
-  .value_shares {
-    padding-left: 20px;
-    padding-right: 20px;
-    .amount {
-      font-size: 25px;
-      line-height: 15px;
-    }
 
-    margin-bottom: 30px;
+  .description::-webkit-scrollbar {
+    display: none;
+  }
+
+  .value_shares {
+    .amount {
+      font-size: 20px;
+      line-height: 15px;
+      padding-left: 70px;
+      padding-top: 3px;
+    }
   }
   .deadlines {
-    margin: 30px auto;
-    .voting {}
+    margin-top: 15px  auto;
+    margin-bottom: 5px;
+    .voting {
+      border-radius: 3px !important;
+      width: 100% !important;
+    }
     .grace {
-      opacity: 0.5;
+        opacity: 0.5;
     }
   }
   .progress .bar {
-    border-radius: 20px;
+    border-radius: 3px;
   }
+
+  #amountYesNo {
+    margin-top: -10px !important;
+    padding: 18px ;
+  }
+
+  #newPorposalButton {
+    position: absolute;
+    margin-left: 90%;
+    }
 
   .ui.secondary.menu {
     overflow: scroll;
@@ -431,6 +489,11 @@ body {
 
     .item {
       color: rgb(10, 1, 48);
+      font-size: 15px !important;
+    }
+
+    .item:hover {
+      color: rgb(53, 36, 133) !important;
     }
 
     .active.item {
@@ -438,13 +501,20 @@ body {
     }
   }
 
+  .ui.text.menu .item {
+    font-size: 18px !important;
+  }
+
+  .ui.text.menu .active.item {
+    font-weight: 600 !important ;
+  }
+
   .ui.secondary.menu::-webkit-scrollbar { 
     display: none;  // Safari and Chrome
   }
 
   .ui.segment.active.tab {
-    background: transparent;
-    border-width: 0px;
+    padding: 30px;
   }
 
   .ui.small.progress.hide-bar {
@@ -455,31 +525,46 @@ body {
   
   @media only screen and (min-width: 320px) and (max-width: 374px) {
     .blurred.box { padding: 30px 7px; }
+    #newPorposalButton { margin-left: 0;}
   }
 
   @media only screen and (min-width: 375px) and (max-width: 424px) {
     .blurred.box { padding: 30px 15px; }
+    #newPorposalButton { margin-left: 0;}
   }
 
   @media only screen and (min-width: 320px) and (max-width: 425px) {
     .pill { padding: 8px 10px !important; }
+    #newPorposalButton { margin-left: 0;}
+
   }
 }
 
 #proposal_detail {
+  padding-top: 20px;
   .title {
-    margin-bottom: 80px;
+    margin-top: 25px !important;
+    margin-bottom: 10px;
   }
   .tokens {
     margin: 30px auto;
   }
   .amount {
-    font-size: 25px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 20px;
     line-height: 15px;
+  }
+  .amount.right {
+    float: right;
+  }
+  .amount.light {
+    font-weight: 600;
   }
   .address {
     font-size: 20px;
     line-height: 15px;
+    color: #0a0130;
   }
   .grace {
     opacity: 0.5;
@@ -491,24 +576,31 @@ body {
     .button {
       width: 60px ;
       padding: 22px ;
-      margin-top: 0.25em !important;
+      margin-top: 0.20em !important;
     }
+
+  }
+  .ui.raised.segment {
+    padding: 25px !important;
+    margin-top: 20px;
+    margin-bottom: 30px;
   }
   .description {
     text-align: justify !important;
-    min-height: 25vh;
+    min-height: 12vh;
+    margin-top: 20px;
   }
 
   .member_list {
-    min-height: 25vh;
+    min-height: 20vh;
   }
   
   .member_avatar {
-    margin-top: 25px;
+    margin-top: 0px;
   }
 
   .btn {
-    min-width: 200px;
+    min-width: 100px;
   }
   
   .pill {
@@ -529,6 +621,14 @@ body {
     .bar {
       background-color: transparent
     }
+  }
+  
+  .subtext.description.wordwrap {
+    font-weight: 500 !important;
+    font-size: 15px;
+    height: 0vh !important;
+    padding-top: 10px;
+    margin-bottom: -40px !important;
   }
   
   @media screen and (min-width: 320px) and (max-width: 375px) { 
@@ -594,24 +694,50 @@ body {
   }
 }
 
+#member_detail {
+  .ui.raised.segment {
+    padding: 25px !important;
+  }
+  .delegateKey {
+    color: rgb(10, 1, 48);
+    font-size: small;
+    padding-top: 10px;
+  }
+}
+
 #proposal_submission {
+  padding-top: 30px;
   input, textarea, select, .dropdown {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background-color: white;
+    color: rgb(53, 36, 133) !important;
+    border-color: lightgray ; 
+    font-size: 18px;
   }
   label {
-    color: white;
-    opacity: 0.5;
+    color: rgb(10, 1, 48) !important;
+    font-weight: 600 !important;
+    font-size: 18px !important;
+    padding: 5px;
   }
   i {
     float: left !important;
   }
+  ::placeholder {
+    color: lightgray !important;
+  }
+
+  #titleInput {
+    font-weight: 600;
+    font-size: 20px;
+  }
+
   .amount {
     font-size: 25px;
     line-height: 15px;
   }
   .blurred.box {
     height: 100%;
+    background-color: white;
   }
   .delete_icon {
     margin-top: 8px;
@@ -624,6 +750,7 @@ body {
   }
   .submit_button {
     text-align: center !important;
+    padding-bottom: 10px;
   }
   
   .computer_delete_icon {
@@ -662,6 +789,7 @@ body {
     .blurred.box {
       padding-left: 20px !important;
       padding-right: 20px !important;
+      background-color: white;
     }
 
     .asset_field_grid {
@@ -748,9 +876,6 @@ body {
       display: none;
     }
   }
-
-  
-  
 }
 
 .wordwrap { 

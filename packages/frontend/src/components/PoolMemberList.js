@@ -3,7 +3,6 @@ import { Grid, Image, Divider } from "semantic-ui-react";
 import { Switch, Route, Link } from "react-router-dom";
 
 import MemberDetail from "./MemberDetail";
-import bull from "assets/bull.png";
 import user from "assets/user.png";
 
 import { useQuery } from "react-apollo";
@@ -41,7 +40,7 @@ const LoggedInUser = props => {
   if (error) throw new Error(`Error!: ${error}`);
   return data.member ? (
     <Link to={`/members/${data.member.id}`} className="uncolored">
-      <Image centered src={bull} size="tiny" />
+      <Image centered src={user} size="tiny" />
       <p className="name">
         {!data.member.id
           ? ""

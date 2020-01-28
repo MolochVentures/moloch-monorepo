@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import {
   Button,
-  Divider,
   Form,
   Grid,
   Input,
@@ -11,7 +10,7 @@ import {
   Icon,
   List,
 } from "semantic-ui-react";
-import { getMoloch, getToken } from "../web3";
+import { getMoloch, getToken, } from "../web3";
 import { utils } from "ethers";
 import { monitorTx } from "helpers/transaction";
 
@@ -64,17 +63,18 @@ class SubmitModal extends Component {
     const { loading, beneficiaryApproved, depositApproved, open } = this.state;
     const { handleSubmit, submittedTx } = this.props;
     return (
-      <Modal
+    <div id="proposal_submission">
+      <Modal 
         trigger={
-          <Button size="large" color="red" onClick={this.handleOpen}>
-            Submit Proposal
+          <Button size="large" color="green" onClick={this.handleOpen} >
+            <Icon name='send' color="white"/>  Submit a new proposal 
           </Button>
         }
         basic
         size="small"
         open={open}
       >
-        <Header icon="send" content="Submit Proposal" />
+        <Header content="Submit Proposal" />
         <Modal.Content>
           <List>
             <List.Item>
@@ -85,7 +85,7 @@ class SubmitModal extends Component {
               ) : (
                 <List.Icon name="x" />
               )}
-              <List.Content>{DEPOSIT_WETH} wETH Deposit Approved</List.Content>
+              <List.Content>{DEPOSIT_WETH} DAI Deposit Approved</List.Content>
             </List.Item>
             <List.Item>
               {loading ? (
@@ -130,6 +130,7 @@ class SubmitModal extends Component {
           </Button>
         </Modal.Actions>
       </Modal>
+    </div>
     );
   }
 }
@@ -279,16 +280,14 @@ export default class ProposalSubmission extends Component {
             <Grid.Row stretched>
               <Grid.Column mobile={16} tablet={16} computer={12}>
                 <Input
+                  id="titleInput"
                   name="title"
-                  transparent
                   size="big"
-                  inverted
                   placeholder="Proposal Title"
                   onChange={this.handleInput}
                   value={title}
                   error={!titleValid}
                 />
-                <Divider />
               </Grid.Column>
             </Grid.Row>
             <Grid.Row stretched>
@@ -315,8 +314,8 @@ export default class ProposalSubmission extends Component {
                   />
                   <Form.Input
                     name="tribute"
-                    label="Tribute Offered (in ETH)"
-                    placeholder="ETH"
+                    label="Tribute Offered (in DAI)"
+                    placeholder="DAI"
                     fluid
                     type="number"
                     onChange={this.handleInput}

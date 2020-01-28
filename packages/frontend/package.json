@@ -1,5 +1,5 @@
 {
-  "name": "molochui",
+  "name": "RosebudUI",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -26,7 +26,8 @@
     "safe-web3-provider": "gnosis/safe-web3-provider#dac23b8",
     "semantic-ui-css": "2.4.1",
     "semantic-ui-react": "0.88.1",
-    "styled-components": "4.4.0"
+    "styled-components": "4.4.0",
+    "uuid": "^3.4.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -56,5 +57,5 @@
     "gh-pages": "2.1.1",
     "prettier": "1.18.2"
   },
-  "homepage": "https://molochdao.com"
+  "homepage": "https://deora.earth"
 }

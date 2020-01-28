@@ -1,6 +1,6 @@
 import React from "react";
-import { Segment, Grid, Button, Tab, Icon, Loader } from "semantic-ui-react";
-import { Route, Switch, Link } from "react-router-dom";
+import { Segment, Grid, Button, Tab, Loader, Divider, Label } from "semantic-ui-react";
+import { Route, Switch, Link, Redirect } from "react-router-dom";
 
 import ProposalDetail from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
@@ -16,36 +16,38 @@ const ProposalCard = ({ proposal }) => {
   return (
     <Grid.Column mobile={16} tablet={8} computer={5}>
       <Link to={{ pathname: `/proposals/${id}` }} className="uncolored">
-        <Segment>
+        <Segment raised>
+          <Label as='a' color='white' ribbon>
+           <h4>{getProposalCountdownText(proposal)}</h4>
+        </Label>
           <p className="name">{proposal.title ? proposal.title : "N/A"}</p>
           <p className="subtext description">
             {proposal.description ? proposal.description : "N/A"}
           </p>
+          <Divider />
           <Grid columns="equal" className="value_shares">
             <Grid.Row>
-              <Grid.Column textAlign="center">
-                <p className="subtext">Shares Requested</p>
-                <p className="amount">{proposal.sharesRequested}</p>
-              </Grid.Column>
-              <Grid.Column textAlign="center">
+              <Grid.Column textAlign="left">
                 <p className="subtext">
-                  Tribute <Icon name="ethereum" />
+                  Tribute in DAI
                 </p>
+              </Grid.Column>
+              <Grid.Column>
                 <p className="amount">
                   {parseFloat(utils.formatEther(proposal.tokenTribute)).toFixed(2)}
                 </p>
               </Grid.Column>
             </Grid.Row>
-          </Grid>
-          <Grid columns="equal" className="deadlines">
             <Grid.Row>
-              <Grid.Column textAlign="center">
-                <Segment className="voting pill" textAlign="center">
-                  {getProposalCountdownText(proposal)}
-                </Segment>
+              <Grid.Column textAlign="left">
+                <p className="subtext">Shares Requested</p>
+              </Grid.Column>
+              <Grid.Column>
+                <p className="amount">{proposal.sharesRequested}</p>
               </Grid.Column>
             </Grid.Row>
           </Grid>
+          <Divider />
           {proposal.aborted ? (
             <Grid columns="equal" className="deadlines">
               <Grid.Row>
@@ -210,7 +212,7 @@ const ProposalList = ({ isActive }) => {
   const readyForProcessing = proposals
     .filter(p => p.status === ProposalStatus.ReadyForProcessing)
     .sort(sortProposals);
-
+  
   const panes = [
     {
       menuItem: `Voting Period (${votingPeriod.length})`,
@@ -305,30 +307,36 @@ const ProposalList = ({ isActive }) => {
           )}
         </Tab.Pane>
       ),
+    },        
+    {
+      menuItem: <Button size="medium" color="grey" id="newPorposalButton" to={isActive ? "/proposalsubmission" : "/proposals"} disabled={!isActive}>
+                  New Proposal
+                </Button>,
+      render: () => (
+        <Tab.Pane attached={false}>
+          <Redirect to="/proposalsubmission" />
+
+        </Tab.Pane>
+      ),
     },
   ];
+
 
   return (
     <div id="proposal_list">
       <>
-        <Grid columns={16} verticalAlign="middle">
+        <Grid columns={16} verticalAlign="middle" >
           <Grid.Column
             mobile={16}
             tablet={8}
             computer={4}
             textAlign="right"
-            floated="right"
-            className="submit_button"
+            id="proposalWidth"
           >
-            <Link to={isActive ? "/proposalsubmission" : "/proposals"} className="link">
-              <Button size="large" color="red" disabled={!isActive}>
-                New Proposal
-              </Button>
-            </Link>
           </Grid.Column>
         </Grid>
-        <Tab menu={{ secondary: true, pointing: true }} panes={panes} />
-      </>
+        <Tab menu={{ text: true }} panes={panes} />        
+        </>
     </div>
   );
 };

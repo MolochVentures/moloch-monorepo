@@ -12,11 +12,11 @@ export const currencyFormatter = new Intl.NumberFormat("en-US", {
  * @param {*} weiAmount
  * @param {*} exchangeRate in Wei units
  */
-export function convertWeiToDollars(weiAmount, exchangeRate) {
-  const weitoEth = utils.formatEther(weiAmount);
-  const exchWeiToEth = utils.formatEther(exchangeRate);
 
-  return currencyFormatter.format(parseFloat(weitoEth * exchWeiToEth));
+export function convertWeiToDollars(weiAmount) {
+  const weitoEth = utils.formatEther(weiAmount);
+
+  return currencyFormatter.format(parseFloat(weitoEth));
 }
 
 export function getShareValue(totalShares, totalValue) {

@@ -1,9 +1,8 @@
 import React from "react";
-import { Grid, Image, Divider } from "semantic-ui-react";
+import { Grid, Image,Segment } from "semantic-ui-react";
 import { Switch, Route, Link } from "react-router-dom";
 
 import MemberDetail from "./MemberDetail";
-import bull from "assets/bull.png";
 import user from "assets/user.png";
 
 import { useQuery } from "react-apollo";
@@ -18,18 +17,11 @@ const MemberAvatar = ({ address, shares }) => (
     tablet={3}
     computer={3}
     textAlign="center"
-    className="member_avatar"
-    title={address}
   >
-    <ProfileHover address={address} noTheme>
-      <Link to={`/members/${address}`} className="uncolored">
-        <Image src={user} centered size="tiny" />
-        <p className="name">
-          {!address ? "" : address.length > 10 ? address.substring(0, 10) + "..." : address}
-        </p>
-        <p className="subtext">{shares} shares</p>
+    <Link to={`/members/${address}`} className="uncolored">
+      <ProfileHover address={address} showName="true" />
       </Link>
-    </ProfileHover>
+      <p id="shares" className="subtext">{shares} shares</p>  
   </Grid.Column>
 );
 
@@ -42,15 +34,13 @@ const LoggedInUser = ({ loggedInUser }) => {
 
   const { member } = data;
   return member && member.isActive ? (
-    <ProfileHover address={loggedInUser} noTheme>
       <Link to={`/members/${member.id}`} className="uncolored">
-        <Image centered src={bull} size="tiny" />
+        <Image centered src={user} size="tiny" />
         <p className="name">
           {!member.id ? "" : member.id.length > 10 ? member.id.substring(0, 10) + "..." : member.id}
         </p>
         <p className="subtext">{member.shares ? member.shares : 0} shares</p>
       </Link>
-    </ProfileHover>
   ) : (
     <div />
   );
@@ -121,7 +111,8 @@ const MemberList = props => {
   }
   return (
     <div id="member_list">
-      <Grid columns={16} verticalAlign="middle">
+      <h4>REGISTERD MEMBERS: {members}</h4>
+      <Grid container columns={16} verticalAlign="center" className="memberListGrid">
         <Grid.Column
           mobile={16}
           tablet={6}
@@ -129,33 +120,30 @@ const MemberList = props => {
           textAlign="left"
           className="member_list_header"
         >
-          <p className="subtext">{members} Members</p>
         </Grid.Column>
       </Grid>
 
+      <Segment id="EldersSegment"> 
       <Grid>
-        <Grid.Column textAlign="center">
-          <LoggedInUser {...props} />
-        </Grid.Column>
-      </Grid>
-      <Grid className="member_item">
         <Grid.Row>
-          <p style={{ paddingLeft: "1rem" }}>Elders (100+ shares)</p>
+          <h3 style={{ paddingLeft: "1rem" }}>ELDERS (100+ SHARES)</h3>
         </Grid.Row>
-        <Divider />
-        <Grid.Row className="members_row" centered>
+        <Grid.Row className="members_row">
           <Elders />
         </Grid.Row>
       </Grid>
-      <Grid className="member_item">
+      </Segment>
+
+      <Segment id="ContributorsSegment">
+      <Grid>
         <Grid.Row>
-          <p style={{ paddingLeft: "1rem" }}>Contributors</p>
+          <h3 style={{ paddingLeft: "1rem" }}>CONTRIBUTORS</h3>
         </Grid.Row>
-        <Divider />
-        <Grid.Row className="members_row" centered>
+        <Grid.Row className="members_row">
           <Contributors />
         </Grid.Row>
       </Grid>
+      </Segment>
     </div>
   );
 };
