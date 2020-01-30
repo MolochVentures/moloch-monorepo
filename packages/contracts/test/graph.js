@@ -74,7 +74,7 @@ function randomInt(min,max) // min and max included
     return Math.floor(Math.random()*(max-min+1)+min);
 }
 
-contract('Moloch', accounts => {
+contract('Graph', accounts => {
   let snapshotId = 0, proposalIndex = 0, numAccounts = 5, applicants = []
 
   before('deploy contracts', async () => {

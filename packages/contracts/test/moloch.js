@@ -1,20 +1,16 @@
 /* global artifacts, contract, assert, web3 */
 /* eslint-env mocha */
 
-const Moloch = artifacts.require('./Moloch')
-const GuildBank = artifacts.require('./GuildBank')
-// const TestCoin = artifacts.require('./TestCoin')
-const LootToken = artifacts.require('./LootToken')
-const foundersJSON = require('../migrations/founders.json')
-const configJSON = require('../migrations/config.json')
+const Moloch = artifacts.require('./Moloch');
+const SimpleToken = artifacts.require('./SimpleToken');
+const configJSON = require('../migrations/config.json');
 
 const abi = require('web3-eth-abi')
-
 const HttpProvider = require(`ethjs-provider-http`)
 const EthRPC = require(`ethjs-rpc`)
 const ethRPC = new EthRPC(new HttpProvider('http://localhost:8545'))
 
-const BigNumber = web3.BigNumber
+const BigNumber = require('bignumber.js')
 
 const should = require('chai').use(require('chai-as-promised')).use(require('chai-bignumber')(BigNumber)).should()
 
@@ -22,231 +18,131 @@ async function blockTime() {
   return (await web3.eth.getBlock('latest')).timestamp
 }
 
-function getEventParams(tx, event) {
-  if (tx.logs.length > 0) {
-    for (let idx=0; idx < tx.logs.length; idx++) {
-      if (tx.logs[idx].event == event) {
-        return tx.logs[idx].args
-      }
+async function forceMine() {
+  return await ethRPC.sendAsync({ method: `evm_mine` }, err => {});
+}
+
+async function moveForwardPeriods(periods) {
+  const blocktimestamp = await blockTime();
+  const goToTime = configJSON.PERIOD_DURATION * periods;
+  await ethRPC.sendAsync(
+    {
+      jsonrpc: "2.0",
+      method: `evm_increaseTime`,
+      params: [goToTime],
+      id: 0
+    },
+    err => {
+      `error increasing time`;
     }
-  }
-  return false
-}
-
-async function snapshot() {
-  return new Promise((accept, reject) => {
-    ethRPC.sendAsync({method: `evm_snapshot`}, (err, result)=> {
-      if (err) {
-        reject(err)
-      } else {
-        accept(result)
-      }
-    })
-  })
-}
-
-async function restore(snapshotId) {
-  return new Promise((accept, reject) => {
-    ethRPC.sendAsync({method: `evm_revert`, params: [snapshotId]}, (err, result) => {
-      if (err) {
-        reject(err)
-      } else {
-        accept(result)
-      }
-    })
-  })
+  );
+  await forceMine();
+  const updatedBlocktimestamp = await blockTime();
+  return true;
 }
 
 contract('Moloch', accounts => {
-  let snapshotId
+  let moloch;
+  let guildBank;
+  let summoner;
+  let applicant;
+  let beneficiary;
 
   before('deploy contracts', async () => {
-    moloch = await Moloch.deployed()
-    guildBank = await GuildBank.deployed()
-    lootAddress = await moloch.lootToken()
-    lootToken = await LootToken.at(lootAddress)
+    moloch = await Moloch.deployed();
+    guildBank = await moloch.guildBank();
+    simpleToken = await SimpleToken.deployed();
+
+    summoner = accounts[0];
+    applicant = accounts[1];
+    beneficiary = accounts[2];
+    // transfer 10 SIM to applicant
+    await simpleToken.transfer(applicant, new BigNumber(configJSON.PROPOSAL_DEPOSIT));
+    
+    // approve 10 SIM owner summoner and applicant to Moloch contract (spender)
+    await simpleToken.approve(moloch.address, new BigNumber(configJSON.PROPOSAL_DEPOSIT * 2));
+    await simpleToken.approve(moloch.address, new BigNumber(configJSON.PROPOSAL_DEPOSIT), {from : applicant});
   })
 
-  beforeEach(async () => {
-    snapshotId = await snapshot()
+  it('allows to verify deployment parameters', async () => {
+    const now = await blockTime() 
+    const summoningTime =  await moloch.summoningTime()
 
-    founder1 = {
-      address: accounts[0],
-      tributeTokenAddresses: []
-    }
-
-    applicant = accounts[2]
+    assert.equal(await moloch.approvedToken(), simpleToken.address)
+    assert.equal(await moloch.periodDuration(), configJSON.PERIOD_DURATION)
+    assert.equal(await moloch.votingPeriodLength(), configJSON.VOTING_PERIOD_LENGTH)
+    assert.equal(await moloch.gracePeriodLength(), configJSON.GRACE_PERIOD_LENGTH)
+    assert.equal(await moloch.proposalDeposit(), configJSON.PROPOSAL_DEPOSIT)
+    assert.equal(await moloch.dilutionBound(), configJSON.DILUTION_BOUND)
+    assert.equal(await moloch.processingReward(), configJSON.PROCESSING_REWARD)
   })
 
-  afterEach(async () => {
-    await restore(snapshotId)
+  it('allows to submit a membership proposal', async () => {
+    const tx = await moloch.submitProposal(applicant, new BigNumber(configJSON.PROPOSAL_DEPOSIT), 3, "first proposal");
+    assert.equal(+tx.logs[0].args.proposalIndex, 0);
+    assert.equal(tx.logs[0].args.applicant, applicant);
+    assert.equal(tx.logs[0].args.memberAddress, summoner);
   })
 
-  it('verify deployment parameters', async () => {
-    const now = await blockTime()
+  it("allows to vote on a membership proposal", async () => {
+    await moveForwardPeriods(1);
+    let tx = await moloch.submitVote(0, 1, {from: summoner});
+    assert.equal(+tx.logs[0].args.proposalIndex, 0);
+    assert.equal(tx.logs[0].args.delegateKey, summoner);
+    assert.equal(tx.logs[0].args.memberAddress, summoner);
+    assert.equal(+tx.logs[0].args.uintVote, 1);
+  });
 
-    const molochLootTokenAddress = await moloch.lootToken()
-    assert.equal(molochLootTokenAddress, lootToken.address)
+  it("allows to process a membership proposal", async () => {
+    await moveForwardPeriods(14);
+    let tx = await moloch.processProposal(0);
+    assert.equal(+tx.logs[0].args.proposalIndex, 0);
+    assert.equal(tx.logs[0].args.applicant, applicant);
+    assert.equal(tx.logs[0].args.memberAddress, summoner);
+    assert.equal(+tx.logs[0].args.tokenTribute, new BigNumber(configJSON.PROPOSAL_DEPOSIT));
+    assert.equal(+tx.logs[0].args.sharesRequested, 3);
+    assert.equal(tx.logs[0].args.didPass, true);
+  });
 
-    const guildBankLootTokenAddress = await guildBank.lootToken()
-    assert.equal(guildBankLootTokenAddress, lootToken.address)
-
-    const foundersVotingShares = foundersJSON.votingShares.reduce((total, shares) => {
-      return total + shares
-    })
-
-    totalLootTokens = await lootToken.totalSupply()
-    assert.equal(+totalLootTokens, foundersVotingShares)
-
-    totalVotingShares = await moloch.totalVotingShares()
-    assert.equal(+totalVotingShares, foundersVotingShares)
-
-    const molochGuildBankAddress = await moloch.guildBank()
-    assert.equal(molochGuildBankAddress, guildBank.address)
-
-    const guildBankOwner = await guildBank.owner()
-    assert.equal(guildBankOwner, moloch.address)
-
-    const periodDuration = await moloch.periodDuration()
-    assert.equal(+periodDuration, configJSON.PERIOD_DURATION_IN_SECONDS)
-
-    const votingPeriodLength = await moloch.votingPeriodLength()
-    assert.equal(+votingPeriodLength, configJSON.VOTING_DURATON_IN_PERIODS)
-
-    const gracePeriodLength = await moloch.gracePeriodLength()
-    assert.equal(+gracePeriodLength, configJSON.GRACE_DURATON_IN_PERIODS)
-
-    const proposalDeposit = await moloch.proposalDeposit()
-    assert.equal(+proposalDeposit, configJSON.MIN_PROPOSAL_DEPOSIT_IN_WEI)
-
-    const currentPeriod = await moloch.currentPeriod()
-    assert.equal(+currentPeriod, 0)
-
-    const periodData = await moloch.periods(+currentPeriod)
-    // assert.equal(+periodData[0], now)
-
-    const startTime = +periodData[0]
-    const endTime = +periodData[1]
-    assert.equal(endTime - startTime, configJSON.PERIOD_DURATION_IN_SECONDS)
-
-    for (let i=0; i < foundersJSON.addresses.length; i++) {
-      let founderAddress = foundersJSON.addresses[i]
-      let founderVotingShares = foundersJSON.votingShares[i]
-      memberData = await moloch.members(founderAddress)
-      assert.equal(+memberData[0], founderVotingShares)
-      assert.equal(memberData[1], true)
-    }
+  it('allows to submit funding proposal', async () => {
+    // there are 4 shares in total, requesting 2
+    const tx = await moloch.submitProposal(beneficiary, 0, 2, "funding proposal");
+    assert.equal(+tx.logs[0].args.proposalIndex, 1);
+    assert.equal(tx.logs[0].args.applicant, beneficiary);
+    assert.equal(tx.logs[0].args.memberAddress, summoner);
   })
 
-  describe('submitProposal', () => {
-    it('happy case', async () => {
-      await moloch.submitProposal()
+  it("allows to vote on funding proposal", async () => {
+    await moveForwardPeriods(1);
+    let tx = await moloch.submitVote(1, 1, {from: summoner});
+    assert.equal(+tx.logs[0].args.proposalIndex, 1);
+    assert.equal(tx.logs[0].args.delegateKey, summoner);
+    assert.equal(tx.logs[0].args.memberAddress, summoner);
+    assert.equal(+tx.logs[0].args.uintVote, 1);
+  });
 
-      // set the applicant profile
-      // the founders have to be the addresses - they are
-      // need to switch it up for voting
-      // one of the founders needs to submit the tx
-      // need to have at least 2 test tokens deployed
-      // approve token transfers in advance
-    })
-  })
+  it("allows to process a funding proposal", async () => {
+    let shares = await moloch.totalShares();
+    assert.equal(+shares, 4);
+    await moveForwardPeriods(14);
+    const guildBankBefore = await simpleToken.balanceOf(guildBank);
+    const balBefore = await simpleToken.balanceOf(beneficiary);
+    assert.equal(+balBefore, 0);
+    let tx = await moloch.processProposal(1);
+    assert.equal(+tx.logs[0].args.proposalIndex, 1);
+    assert.equal(tx.logs[0].args.applicant, beneficiary);
+    assert.equal(tx.logs[0].args.memberAddress, summoner);
+    assert.equal(+tx.logs[0].args.tokenTribute, 0);
+    assert.equal(+tx.logs[0].args.sharesRequested, 2);
+    assert.equal(tx.logs[0].args.didPass, true);
+    const guildBankAfter = await simpleToken.balanceOf(guildBank);
+    assert.equal(+guildBankAfter, guildBankBefore / 2);
+    const balAfter = await simpleToken.balanceOf(beneficiary);
+    // requesting funding of 2 shares, when total shares are 4, will return half of total bank
+    assert.equal(balAfter * 2, +guildBankBefore);
+    // amount of shares should have not increased
+    hares = await moloch.totalShares();
+    assert.equal(+shares, 4);
+  });
 
-  describe('submitVote', () => {
-
-  })
-
-  describe('processProposal', () => {
-
-  })
-
-  describe('collectLootTokens', () => {
-
-  })
-
-  describe('GuildBank::redeemLootTokens', () => {
-
-  })
-
-  describe('GuildBank::safeRedeemLootTokens', () => {
-
-  })
-
-  // verify founding members
-  // it('should save addresses from deploy', async () => {
-  //   for (let i = 0; i < founders.addresses.length; i++) {
-  //     let memberAddress = founders.addresses[i]
-  //     const member = await moloch.getMember(memberAddress)
-  //     assert.equal(member, true, 'founding member not saved correctly')
-  //   }
-  // })
-  // // verify failure of non-founding members
-  // it('should fail non deployed addresses', async () => {
-  //   for (let i = 2; i < 10; i++) {
-  //     let nonMemberAddress = accounts[i]
-  //     const nonMember = await moloch.getMember(nonMemberAddress)
-  //     assert.notEqual(nonMember, true, 'non-member added incorrectly')
-  //   }
-  // })
-  // // verify founding member shares
-  // it('should save founder shares from deploy', async () => {
-  //   for (let i = 0; i < founders.addresses.length; i++) {
-  //     let memberAddress = founders.addresses[i]
-  //     const memberShares = await moloch.getVotingShares(memberAddress)
-  //     assert.equal(
-  //       founders.shares[i],
-  //       memberShares.toNumber(),
-  //       'founding shares not saved correctly'
-  //     )
-  //   }
-  // })
-  // // verify failure of incorrect shares
-  // it('should fail on incorrect shares', async () => {
-  //   for (let i = 0; i < founders.addresses.length; i++) {
-  //     let memberAddress = founders.addresses[i]
-  //     const memberShares = await moloch.getVotingShares(memberAddress)
-  //     assert.notEqual(
-  //       parseInt(Math.random() * 1000),
-  //       memberShares.toNumber(),
-  //       'incorrect shares saved'
-  //     )
-  //   }
-  // })
 })
-
-// verify failure member proposal
-// verify create/failure project proposal
-// verify failure start proposal vote
-// verify failure vote on current proposal
-// verify failure transition proposal to grace period
-// verify failure finish proposal
-
-// verify shares
-// verify tokens
-
-// verify tokens/ETH on member application rejection
-
-// verify member exit
-// verify member exit burned voting tokens
-// verify member exit loot tokens calculation
-// verify loot tokens decremented correctly on member exit
-// verify exited member no longer has voting ability
-
-/*
-  TEST STATES
-  1. deploy
-  2. donation
-  3. membership proposal (exit at any time)
-  - start voting
-  - voting
-  - grace period
-  - membership success
-  - membership failure
-  - finish
-  4. project proposal (exit at any time)
-  - start voting
-  - voting
-  - grace period
-  - project success
-  - project failure
-  - finish
-  */

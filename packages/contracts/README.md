@@ -10,6 +10,16 @@ Moloch is a grant-making DAO / Guild and a radical experiment in voluntary incen
 
 This documentation will focus on the Moloch DAO system design and smart contracts. For a deeper explanation of the philosophy behind Moloch, please read the Slate Star Codex post, [Meditations on Moloch](http://slatestarcodex.com/2014/07/30/meditations-on-moloch/), which served as inspiration.
 
+## Testing Contracts
+
+1. run ganache-cli in another terminal
+2. run in the repo
+
+```
+truffle compile
+truffle test test/moloch.js
+```
+
 ## Design Principles
 
 In developing the Moloch DAO, we realized that the more Solidity we wrote, the greater the likelihood that we would lose everyone's money. In order to prioritize security, we took simplicity and elegance as our primary design principles. We consciously skipped many features, and the result is what we believe to be a Minimally Viable DAO.

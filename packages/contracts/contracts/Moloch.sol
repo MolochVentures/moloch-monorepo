@@ -168,7 +168,9 @@ contract Moloch {
         require(approvedToken.transferFrom(msg.sender, address(this), proposalDeposit), "Moloch::submitProposal - proposal deposit token transfer failed");
 
         // collect tribute from applicant and store it in the Moloch until the proposal is processed
-        require(approvedToken.transferFrom(applicant, address(this), tokenTribute), "Moloch::submitProposal - tribute token transfer failed");
+        if (tokenTribute > 0) {
+          require(approvedToken.transferFrom(applicant, address(this), tokenTribute), "Moloch::submitProposal - tribute token transfer failed");
+        }
 
         // compute startingPeriod for proposal
         uint256 startingPeriod = max(
@@ -266,7 +268,14 @@ contract Moloch {
             if (members[proposal.applicant].exists) {
                 members[proposal.applicant].shares = members[proposal.applicant].shares.add(proposal.sharesRequested);
 
-            // the applicant is a new member, create a new record for them
+            // the proposal is a funding proposal
+            } else if (proposal.tokenTribute == 0) {
+                // instruct guildBank to transfer funding amount to applicant
+                require(
+                    guildBank.withdraw(proposal.applicant, proposal.sharesRequested, totalShares),
+                    "Moloch::ragequit - withdrawal of tokens from guildBank failed"
+                );
+            // the applicant is a new member, create a new record for them    
             } else {
                 // if the applicant address is already taken by a member's delegateKey, reset it to their member address
                 if (members[memberAddressByDelegateKey[proposal.applicant]].exists) {
@@ -280,14 +289,16 @@ contract Moloch {
                 memberAddressByDelegateKey[proposal.applicant] = proposal.applicant;
             }
 
-            // mint new shares
-            totalShares = totalShares.add(proposal.sharesRequested);
+            if (proposal.tokenTribute > 0) {
+                // mint new shares
+                totalShares = totalShares.add(proposal.sharesRequested);
 
-            // transfer tokens to guild bank
-            require(
-                approvedToken.transfer(address(guildBank), proposal.tokenTribute),
-                "Moloch::processProposal - token transfer to guild bank failed"
-            );
+                // transfer tokens to guild bank
+                require(
+                    approvedToken.transfer(address(guildBank), proposal.tokenTribute),
+                    "Moloch::processProposal - token transfer to guild bank failed"
+                );
+            }
 
         // PROPOSAL FAILED OR ABORTED
         } else {
