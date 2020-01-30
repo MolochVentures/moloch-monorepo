@@ -273,7 +273,7 @@ contract Moloch {
                 // instruct guildBank to transfer funding amount to applicant
                 require(
                     guildBank.withdraw(proposal.applicant, proposal.sharesRequested, totalShares),
-                    "Moloch::ragequit - withdrawal of tokens from guildBank failed"
+                    "Moloch::processProposal - withdrawal of tokens from guildBank failed"
                 );
             // the applicant is a new member, create a new record for them    
             } else {
