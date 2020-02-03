@@ -1,6 +1,8 @@
 {
   "name": "root",
   "private": true,
-  "devDependencies": {},
+  "devDependencies": {
+    "prettier": "^1.19.1"
+  },
   "dependencies": {}
 }

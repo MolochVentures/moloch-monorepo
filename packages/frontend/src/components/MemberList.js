@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Image,Segment } from "semantic-ui-react";
+import { Grid, Image, Segment } from "semantic-ui-react";
 import { Switch, Route, Link } from "react-router-dom";
 
 import MemberDetail from "./MemberDetail";
@@ -18,11 +18,13 @@ const MemberAvatar = ({ address, shares }) => (
     computer={3}
     textAlign="center"
   >
-    <Link to={`/members/${address}`} className="uncolored">
-      <ProfileHover address={address} showName="true" />
+    <div className="profile">
+      <Link to={`/members/${address}`} className="uncolored">
+        <ProfileHover address={address} showName="true" />
       </Link>
-      <p id="shares" className="subtext">{shares} shares</p>  
-  </Grid.Column>
+    </div>
+      <p className="uncolored">{shares} shares</p>
+  </Grid.Column >
 );
 
 const LoggedInUser = ({ loggedInUser }) => {
@@ -34,16 +36,16 @@ const LoggedInUser = ({ loggedInUser }) => {
 
   const { member } = data;
   return member && member.isActive ? (
-      <Link to={`/members/${member.id}`} className="uncolored">
-        <Image centered src={user} size="tiny" />
-        <p className="name">
-          {!member.id ? "" : member.id.length > 10 ? member.id.substring(0, 10) + "..." : member.id}
-        </p>
-        <p className="subtext">{member.shares ? member.shares : 0} shares</p>
-      </Link>
+    <Link to={`/members/${member.id}`} className="uncolored">
+      <Image centered src={user} size="tiny" />
+      <p className="name">
+        {!member.id ? "" : member.id.length > 10 ? member.id.substring(0, 10) + "..." : member.id}
+      </p>
+      <p className="subtext">{member.shares ? member.shares : 0} shares</p>
+    </Link>
   ) : (
-    <div />
-  );
+      <div />
+    );
 };
 
 const GET_ELDERS = gql`
@@ -68,8 +70,8 @@ const Elders = () => {
       <MemberAvatar address={elder.id} shares={elder.shares} key={idx} />
     ))
   ) : (
-    <>No elders to show.</>
-  );
+      <>No elders to show.</>
+    );
 };
 
 const GET_NON_ELDERS = gql`
@@ -94,8 +96,8 @@ const Contributors = () => {
       <MemberAvatar address={contributor.id} shares={contributor.shares} key={idx} />
     ))
   ) : (
-    <>No contributors to show.</>
-  );
+      <>No contributors to show.</>
+    );
 };
 
 const MemberList = props => {
@@ -123,26 +125,26 @@ const MemberList = props => {
         </Grid.Column>
       </Grid>
 
-      <Segment id="EldersSegment"> 
-      <Grid>
-        <Grid.Row>
-          <h3 style={{ paddingLeft: "1rem" }}>ELDERS (100+ SHARES)</h3>
-        </Grid.Row>
-        <Grid.Row className="members_row">
-          <Elders />
-        </Grid.Row>
-      </Grid>
+      <Segment id="EldersSegment">
+        <Grid>
+          <Grid.Row>
+            <h3 style={{ paddingLeft: "1rem" }}>ELDERS (100+ SHARES)</h3>
+          </Grid.Row>
+          <Grid.Row className="members_row">
+            <Elders />
+          </Grid.Row>
+        </Grid>
       </Segment>
 
       <Segment id="ContributorsSegment">
-      <Grid>
-        <Grid.Row>
-          <h3 style={{ paddingLeft: "1rem" }}>CONTRIBUTORS</h3>
-        </Grid.Row>
-        <Grid.Row className="members_row">
-          <Contributors />
-        </Grid.Row>
-      </Grid>
+        <Grid>
+          <Grid.Row>
+            <h3 style={{ paddingLeft: "1rem" }}>CONTRIBUTORS</h3>
+          </Grid.Row>
+          <Grid.Row className="members_row">
+            <Contributors />
+          </Grid.Row>
+        </Grid>
       </Segment>
     </div>
   );

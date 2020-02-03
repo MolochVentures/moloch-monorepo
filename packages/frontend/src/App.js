@@ -1,7 +1,7 @@
 import { useQuery } from "@apollo/react-hooks";
 import { HttpLink, ApolloClient, InMemoryCache } from "apollo-boost";
 import gql from "graphql-tag";
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import { ApolloProvider } from "react-apollo";
 import { ToastMessage } from "rimble-ui";
@@ -11,7 +11,7 @@ import Background from "./components/Background";
 import Header from "./components/Header";
 import Home from "./components/Home";
 import MemberList from "./components/MemberList";
-import PoolMemberListView from "./components/PoolMemberList";
+import FundingSubmission from "./components/FundingSubmission";
 import ProposalList from "./components/ProposalList";
 import ProposalSubmission from "./components/ProposalSubmission";
 import Wrapper from "./components/Wrapper";
@@ -81,18 +81,24 @@ const Routes = () => {
                 render={props => <MemberList {...props} loggedInUser={loggedInUser} />}
               />
               <Route
-                path="/proposalsubmission"
+                path="/proposal-submission"
                 render={props =>
                   loggedInUser ? (
                     <ProposalSubmission {...props} loggedInUser={loggedInUser} />
                   ) : (
-                    <Redirect to={{ pathname: "/" }} />
-                  )
+                      <Redirect to={{ pathname: "/" }} />
+                    )
                 }
               />
               <Route
-                path="/pool-members"
-                render={props => <PoolMemberListView {...props} loggedInUser={loggedInUser} />}
+                path="/funding-submission"
+                render={props =>
+                  loggedInUser ? (
+                    <FundingSubmission {...props} loggedInUser={loggedInUser} />
+                  ) : (
+                      <Redirect to={{ pathname: "/" }} />
+                    )
+                }
               />
               <Route component={props => <Home {...props} loggedInUser={loggedInUser} />} />
             </Switch>
@@ -130,13 +136,13 @@ const App = () => {
       </Router>
     </ApolloProvider>
   ) : (
-    <>
-      <Background />
-      <Dimmer active>
-        <Loader size="massive" />
-      </Dimmer>
-    </>
-  );
+      <>
+        <Background />
+        <Dimmer active>
+          <Loader size="massive" />
+        </Dimmer>
+      </>
+    );
 };
 
 export default App;

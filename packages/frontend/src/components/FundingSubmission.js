@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component } from 'react'
 import {
   Button,
   Form,
@@ -13,19 +13,30 @@ import {
 import { getMoloch, getToken, } from "../web3";
 import { utils } from "ethers";
 import { monitorTx } from "helpers/transaction";
+import { Query } from "react-apollo";
+import { bigNumberify } from "ethers/utils";
+import gql from "graphql-tag";
+import { getShareValue } from "../helpers/currency";
+
+const GET_METADATA = gql`
+  {
+    exchangeRate @client
+    totalShares @client
+    guildBankValue @client
+  }
+`;
 
 const DEPOSIT_WETH = process.env.REACT_APP_DEPOSIT_WETH || "10";
 
 class SubmitModal extends Component {
   state = {
     loading: true,
-    beneficiaryApproved: false,
     depositApproved: false,
     open: false,
   };
 
   handleOpen = async () => {
-    const { token, address, tribute, moloch, loggedInUser, valid } = this.props;
+    const { token, moloch, loggedInUser, valid } = this.props;
     if (!valid) {
       alert("Please fill any missing fields.");
       return;
@@ -34,12 +45,6 @@ class SubmitModal extends Component {
       open: true,
     });
 
-    const beneficiaryAllowance = await token.allowance(address, moloch.address);
-    let beneficiaryApproved = false;
-    if (beneficiaryAllowance.gte(utils.parseEther(tribute))) {
-      beneficiaryApproved = true;
-    }
-
     const depositAllowance = await token.allowance(loggedInUser, moloch.address);
     let depositApproved = false;
     if (depositAllowance.gte(utils.parseEther(DEPOSIT_WETH))) {
@@ -47,7 +52,6 @@ class SubmitModal extends Component {
     }
 
     this.setState({
-      beneficiaryApproved,
       depositApproved,
       loading: false,
     });
@@ -60,7 +64,7 @@ class SubmitModal extends Component {
   };
 
   render() {
-    const { loading, beneficiaryApproved, depositApproved, open } = this.state;
+    const { loading, depositApproved, open } = this.state;
     const { handleSubmit, submittedTx } = this.props;
     return (
       <div id="proposal_submission">
@@ -88,16 +92,6 @@ class SubmitModal extends Component {
                 <List.Content>{DEPOSIT_WETH} DAI Deposit Approved</List.Content>
               </List.Item>
               <List.Item>
-                {loading ? (
-                  <List.Icon name="time" />
-                ) : beneficiaryApproved ? (
-                  <List.Icon name="check circle" />
-                ) : (
-                      <List.Icon name="x" />
-                    )}
-                <List.Content>Tribute Approved By Beneficiary</List.Content>
-              </List.Item>
-              <List.Item>
                 {submittedTx ? <List.Icon name="code" /> : <></>}
                 <List.Content>
                   {submittedTx ? (
@@ -121,7 +115,7 @@ class SubmitModal extends Component {
               color="green"
               inverted
               onClick={handleSubmit}
-              disabled={submittedTx || !depositApproved || !beneficiaryApproved}
+              disabled={submittedTx || !depositApproved}
             >
               <Icon name="check" /> Submit
           </Button>
@@ -135,26 +129,28 @@ class SubmitModal extends Component {
   }
 }
 
-export default class ProposalSubmission extends Component {
+export default class FundingSubmission extends Component {
+
   state = {
     address: "",
     title: "",
     description: "",
-    shares: "",
-    tribute: "", // TODO: this will be calculated with the blockchain
-    fieldValidationErrors: { title: "", description: "", assets: "", shares: "" },
+    amount: "",
+    tribute: 0, // TODO: this will be calculated with the blockchain
+    fieldValidationErrors: { title: "", description: "", assets: "", amount: "" },
     titleValid: false,
     descriptionValid: false,
-    tributeValid: false,
-    sharesValid: false,
+    amountValid: false,
     addressValid: false,
     formValid: false,
+    shareValue: null
   };
 
   async componentDidMount() {
     const { loggedInUser } = this.props;
     const moloch = await getMoloch(loggedInUser);
     const token = await getToken(loggedInUser);
+
     this.setState({
       moloch,
       token,
@@ -166,8 +162,7 @@ export default class ProposalSubmission extends Component {
       fieldValidationErrors,
       titleValid,
       descriptionValid,
-      tributeValid,
-      sharesValid,
+      amountValid,
       addressValid,
     } = this.state;
 
@@ -178,21 +173,15 @@ export default class ProposalSubmission extends Component {
         break;
       case "address":
         addressValid = utils.isHexString(value);
-        console.log("utils.isHexString(value): ", utils.isHexString(value));
-        console.log("value: ", value);
         fieldValidationErrors.address = addressValid ? "" : "Address is invalid";
         break;
       case "description":
         descriptionValid = value !== "";
         fieldValidationErrors.description = descriptionValid ? "" : "Description is invalid";
         break;
-      case "shares":
-        sharesValid = value > 0;
-        fieldValidationErrors.shares = sharesValid ? "" : "Shares is invalid";
-        break;
-      case "tribute":
-        tributeValid = value >= 5;
-        fieldValidationErrors.tribute = tributeValid ? "" : "Tribute is invalid";
+      case "amount":
+        amountValid = value > 0;
+        fieldValidationErrors.amount = amountValid ? "" : "Amount is invalid";
         break;
       default:
         break;
@@ -202,8 +191,7 @@ export default class ProposalSubmission extends Component {
         fieldValidationErrors,
         titleValid,
         descriptionValid,
-        tributeValid,
-        sharesValid,
+        amountValid,
         addressValid,
       },
       this.validateForm,
@@ -211,9 +199,9 @@ export default class ProposalSubmission extends Component {
   };
 
   validateForm = () => {
-    const { titleValid, descriptionValid, sharesValid, tributeValid, addressValid } = this.state;
+    const { titleValid, descriptionValid, amountValid, addressValid } = this.state;
     this.setState({
-      formValid: titleValid && descriptionValid && sharesValid && tributeValid && addressValid,
+      formValid: titleValid && descriptionValid && amountValid && addressValid,
     });
   };
 
@@ -226,38 +214,33 @@ export default class ProposalSubmission extends Component {
   };
 
   handleSubmit = async () => {
-    const { moloch, address, title, description, shares, tribute } = this.state;
+    const { moloch, address, title, description, amount, shareValue } = this.state;
+    const shares = bigNumberify(amount).mul(10 ** 9).mul(10 ** 9).div(bigNumberify(shareValue));
 
     let submittedTx;
     try {
-      console.log(
-        "Submitting proposal: ",
-        address,
-        utils.parseEther(tribute).toString(),
-        shares,
-        JSON.stringify({ title, description }),
-      );
       monitorTx(
         moloch.submitProposal(
           address,
-          utils.parseEther(tribute),
+          0,
           shares,
           JSON.stringify({ title, description }),
         ),
       );
+
+      this.setState({
+        submittedTx,
+      });
+
     } catch (e) {
       console.error(e);
       alert("Error processing proposal");
     }
-
-    this.setState({
-      submittedTx,
-    });
   };
 
   render() {
     const {
-      shares,
+      amount,
       tribute,
       title,
       description,
@@ -267,18 +250,35 @@ export default class ProposalSubmission extends Component {
       moloch,
       titleValid,
       descriptionValid,
-      sharesValid,
-      tributeValid,
+      amountValid,
       addressValid,
       submittedTx,
     } = this.state;
     const { loggedInUser } = this.props;
+
     return (
       <div id="proposal_submission">
         <Form>
+          <Query query={GET_METADATA}>
+            {({ loading, error, data }) => {
+              if (loading) return <p>Loading...</p>
+              if (error) throw new Error(error);
+              const { guildBankValue, totalShares, } = data;
+
+              const shareValue = getShareValue(totalShares, guildBankValue);
+
+              if (!this.state.shareValue && data) {
+                this.setState({
+                  shareValue
+                });
+              }
+
+              return null;
+            }}
+          </Query>
           <Grid centered columns={16}>
             <Grid.Column mobile={16} tablet={16} computer={12}>
-              <h1> New Member Proposal </h1>
+              <h1> New Funding Proposal </h1>
             </Grid.Column>
             <Grid.Row stretched>
               <Grid.Column mobile={16} tablet={16} computer={12}>
@@ -306,24 +306,14 @@ export default class ProposalSubmission extends Component {
                     error={!addressValid}
                   />
                   <Form.Input
-                    name="shares"
-                    label="Shares Requested"
-                    placeholder="Shares"
-                    fluid
-                    type="number"
-                    onChange={this.handleInput}
-                    value={shares}
-                    error={!sharesValid}
-                  />
-                  <Form.Input
-                    name="tribute"
-                    label="Tribute Offered (in DAI)"
+                    name="amount"
+                    label="DAI Requested"
                     placeholder="DAI"
                     fluid
                     type="number"
                     onChange={this.handleInput}
-                    value={tribute}
-                    error={!tributeValid}
+                    value={amount}
+                    error={!amountValid}
                   />
                 </Segment>
               </Grid.Column>
@@ -349,9 +339,6 @@ export default class ProposalSubmission extends Component {
             </Grid.Row>
             <Grid.Row>
               <Grid.Column mobile={16} tablet={8} computer={8} className="submit_button">
-                {/* <Button size="large" color="red" onClick={this.handleSubmit}>
-                  Submit Proposal
-                </Button> */}
                 <SubmitModal
                   valid={formValid}
                   tribute={tribute}

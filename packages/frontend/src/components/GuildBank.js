@@ -27,7 +27,7 @@ export default class GuildBank extends React.Component {
     isActive: true,
   };
 
-  redeemToken() {}
+  redeemToken() { }
 
   render() {
     return (

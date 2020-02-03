@@ -1,6 +1,6 @@
 import React from "react";
-import { Segment, Grid, Button, Tab, Loader, Divider, Label } from "semantic-ui-react";
-import { Route, Switch, Link, Redirect } from "react-router-dom";
+import { Segment, Grid, Tab, Loader, Divider, Label, Dropdown, } from "semantic-ui-react";
+import { Route, Switch, Link, } from "react-router-dom";
 
 import ProposalDetail from "./ProposalDetail";
 import ProgressBar from "./ProgressBar";
@@ -18,8 +18,8 @@ const ProposalCard = ({ proposal }) => {
       <Link to={{ pathname: `/proposals/${id}` }} className="uncolored">
         <Segment raised>
           <Label as='a' color='white' ribbon>
-           <h4>{getProposalCountdownText(proposal)}</h4>
-        </Label>
+            <h4>{getProposalCountdownText(proposal)}</h4>
+          </Label>
           <p className="name">{proposal.title ? proposal.title : "N/A"}</p>
           <p className="subtext description">
             {proposal.description ? proposal.description : "N/A"}
@@ -57,8 +57,8 @@ const ProposalCard = ({ proposal }) => {
               </Grid.Row>
             </Grid>
           ) : (
-            <ProgressBar yes={proposal.yesShares} no={proposal.noShares} />
-          )}
+              <ProgressBar yes={proposal.yesShares} no={proposal.noShares} />
+            )}
         </Segment>
       </Link>
     </Grid.Column>
@@ -212,7 +212,7 @@ const ProposalList = ({ isActive }) => {
   const readyForProcessing = proposals
     .filter(p => p.status === ProposalStatus.ReadyForProcessing)
     .sort(sortProposals);
-  
+
   const panes = [
     {
       menuItem: `Voting Period (${votingPeriod.length})`,
@@ -293,32 +293,38 @@ const ProposalList = ({ isActive }) => {
           {completedLoading ? (
             <Loader size="massive" active />
           ) : (
-            <Grid columns={3}>
-              {completedProposals.map((p, index) => (
-                <ProposalCard
-                  exchangeRate={exchangeRate}
-                  shareValue={shareValue}
-                  totalShares={+totalShares}
-                  proposal={p}
-                  key={index}
-                />
-              ))}
-            </Grid>
-          )}
-        </Tab.Pane>
-      ),
-    },        
-    {
-      menuItem: <Button size="medium" color="grey" id="newPorposalButton" to={isActive ? "/proposalsubmission" : "/proposals"} disabled={!isActive}>
-                  New Proposal
-                </Button>,
-      render: () => (
-        <Tab.Pane attached={false}>
-          <Redirect to="/proposalsubmission" />
-
+              <Grid columns={3}>
+                {completedProposals.map((p, index) => (
+                  <ProposalCard
+                    exchangeRate={exchangeRate}
+                    shareValue={shareValue}
+                    totalShares={+totalShares}
+                    proposal={p}
+                    key={index}
+                  />
+                ))}
+              </Grid>
+            )}
         </Tab.Pane>
       ),
     },
+    {
+      menuItem: <Dropdown text="New Proposal" id="newPorposalDropdown" disabled={!isActive} button className="grey" >
+        <Dropdown.Menu>
+          <Dropdown.Item text='Member Proposal'>
+            <Link to="/proposal-submission" className="uncolored">
+              Member Proposal
+                      </Link>
+          </Dropdown.Item>
+          <Dropdown.Item text='Member Proposal'>
+            <Link to="/funding-submission" className="uncolored">
+              Funding Proposal
+                      </Link>
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+    }
+
   ];
 
 
@@ -335,8 +341,8 @@ const ProposalList = ({ isActive }) => {
           >
           </Grid.Column>
         </Grid>
-        <Tab menu={{ text: true }} panes={panes} />        
-        </>
+        <Tab menu={{ text: true }} panes={panes} />
+      </>
     </div>
   );
 };

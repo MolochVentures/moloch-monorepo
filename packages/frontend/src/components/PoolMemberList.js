@@ -45,14 +45,14 @@ const LoggedInUser = props => {
         {!data.member.id
           ? ""
           : data.member.id.length > 10
-          ? data.member.id.substring(0, 10) + "..."
-          : data.member.id}
+            ? data.member.id.substring(0, 10) + "..."
+            : data.member.id}
       </p>
       <p className="subtext">{data.member.shares ? data.member.shares : 0} shares</p>
     </Link>
   ) : (
-    <div />
-  );
+      <div />
+    );
 };
 
 const GET_POOL_MEMBERS = gql`
@@ -106,8 +106,8 @@ const PoolMemberList = props => {
               <MemberAvatar address={elder.id} shares={elder.shares} key={idx} />
             ))
           ) : (
-            <>No pool members to show.</>
-          )}
+              <>No pool members to show.</>
+            )}
         </Grid.Row>
       </Grid>
     </div>

@@ -75,69 +75,69 @@ const MemberDetail = ({ memberAddress, shareValue, exchangeRate }) => {
 
   return (
     <div id="member_detail">
-    <Segment className="blurred box">
-      <Grid columns={1}>
-      <Grid.Row>
-          <ProfileHover
-            address={memberAddress}
-            showName="true"
-            displayFull="true"
-            href="/members/${memberAddress}"
-          />
-        </Grid.Row>
-        <Grid.Row>
-        <Segment raised>
-          <Grid columns={2}>
-            <Grid.Row>
-              <Grid.Column>
-                <p className="subtitle">Shares</p>
-              </Grid.Column>
-              <Grid.Column textAlign="right">
-                <p className="amount">{member.shares}</p>
-              </Grid.Column>
-            </Grid.Row>
-            <Divider />
-            <Grid.Row>
-              <Grid.Column>
-                <p className="subtitle">Total Value</p>
-              </Grid.Column>
-              <Grid.Column textAlign="right">
-                <p className="amount">
-                  {convertWeiToDollars(
-                    utils
-                      .bigNumberify(member.shares)
-                      .mul(shareValue)
-                      .toString(),
-                    exchangeRate,
-                  )}
+      <Segment className="blurred box">
+        <Grid columns={1}>
+          <Grid.Row>
+            <ProfileHover
+              address={memberAddress}
+              showName="true"
+              displayFull="true"
+              href="/members/${memberAddress}"
+            />
+          </Grid.Row>
+          <Grid.Row>
+            <Segment raised>
+              <Grid columns={2}>
+                <Grid.Row>
+                  <Grid.Column>
+                    <p className="subtitle">Shares</p>
+                  </Grid.Column>
+                  <Grid.Column textAlign="right">
+                    <p className="amount">{member.shares}</p>
+                  </Grid.Column>
+                </Grid.Row>
+                <Divider />
+                <Grid.Row>
+                  <Grid.Column>
+                    <p className="subtitle">Total Value</p>
+                  </Grid.Column>
+                  <Grid.Column textAlign="right">
+                    <p className="amount">
+                      {convertWeiToDollars(
+                        utils
+                          .bigNumberify(member.shares)
+                          .mul(shareValue)
+                          .toString(),
+                        exchangeRate,
+                      )}
+                    </p>
+                  </Grid.Column>
+                </Grid.Row>
+                <Divider />
+                <Grid.Row>
+                  <Grid.Column>
+                    <p className="subtitle">Tribute</p>
+                  </Grid.Column>
+                  <Grid.Column textAlign="right">
+                    <p className="amount">
+                      {utils.formatEther(member.tokenTribute)} DAI
                 </p>
-              </Grid.Column>
-            </Grid.Row>
-            <Divider />
-            <Grid.Row>
-              <Grid.Column>
-                <p className="subtitle">Tribute</p>
-              </Grid.Column>
-              <Grid.Column textAlign="right">
-                <p className="amount"> 
-                  {utils.formatEther(member.tokenTribute)} DAI
-                </p>
-              </Grid.Column>
-            </Grid.Row>
-          </Grid>
-          </Segment>
-        </Grid.Row>
+                  </Grid.Column>
+                </Grid.Row>
+              </Grid>
+            </Segment>
+          </Grid.Row>
 
-        <Grid.Row>
-          <Grid.Column>
-            <p className="subtitle">Delegate Key</p>
-          </Grid.Column>
-          <Grid.Column>
+          <Grid.Row>
+            <Grid.Column>
+              <p className="subtitle">Delegate Key</p>
+            </Grid.Column>
+            <Grid.Column>
               <h4 className="delegateKey">{member.delegateKey}</h4>
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
-    </Segment>
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
+      </Segment>
     </div>
   );
 };
@@ -227,12 +227,12 @@ const ProposalDetail = ({ memberAddress }) => {
             );
           })
         ) : (
-          <Grid.Row verticalAlign="middle">
-            <Grid.Column textAlign="center">
-              {`This member hasn't voted on any proposals yet.`}
-            </Grid.Column>
-          </Grid.Row>
-        )}
+            <Grid.Row verticalAlign="middle">
+              <Grid.Column textAlign="center">
+                {`This member hasn't voted on any proposals yet.`}
+              </Grid.Column>
+            </Grid.Row>
+          )}
       </Grid>
     </Segment>
   );

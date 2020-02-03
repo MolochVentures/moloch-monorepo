@@ -151,24 +151,24 @@ const ProposalDetail = ({ loggedInUser, match }) => {
         <Label as='a' color='white' ribbon>
           <h4>{getProposalCountdownText(proposal)}</h4>
         </Label>
-     
-      <Grid container  /*  TITLE */> 
-        <Grid.Column>
-          <Grid.Row>
-            <h1 className="title">{proposal.title ? proposal.title : "N/A"}</h1>
-          </Grid.Row>
-          <Grid.Row>
-            <Linkify properties={{ target: "_blank" }}>
-              <div className="subtext description wordwrap">
-                {proposal.description ? proposal.description : "N/A"}
-              </div>
-            </Linkify>
-          </Grid.Row>
-        </Grid.Column>
-      </Grid>
 
-      <Grid container stackable columns={2} /*  Applicaln and Proposer */>
-        <Grid.Column>
+        <Grid container  /*  TITLE */>
+          <Grid.Column>
+            <Grid.Row>
+              <h1 className="title">{proposal.title ? proposal.title : "N/A"}</h1>
+            </Grid.Row>
+            <Grid.Row>
+              <Linkify properties={{ target: "_blank" }}>
+                <div className="subtext description wordwrap">
+                  {proposal.description ? proposal.description : "N/A"}
+                </div>
+              </Linkify>
+            </Grid.Row>
+          </Grid.Column>
+        </Grid>
+
+        <Grid container stackable columns={2} /*  Applicaln and Proposer */>
+          <Grid.Column>
             <Grid container stackable columns={2} doubling>
               <Grid.Column>
                 <h3>Applicant/Beneficiary</h3>
@@ -184,135 +184,135 @@ const ProposalDetail = ({ loggedInUser, match }) => {
                 />
               </Grid.Column>
 
-            <Segment raised /* Details Segment */ >
+              <Segment raised /* Details Segment */ >
 
-            <Grid container columns={2} /* Tribute Row */>
+                <Grid container columns={2} /* Tribute Row */>
+                  <Grid.Row>
+                    <Grid.Column>
+                      <p className="amount light">Tribute</p>
+                    </Grid.Column>
+                    <Grid.Column>
+                      <p className="amount right">{utils.formatEther(proposal.tokenTribute)} DAI</p>
+                    </Grid.Column>
+                  </Grid.Row>
+                </Grid>
+
+                <Divider />
+
                 <Grid.Row>
-                  <Grid.Column>
-                    <p className="amount light">Tribute</p>
-                  </Grid.Column>
-                  <Grid.Column>
-                    <p className="amount right">{utils.formatEther(proposal.tokenTribute)} DAI</p>
-                  </Grid.Column>
-                </Grid.Row>
-              </Grid>
-
-              <Divider />
-
-              <Grid.Row> 
-              <Grid container columns={2} /* Shares Row */>
-                <Grid.Row>
-                  <Grid.Column>
-                    <p className="amount light">Shares</p>
-                  </Grid.Column>
-                  <Grid.Column>
-                    <p className="amount right">{proposal.sharesRequested}</p>
-                  </Grid.Column>
-                </Grid.Row>
-              </Grid>
-
-              <Divider />
-
-              <Grid.Row> 
-              <Grid container columns={2} /* Total value Row */ >
-                <Grid.Row>
-                  <Grid.Column>
-                    <p className="amount light">Total value</p>
-                  </Grid.Column>
-                  <Grid.Column>
-                    <p className="amount right">
-                    {convertWeiToDollars(
-                      utils
-                        .bigNumberify(proposal.sharesRequested)
-                        .mul(shareValue)
-                        .toString(),
-                      exchangeRate,
-                    )}
-                  </p>
-                  </Grid.Column>
-                </Grid.Row>
-              </Grid>
-            </Grid.Row>
-
-            </Grid.Row>
-            </Segment>
-          </Grid>
-        </Grid.Column>
-
-        <Grid.Column>
-          <Grid container>
-          <h3>Members who voted</h3>
-            <Grid.Row>
-              <Grid.Column className="member_list">
-                {proposal.votes.length > 0 ? (
-                  <Grid>
-                    <Grid.Row className="members_row">
-                      {/* centered */}
-                      {proposal.votes.map((vote, idx) => (
-                        <ProfileHover
-                          address={vote.member.id}
-                          showName="true"
-                          displayFull="true"
-                          to={`/members/${proposal.memberAddress}`}
-                        />
-                      ))}
+                  <Grid container columns={2} /* Shares Row */>
+                    <Grid.Row>
+                      <Grid.Column>
+                        <p className="amount light">Shares</p>
+                      </Grid.Column>
+                      <Grid.Column>
+                        <p className="amount right">{proposal.sharesRequested}</p>
+                      </Grid.Column>
                     </Grid.Row>
                   </Grid>
-                ) : null}
-              </Grid.Column>
-            </Grid.Row>
-            <Grid.Row>
-              <Grid.Column textAlign="left">
-                {proposal.aborted ? (
-                  <p className="amount">Aborted</p>
-                ) : (
-                  <ProgressBar yes={proposal.yesShares} no={proposal.noShares} />
-                )}
-              </Grid.Column>
-            </Grid.Row>
 
-            
-            <Grid.Row>
-              <Grid container stackable columns={3}>
+                  <Divider />
+
+                  <Grid.Row>
+                    <Grid container columns={2} /* Total value Row */ >
+                      <Grid.Row>
+                        <Grid.Column>
+                          <p className="amount light">Total value</p>
+                        </Grid.Column>
+                        <Grid.Column>
+                          <p className="amount right">
+                            {convertWeiToDollars(
+                              utils
+                                .bigNumberify(proposal.sharesRequested)
+                                .mul(shareValue)
+                                .toString(),
+                              exchangeRate,
+                            )}
+                          </p>
+                        </Grid.Column>
+                      </Grid.Row>
+                    </Grid>
+                  </Grid.Row>
+
+                </Grid.Row>
+              </Segment>
+            </Grid>
+          </Grid.Column>
+
+          <Grid.Column>
+            <Grid container>
+              <h3>Members who voted</h3>
+              <Grid.Row>
+                <Grid.Column className="member_list">
+                  {proposal.votes.length > 0 ? (
+                    <Grid>
+                      <Grid.Row className="members_row">
+                        {/* centered */}
+                        {proposal.votes.map((vote, idx) => (
+                          <ProfileHover
+                            address={vote.member.id}
+                            showName="true"
+                            displayFull="true"
+                            to={`/members/${proposal.memberAddress}`}
+                          />
+                        ))}
+                      </Grid.Row>
+                    </Grid>
+                  ) : null}
+                </Grid.Column>
+              </Grid.Row>
+              <Grid.Row>
                 <Grid.Column textAlign="left">
-                  <ButtonGroup>
-                    <Button
-                      className="btn"
-                      color="green"
-                      size="mediun"
-                      disabled={cannotVote}
-                      onClick={() => handleYes(proposal)}
-                    > Vote Yes
+                  {proposal.aborted ? (
+                    <p className="amount">Aborted</p>
+                  ) : (
+                      <ProgressBar yes={proposal.yesShares} no={proposal.noShares} />
+                    )}
+                </Grid.Column>
+              </Grid.Row>
+
+
+              <Grid.Row>
+                <Grid container stackable columns={3}>
+                  <Grid.Column textAlign="left">
+                    <ButtonGroup>
+                      <Button
+                        className="btn"
+                        color="green"
+                        size="mediun"
+                        disabled={cannotVote}
+                        onClick={() => handleYes(proposal)}
+                      > Vote Yes
                     </Button>
-                  <ButtonOr />
+                      <ButtonOr />
+                      <Button
+                        className="btn"
+                        color="red"
+                        size="medium"
+                        disabled={cannotVote}
+                        onClick={() => handleNo(proposal)}
+                      > Vote No
+                    </Button>
+                    </ButtonGroup>
+                  </Grid.Column>
+                  <Grid.Column textAlign="left">
+                  </Grid.Column>
+                  <Grid.Column textAlign="left">
                     <Button
                       className="btn"
-                      color="red"
+                      color="grey"
                       size="medium"
-                      disabled={cannotVote}
-                      onClick={() => handleNo(proposal)}
-                    > Vote No
-                    </Button>
-                  </ButtonGroup>
-                </Grid.Column>
-                <Grid.Column textAlign="left">
-                </Grid.Column>
-                <Grid.Column textAlign="left">
-                  <Button
-                    className="btn"
-                    color="grey"
-                    size="medium"
-                    onClick={() => handleProcess(proposal)}
-                    disabled={proposal.status !== ProposalStatus.ReadyForProcessing}
-                  >
-                    Process Proposal
+                      onClick={() => handleProcess(proposal)}
+                      disabled={proposal.status !== ProposalStatus.ReadyForProcessing}
+                    >
+                      Process Proposal
                   </Button>
-                </Grid.Column>
-              </Grid>
-            </Grid.Row>
-          </Grid>
-        </Grid.Column>
-      </Grid>
+                  </Grid.Column>
+                </Grid>
+              </Grid.Row>
+            </Grid>
+          </Grid.Column>
+        </Grid>
       </Segment>
     </div>
   );
