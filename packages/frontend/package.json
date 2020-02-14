@@ -21,7 +21,7 @@
     "react-linkify": "1.0.0-alpha",
     "react-redux": "7.1.1",
     "react-router-dom": "5.1.2",
-    "react-scripts": "3.2.0",
+    "react-scripts": "3.4.0",
     "rimble-ui": "0.10.0",
     "safe-web3-provider": "gnosis/safe-web3-provider#dac23b8",
     "semantic-ui-css": "2.4.1",
