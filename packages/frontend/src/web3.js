@@ -1,5 +1,6 @@
-import SafeProvider from "safe-web3-provider";
+import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers } from "ethers";
+import Web3Connect from "web3connect";
 
 const molochAbi = require("./abi/Moloch.abi.json");
 const molochPoolAbi = require("./abi/MolochPool.abi.json");
@@ -12,36 +13,26 @@ let token;
 let medianizer;
 let eth;
 
+const providerOptions = {
+  walletconnect: {
+    package: WalletConnectProvider,
+    options: {
+      infuraId: (process.env.REACT_APP_ETH_URL).split("/").pop()
+    }
+  }
+};
+
+const web3Connect = new Web3Connect.Core({
+  network: "mainnet", // optional
+  cacheProvider: false, // optional
+  providerOptions // required
+});
+
 export async function initWeb3(client, loggedInUser) {
-  const loginMethod = localStorage.getItem("loginType");
-  if (loginMethod === "gnosis") {
-    await initGnosisSafe(client, loggedInUser);
-  } else {
-    await initMetamask(client, loggedInUser);
-  }
-}
-
-async function checkNetwork(eth) {
-  const network = await eth.getNetwork();
-  console.log("network: ", network);
-  if (network.chainId !== 1) {
-    alert("Please set Web3 provider to Mainnet and try again.");
-    return false;
-  }
-  return true;
-}
-
-export async function initMetamask(client, loggedInUser) {
-  if (!window.ethereum && !window.web3) {
-    // Non-DApp browsers won't work.
-    alert("Web3 not detected.");
-  }
   let coinbase = "";
-  if (window.ethereum) {
-    // Modern DApp browsers need to enable Metamask access.
-    await window.ethereum.enable();
-    let web3Provider = window["ethereum"] || window.web3.currentProvider;
-    eth = new ethers.providers.Web3Provider(web3Provider);
+  const provider = await web3Connect.connect();
+  if (provider) {
+    eth = new ethers.providers.Web3Provider(provider);
     if (await checkNetwork(eth)) {
       localStorage.setItem("loginType", "metamask");
       const accounts = await eth.listAccounts();
@@ -51,6 +42,8 @@ export async function initMetamask(client, loggedInUser) {
         console.error("Could not retrieve accounts...");
       }
     }
+  } else {
+    alert("No Web3 enabled, viewing in read-only mode.");
   }
   if (client && loggedInUser !== coinbase) {
     client.writeData({
@@ -63,48 +56,18 @@ export async function initMetamask(client, loggedInUser) {
   return eth;
 }
 
-export async function initGnosisSafe(client, loggedInUser) {
-  /**
-   *  Create Safe Provider
-   */
-  const provider = new SafeProvider({
-    // TODO: CHANGE THIS TO INFURA/ALCHEMY
-    rpcUrl: process.env.REACT_APP_ETH_URL,
-  });
-
-  /**
-   *  Create Web3
-   */
-  let coinbase = "";
-  eth = new ethers.providers.Web3Provider(provider);
-  if (await checkNetwork(eth)) {
-    localStorage.setItem("loginType", "gnosis");
-    const accounts = await eth.listAccounts();
-    if (accounts.length > 0) {
-      coinbase = accounts[0].toLowerCase();
-    } else {
-      console.error("Could not retrieve accounts...");
-    }
+async function checkNetwork(eth) {
+  const network = await eth.getNetwork();
+  if (network.chainId !== 1) {
+    alert("Please set Web3 provider to Mainnet and try again.");
+    return false;
   }
-  if (client && loggedInUser !== coinbase) {
-    client.writeData({
-      data: {
-        loggedInUser: coinbase,
-      },
-    });
-    window.localStorage.setItem("loggedInUser", coinbase);
-  }
+  return true;
 }
 
 export async function getEthSigner() {
   if (!eth) {
-    if (localStorage.getItem("loginType") === "metamask") {
-      eth = await initMetamask();
-    } else if (localStorage.getItem("loginType") === "gnosis") {
-      eth = await initGnosisSafe();
-    } else {
-      throw new Error("Not logged in with web3.");
-    }
+    eth = await initWeb3();
   }
   return eth;
 }

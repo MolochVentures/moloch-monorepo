@@ -5,11 +5,10 @@ import { withApollo, useQuery } from "react-apollo";
 import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 import {
   getMoloch,
-  initMetamask,
-  initGnosisSafe,
   getToken,
   getEthSigner,
   getMolochPool,
+  initWeb3,
 } from "../web3";
 import { utils } from "ethers";
 import { monitorTx } from "../helpers/transaction";
@@ -350,15 +349,8 @@ export default ({ loggedInUser, client }) => {
 
   const _handleCloseDropdown = () => setVisibleRightMenu(false);
 
-  const logIn = async method => {
-    let eth;
-    if (method === "metamask") {
-      eth = await initMetamask(client);
-    } else if (method === "gnosis") {
-      eth = await initGnosisSafe(client);
-    } else {
-      throw new Error("Unsupported Web3 login method");
-    }
+  const logIn = async () => {
+    const eth = await initWeb3(client);
     if (!eth) {
       return;
     }
@@ -443,16 +435,10 @@ export default ({ loggedInUser, client }) => {
           <Dropdown.Item
             icon="user"
             className="item"
-            content="Log In With Metamask"
+            content="Log In With Web3"
             onClick={() => logIn("metamask")}
           />
           <Dropdown.Divider />
-          <Dropdown.Item
-            icon="user"
-            className="item"
-            content="Log In With Gnosis Safe"
-            onClick={() => logIn("gnosis")}
-          />
         </>
       );
     }
