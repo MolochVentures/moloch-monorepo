@@ -1,7 +1,7 @@
 import { useQuery } from "@apollo/react-hooks";
 import { HttpLink, ApolloClient, InMemoryCache } from "apollo-boost";
 import gql from "graphql-tag";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import { ApolloProvider } from "react-apollo";
 import { ToastMessage } from "rimble-ui";
@@ -18,7 +18,6 @@ import ProposalSubmission from "./components/ProposalSubmission";
 import Wrapper from "./components/Wrapper";
 import { resolvers } from "./resolvers";
 import { typeDefs } from "./schema";
-import { initWeb3 } from "./web3";
 
 console.log(process.env);
 
@@ -110,37 +109,12 @@ const Routes = () => {
 };
 
 const App = () => {
-  const [restored, setRestored] = useState(false);
-  useEffect(() => {
-    async function init() {
-      let {
-        data: { loggedInUser },
-      } = await client.query({
-        query: IS_LOGGED_IN,
-      });
-
-      // make sure logged in metamask user is the one that's saved to storage
-      if (loggedInUser && client) {
-        await initWeb3(client, loggedInUser);
-      }
-      setRestored(true);
-    }
-    init();
-  }, []);
-
-  return restored ? (
+  return (
     <ApolloProvider client={client}>
       <Router basename={process.env.PUBLIC_URL}>
         <Routes />
       </Router>
     </ApolloProvider>
-  ) : (
-    <>
-      <Background />
-      <Dimmer active>
-        <Loader size="massive" />
-      </Dimmer>
-    </>
   );
 };
 

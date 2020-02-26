@@ -31,10 +31,10 @@ const web3Connect = new Web3Connect.Core({
 export async function initWeb3(client, loggedInUser) {
   let coinbase = "";
   const provider = await web3Connect.connect();
+  console.log('provider: ', provider);
   if (provider) {
     eth = new ethers.providers.Web3Provider(provider);
     if (await checkNetwork(eth)) {
-      localStorage.setItem("loginType", "metamask");
       const accounts = await eth.listAccounts();
       if (accounts.length > 0) {
         coinbase = accounts[0].toLowerCase();
