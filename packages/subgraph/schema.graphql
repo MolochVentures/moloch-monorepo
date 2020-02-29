@@ -65,6 +65,13 @@ type Meta @entity {
   id: ID!
   currentPeriod: BigInt!
   totalShares: BigInt!
+  periodDuration: BigInt!
+  votingPeriodLength: BigInt!
+  gracePeriodLength: BigInt!
+  proposalDeposit: BigInt!
+  dilutionBound: BigInt!
+  processingReward: BigInt!
+  summoningTime: BigInt!
 }
 
 type PoolMember @entity {

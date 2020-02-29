@@ -606,6 +606,69 @@ export class Meta extends Entity {
   set totalShares(value: BigInt) {
     this.set("totalShares", Value.fromBigInt(value));
   }
+
+  get periodDuration(): BigInt {
+    let value = this.get("periodDuration");
+    return value.toBigInt();
+  }
+
+  set periodDuration(value: BigInt) {
+    this.set("periodDuration", Value.fromBigInt(value));
+  }
+
+  get votingPeriodLength(): BigInt {
+    let value = this.get("votingPeriodLength");
+    return value.toBigInt();
+  }
+
+  set votingPeriodLength(value: BigInt) {
+    this.set("votingPeriodLength", Value.fromBigInt(value));
+  }
+
+  get gracePeriodLength(): BigInt {
+    let value = this.get("gracePeriodLength");
+    return value.toBigInt();
+  }
+
+  set gracePeriodLength(value: BigInt) {
+    this.set("gracePeriodLength", Value.fromBigInt(value));
+  }
+
+  get proposalDeposit(): BigInt {
+    let value = this.get("proposalDeposit");
+    return value.toBigInt();
+  }
+
+  set proposalDeposit(value: BigInt) {
+    this.set("proposalDeposit", Value.fromBigInt(value));
+  }
+
+  get dilutionBound(): BigInt {
+    let value = this.get("dilutionBound");
+    return value.toBigInt();
+  }
+
+  set dilutionBound(value: BigInt) {
+    this.set("dilutionBound", Value.fromBigInt(value));
+  }
+
+  get processingReward(): BigInt {
+    let value = this.get("processingReward");
+    return value.toBigInt();
+  }
+
+  set processingReward(value: BigInt) {
+    this.set("processingReward", Value.fromBigInt(value));
+  }
+
+  get summoningTime(): BigInt {
+    let value = this.get("summoningTime");
+    return value.toBigInt();
+  }
+
+  set summoningTime(value: BigInt) {
+    this.set("summoningTime", Value.fromBigInt(value));
+  }
 }
 
 export class PoolMember extends Entity {

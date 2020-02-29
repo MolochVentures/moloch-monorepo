@@ -32,6 +32,31 @@ export function handleSummonComplete(event: SummonComplete): void {
   member.submissions = new Array<string>();
   member.highestIndexYesVote = BigInt.fromI32(0);
   member.save();
+
+  let contract = Moloch.bind(event.address);
+  let currentPeriod = contract.getCurrentPeriod();
+  let periodDuration = contract.periodDuration();
+  let votingPeriodLength = contract.votingPeriodLength();
+  let gracePeriodLength = contract.gracePeriodLength();
+  let proposalDeposit = contract.proposalDeposit();
+  let dilutionBound = contract.dilutionBound();
+  let processingReward = contract.processingReward();
+  let summoningTime = contract.summoningTime();
+
+  let meta = Meta.load("");
+  if (!meta) {
+    meta = new Meta("");
+    meta.totalShares = event.params.shares;
+    meta.periodDuration = periodDuration;
+    meta.votingPeriodLength = votingPeriodLength;
+    meta.gracePeriodLength = gracePeriodLength;
+    meta.proposalDeposit = proposalDeposit;
+    meta.dilutionBound = dilutionBound;
+    meta.processingReward = processingReward;
+    meta.summoningTime = summoningTime;
+  }
+  meta.currentPeriod = currentPeriod;
+  meta.save();
 }
 
 export function handleSubmitProposal(event: SubmitProposal): void {
@@ -104,10 +129,6 @@ export function handleSubmitProposal(event: SubmitProposal): void {
   let currentPeriod = contract.getCurrentPeriod();
 
   let meta = Meta.load("");
-  if (!meta) {
-    meta = new Meta("");
-    meta.totalShares = new BigInt(0);
-  }
   meta.currentPeriod = currentPeriod;
   meta.save();
 }
@@ -160,10 +181,6 @@ export function handleSubmitVote(event: SubmitVote): void {
   let currentPeriod = contract.getCurrentPeriod();
 
   let meta = Meta.load("");
-  if (!meta) {
-    meta = new Meta("");
-    meta.totalShares = new BigInt(0);
-  }
   meta.currentPeriod = currentPeriod;
   meta.save();
 }
@@ -206,12 +223,7 @@ export function handleProcessProposal(event: ProcessProposal): void {
 
     // update total shares
     let meta = Meta.load("");
-    if (!meta) {
-      meta = new Meta("");
-      meta.totalShares = event.params.sharesRequested;
-    } else {
-      meta.totalShares = meta.totalShares.plus(event.params.sharesRequested);
-    }
+    meta.totalShares = meta.totalShares.plus(event.params.sharesRequested);
     meta.currentPeriod = currentPeriod;
   }
 }
@@ -228,10 +240,7 @@ export function handleRagequit(event: Ragequit): void {
   let currentPeriod = contract.getCurrentPeriod();
 
   let meta = Meta.load("");
-  if (!meta) {
-    meta = new Meta("");
-    meta.totalShares = new BigInt(0);
-  }
+  meta.totalShares = meta.totalShares.minus(event.params.sharesToBurn);
   meta.currentPeriod = currentPeriod;
   meta.save();
 }
@@ -249,11 +258,6 @@ export function handleAbort(event: Abort): void {
   let currentPeriod = contract.getCurrentPeriod();
 
   let meta = Meta.load("");
-  if (!meta) {
-    meta = new Meta("");
-    meta.totalShares = new BigInt(0);
-
-  }
   meta.currentPeriod = currentPeriod;
   meta.save();
 }
@@ -267,10 +271,6 @@ export function handleUpdateDelegateKey(event: UpdateDelegateKey): void {
   let currentPeriod = contract.getCurrentPeriod();
 
   let meta = Meta.load("");
-  if (!meta) {
-    meta = new Meta("");
-    meta.totalShares = new BigInt(0);
-  }
   meta.currentPeriod = currentPeriod;
   meta.save();
 }
@@ -291,6 +291,7 @@ export function handlePoolSharesMinted(event: SharesMinted): void {
   let meta = PoolMeta.load("");
   if (!meta) {
     meta = new PoolMeta("");
+    meta.currentPoolIndex = new BigInt(0);
   }
   meta.totalPoolShares = event.params.totalPoolShares;
   meta.save();
@@ -304,6 +305,7 @@ export function handlePoolSharesBurned(event: SharesBurned): void {
   let meta = PoolMeta.load("");
   if (!meta) {
     meta = new PoolMeta("");
+    meta.currentPoolIndex = new BigInt(0);
   }
   meta.totalPoolShares = event.params.totalPoolShares;
   meta.save();
@@ -330,6 +332,7 @@ export function handlePoolSync(event: Sync): void {
   let meta = PoolMeta.load("");
   if (!meta) {
     meta = new PoolMeta("");
+    meta.currentPoolIndex = new BigInt(0);
   }
 
   meta.currentPoolIndex = event.params.currentProposalIndex;
