@@ -65,6 +65,9 @@ const GET_PROPOSAL_DETAIL = gql`
       startingPeriod
       processed
       status
+      votingPeriodBegins
+      votingPeriodEnds
+      gracePeriodEnds
       title @client
       description @client
       readyForProcessing @client
