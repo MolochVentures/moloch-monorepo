@@ -9,6 +9,14 @@ type Vote @entity {
   member: Member!
 }
 
+enum ProposalStatus {
+  IN_QUEUE
+  VOTING_PERIOD
+  PASSED
+  FAILED
+  ABORTED
+}
+
 type Proposal @entity {
   id: ID!
   timestamp: String!
@@ -26,11 +34,13 @@ type Proposal @entity {
   yesShares: BigInt!
   noShares: BigInt!
   processed: Boolean!
-  didPass: Boolean!
-  aborted: Boolean!
   votes: [Vote!]!
   details: String!
   maxTotalSharesAtYesVote: BigInt!
+  status: ProposalStatus!
+  votingPeriodBegins: BigInt!
+  votingPeriodEnds: BigInt!
+  gracePeriodEnds: BigInt!
 }
 
 type Applicant @entity {

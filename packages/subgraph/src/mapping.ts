@@ -12,9 +12,6 @@ import {
 import {
   AddKeepers,
   RemoveKeepers,
-  Deposit,
-  Withdraw,
-  KeeperWithdraw,
   Sync,
   SharesMinted,
   SharesBurned,
@@ -77,9 +74,19 @@ export function handleSubmitProposal(event: SubmitProposal): void {
   //     mapping (address => Vote) votesByMember; // the votes on this proposal by each member
   // }
   let contract = Moloch.bind(event.address);
+  let currentPeriod = contract.getCurrentPeriod();
   let proposalFromContract = contract.proposalQueue(event.params.proposalIndex);
   let startingPeriod = proposalFromContract.value3;
   let details = proposalFromContract.value10;
+
+  let meta = Meta.load("");
+
+  // calculate voting and grace end
+  let votingEndPeriod = startingPeriod.plus(meta.votingPeriodLength);
+  let graceEndPeriod = votingEndPeriod.plus(meta.gracePeriodLength);
+  let votingStartTime = currentPeriod.times(meta.periodDuration).plus(meta.summoningTime);
+  let votingEndTime = votingEndPeriod.times(meta.periodDuration).plus(meta.summoningTime);
+  let graceEndTime = graceEndPeriod.times(meta.periodDuration).plus(meta.summoningTime);
 
   let proposal = new Proposal(event.params.proposalIndex.toString());
   proposal.timestamp = event.block.timestamp.toString();
@@ -98,8 +105,10 @@ export function handleSubmitProposal(event: SubmitProposal): void {
   proposal.noShares = BigInt.fromI32(0);
   proposal.maxTotalSharesAtYesVote = BigInt.fromI32(0);
   proposal.processed = false;
-  proposal.didPass = false;
-  proposal.aborted = false;
+  proposal.status = "IN_QUEUE";
+  proposal.votingPeriodBegins = votingStartTime;
+  proposal.votingPeriodEnds = votingEndTime;
+  proposal.gracePeriodEnds = graceEndTime;
   proposal.votes = new Array<string>();
   proposal.details = details;
   proposal.save();
@@ -126,9 +135,6 @@ export function handleSubmitProposal(event: SubmitProposal): void {
   member.submissions = memberSubmissions;
   member.save();
 
-  let currentPeriod = contract.getCurrentPeriod();
-
-  let meta = Meta.load("");
   meta.currentPeriod = currentPeriod;
   meta.save();
 }
@@ -150,6 +156,7 @@ export function handleSubmitVote(event: SubmitVote): void {
   vote.save();
 
   let proposal = Proposal.load(event.params.proposalIndex.toString());
+  proposal.status = "VOTING_PERIOD";
   let member = Member.load(event.params.memberAddress.toHex());
 
   if (event.params.uintVote == 1) {
@@ -191,11 +198,11 @@ export function handleProcessProposal(event: ProcessProposal): void {
   proposal.memberAddress = event.params.memberAddress;
   proposal.tokenTribute = event.params.tokenTribute;
   proposal.sharesRequested = event.params.sharesRequested;
-  proposal.didPass = event.params.didPass;
   proposal.processed = true;
-  proposal.save();
 
   if (event.params.didPass) {
+    proposal.status = "PASSED";
+
     let applicant = Applicant.load(event.params.applicant.toHex());
     applicant.didPass = true;
     applicant.save();
@@ -225,7 +232,12 @@ export function handleProcessProposal(event: ProcessProposal): void {
     let meta = Meta.load("");
     meta.totalShares = meta.totalShares.plus(event.params.sharesRequested);
     meta.currentPeriod = currentPeriod;
+    meta.save();
+  } else {
+    proposal.status = "FAILED";
   }
+
+  proposal.save();
 }
 
 export function handleRagequit(event: Ragequit): void {
@@ -247,7 +259,7 @@ export function handleRagequit(event: Ragequit): void {
 
 export function handleAbort(event: Abort): void {
   let proposal = Proposal.load(event.params.proposalIndex.toString());
-  proposal.aborted = true;
+  proposal.status = "ABORTED"
   proposal.save();
 
   let applicant = Applicant.load(event.params.applicantAddress.toHex());

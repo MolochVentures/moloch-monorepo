@@ -271,24 +271,6 @@ export class Proposal extends Entity {
     this.set("processed", Value.fromBoolean(value));
   }
 
-  get didPass(): boolean {
-    let value = this.get("didPass");
-    return value.toBoolean();
-  }
-
-  set didPass(value: boolean) {
-    this.set("didPass", Value.fromBoolean(value));
-  }
-
-  get aborted(): boolean {
-    let value = this.get("aborted");
-    return value.toBoolean();
-  }
-
-  set aborted(value: boolean) {
-    this.set("aborted", Value.fromBoolean(value));
-  }
-
   get votes(): Array<string> {
     let value = this.get("votes");
     return value.toStringArray();
@@ -314,6 +296,42 @@ export class Proposal extends Entity {
 
   set maxTotalSharesAtYesVote(value: BigInt) {
     this.set("maxTotalSharesAtYesVote", Value.fromBigInt(value));
+  }
+
+  get status(): string {
+    let value = this.get("status");
+    return value.toString();
+  }
+
+  set status(value: string) {
+    this.set("status", Value.fromString(value));
+  }
+
+  get votingPeriodBegins(): BigInt {
+    let value = this.get("votingPeriodBegins");
+    return value.toBigInt();
+  }
+
+  set votingPeriodBegins(value: BigInt) {
+    this.set("votingPeriodBegins", Value.fromBigInt(value));
+  }
+
+  get votingPeriodEnds(): BigInt {
+    let value = this.get("votingPeriodEnds");
+    return value.toBigInt();
+  }
+
+  set votingPeriodEnds(value: BigInt) {
+    this.set("votingPeriodEnds", Value.fromBigInt(value));
+  }
+
+  get gracePeriodEnds(): BigInt {
+    let value = this.get("gracePeriodEnds");
+    return value.toBigInt();
+  }
+
+  set gracePeriodEnds(value: BigInt) {
+    this.set("gracePeriodEnds", Value.fromBigInt(value));
   }
 }
 
