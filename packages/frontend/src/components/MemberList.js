@@ -8,7 +8,6 @@ import hood from "assets/hood.png";
 
 import { useQuery } from "react-apollo";
 import gql from "graphql-tag";
-import { GET_MEMBERS, GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 
 import ProfileHover from "profile-hover";
 
@@ -32,6 +31,18 @@ const MemberAvatar = ({ address, shares }) => (
     </ProfileHover>
   </Grid.Column>
 );
+
+const GET_MEMBER_DETAIL = gql`
+  query Member($address: String!) {
+    member(id: $address) {
+      id
+      shares
+      isActive
+      tokenTribute
+      delegateKey
+    }
+  }
+`;
 
 const LoggedInUser = ({ loggedInUser }) => {
   const { loading, error, data } = useQuery(GET_MEMBER_DETAIL, {
@@ -107,6 +118,18 @@ const Contributors = () => {
     <>No contributors to show.</>
   );
 };
+
+const GET_MEMBERS = gql`
+  {
+    members(first: 100, where: { shares_gt: 0, isActive: true }) {
+      id
+      shares
+      isActive
+      tokenTribute
+      delegateKey
+    }
+  }
+`;
 
 const MemberList = props => {
   const { loading, error, data } = useQuery(GET_MEMBERS);

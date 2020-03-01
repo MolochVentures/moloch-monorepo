@@ -2,14 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Grid, Icon, Dropdown, Form, Button, Loader } from "semantic-ui-react";
 import { withApollo, useQuery } from "react-apollo";
-import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
-import {
-  getMoloch,
-  getToken,
-  getEthSigner,
-  getMolochPool,
-  initWeb3,
-} from "../web3";
+import { getMoloch, getToken, getEthSigner, getMolochPool, initWeb3 } from "../web3";
 import { utils } from "ethers";
 import { monitorTx } from "../helpers/transaction";
 import { formatEther } from "ethers/utils";
@@ -315,16 +308,6 @@ function ApproveWethMenu({ token, eth, onLoadMain, loggedInUser }) {
   );
 }
 
-const GET_POOL_MEMBER = gql`
-  query PoolMembers($address: String!) {
-    poolMember(id: $address) {
-      id
-      shares
-      keepers
-    }
-  }
-`;
-
 export default ({ loggedInUser, client }) => {
   const [visibleRightMenu, setVisibleRightMenu] = useState(false);
   const [visibleMenu, setVisibleMenu] = useState("main");
@@ -444,6 +427,30 @@ export default ({ loggedInUser, client }) => {
     }
     return topRightMenuContent;
   };
+
+  const GET_POOL_MEMBER = gql`
+    query PoolMembers($address: String!) {
+      poolMember(id: $address) {
+        id
+        shares
+        keepers
+      }
+      exchangeRate @client
+    }
+  `;
+
+  const GET_MEMBER_DETAIL = gql`
+    query Member($address: String!) {
+      member(id: $address) {
+        id
+        shares
+        isActive
+        tokenTribute
+        delegateKey
+      }
+      exchangeRate @client
+    }
+  `;
 
   const { loading: memberLoading, error: memberError, data: memberData } = useQuery(
     GET_MEMBER_DETAIL,

@@ -49,8 +49,6 @@ const GET_PROPOSAL_DETAIL = gql`
       tokenTribute
       sharesRequested
       processed
-      didPass
-      aborted
       yesVotes
       noVotes
       yesShares
@@ -66,12 +64,9 @@ const GET_PROPOSAL_DETAIL = gql`
       details
       startingPeriod
       processed
-      status @client
+      status
       title @client
       description @client
-      gracePeriod @client
-      votingEnds @client
-      votingStarts @client
       readyForProcessing @client
     }
     members(where: { delegateKey: $delegateKey }) {
@@ -81,10 +76,11 @@ const GET_PROPOSAL_DETAIL = gql`
       tokenTribute
       delegateKey
     }
+    meta(id: "") {
+      totalShares
+    }
     exchangeRate @client
-    totalShares @client
     guildBankValue @client
-    currentPeriod @client
     proposalQueueLength @client
   }
 `;
@@ -130,10 +126,11 @@ const ProposalDetail = ({ loggedInUser, match }) => {
   const {
     proposal,
     exchangeRate,
-    totalShares,
     guildBankValue,
     members,
+    meta
   } = data;
+  const { totalShares } = meta;
 
   const shareValue = getShareValue(totalShares, guildBankValue);
 

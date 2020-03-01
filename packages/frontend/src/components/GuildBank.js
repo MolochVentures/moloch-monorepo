@@ -2,7 +2,6 @@ import React from "react";
 import { Grid, Image, Divider, Button } from "semantic-ui-react";
 import ethereumIcon from "assets/ethereumIcon.png";
 import { Query } from "react-apollo";
-import { GET_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 
 const currencies = [
   {
@@ -21,6 +20,18 @@ const CurrencyElement = ({ name, shares, icon, value }) => (
     <p className="subtext">{"$" + value}</p>
   </Grid.Column>
 );
+
+const GET_MEMBER_DETAIL = gql`
+  query Member($address: String!) {
+    member(id: $address) {
+      id
+      shares
+      isActive
+      tokenTribute
+      delegateKey
+    }
+  }
+`;
 
 export default class GuildBank extends React.Component {
   state = {

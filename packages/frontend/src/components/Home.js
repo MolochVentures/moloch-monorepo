@@ -31,11 +31,14 @@ const MolochPool = () => (
 );
 
 const GET_METADATA = gql`
-  {
+  query GetMetadata {
     poolValue @client
     exchangeRate @client
-    totalShares @client
     guildBankValue @client
+
+    meta(id: "") {
+      totalShares
+    }
   }
 `;
 
@@ -43,7 +46,9 @@ const Home = () => {
   const { loading, error, data } = useQuery(GET_METADATA);
   if (loading) return <Loader size="massive" active />;
   if (error) throw new Error(error);
-  const { guildBankValue, exchangeRate, totalShares, poolValue } = data;
+  const { guildBankValue, exchangeRate, meta, poolValue } = data;
+
+  const { totalShares } = meta;
 
   const shareValue = getShareValue(totalShares, guildBankValue);
   console.log("metadata: ", data);

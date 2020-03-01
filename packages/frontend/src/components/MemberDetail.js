@@ -38,18 +38,13 @@ const GET_MEMBER_VOTES = gql`
           tokenTribute
           sharesRequested
           processed
-          didPass
-          aborted
           yesVotes
           noVotes
           proposalIndex
           details
-          status @client
+          status
           title @client
           description @client
-          gracePeriod @client
-          votingEnds @client
-          votingStarts @client
           readyForProcessing @client
         }
       }
@@ -58,12 +53,14 @@ const GET_MEMBER_VOTES = gql`
 `;
 
 const GET_METADATA = gql`
-  {
+  query GetMetadata {
     exchangeRate @client
-    totalShares @client
     guildBankValue @client
-    currentPeriod @client
     proposalQueueLength @client
+
+    meta(id: "") {
+      totalShares
+    }
   }
 `;
 
@@ -236,7 +233,8 @@ const MemberDetailView = ({ loggedInUser, match }) => {
   const { loading, error, data } = useQuery(GET_METADATA);
   if (loading) return <Loader size="massive" active />;
   if (error) throw new Error(error);
-  const { totalShares, guildBankValue, exchangeRate } = data;
+  const { meta, guildBankValue, exchangeRate } = data;
+  const { totalShares } = meta;
 
   const shareValue = getShareValue(totalShares, guildBankValue);
   return (

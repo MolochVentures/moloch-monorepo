@@ -1,16 +1,15 @@
 import {
-  determineProposalStatus,
-  inGracePeriod,
-  VOTING_PERIOD_LENGTH,
-  GRACE_PERIOD_LENGTH,
-  inVotingPeriod,
-  inQueue,
   passedVotingAndGrace,
 } from "./helpers/proposals";
-import gql from "graphql-tag";
-import { GET_METADATA } from "./helpers/graphQlQueries";
 import { getToken, getMoloch, getMedianizer, getMolochPool } from "./web3";
 import { bigNumberify } from "ethers/utils";
+import gql from "graphql-tag";
+
+const GET_CURRENT_PERIOD = gql`
+  query Metadata {
+    molochPeriod @client
+  }
+`;
 
 export const resolvers = {
   Query: {
@@ -18,16 +17,6 @@ export const resolvers = {
       const token = await getToken();
       const value = (await token.balanceOf(process.env.REACT_APP_GUILD_BANK_ADDRESS)).toString();
       return value;
-    },
-    totalShares: async () => {
-      const moloch = await getMoloch();
-      const shares = (await moloch.totalShares()).toString();
-      return shares;
-    },
-    currentPeriod: async () => {
-      const moloch = await getMoloch();
-      const period = (await moloch.getCurrentPeriod()).toString();
-      return period;
     },
     exchangeRate: async () => {
       const medianizer = await getMedianizer();
@@ -49,12 +38,13 @@ export const resolvers = {
       const value = (await token.balanceOf(process.env.REACT_APP_MOLOCH_POOL_ADDRESS)).toString();
       return value;
     },
+    molochPeriod: async () => {
+      const moloch = await getMoloch();
+      const period = (await moloch.getCurrentPeriod()).toString();
+      return period;
+    }
   },
   Proposal: {
-    status: (proposal, _args, { cache }) => {
-      const { currentPeriod } = cache.readQuery({ query: GET_METADATA });
-      return determineProposalStatus(proposal, +currentPeriod);
-    },
     title: proposal => {
       try {
         const details = JSON.parse(proposal.details);
@@ -105,64 +95,12 @@ export const resolvers = {
         return "";
       }
     },
-    gracePeriod: (proposal, _args, { cache }) => {
-      const { currentPeriod } = cache.readQuery({ query: GET_METADATA });
-      if (inGracePeriod(proposal, currentPeriod)) {
-        return (
-          +proposal.startingPeriod + VOTING_PERIOD_LENGTH + GRACE_PERIOD_LENGTH - currentPeriod
-        );
-      }
-      return 0;
-    },
-    votingEnds: (proposal, _args, { cache }) => {
-      const { currentPeriod } = cache.readQuery({ query: GET_METADATA });
-      if (inVotingPeriod(proposal, currentPeriod)) {
-        return proposal.startingPeriod + VOTING_PERIOD_LENGTH - currentPeriod;
-      }
-      return 0;
-    },
-    votingStarts: (proposal, _args, { cache }) => {
-      const { currentPeriod } = cache.readQuery({ query: GET_METADATA });
-      if (inQueue(proposal, currentPeriod)) {
-        return proposal.startingPeriod - currentPeriod;
-      }
-      return 0;
-    },
     readyForProcessing: (proposal, _args, { cache }) => {
-      const { currentPeriod } = cache.readQuery({ query: GET_METADATA });
+      const { currentPeriod } = cache.readQuery({ query: GET_CURRENT_PERIOD });
       if (passedVotingAndGrace(proposal, currentPeriod) && !proposal.processed) {
         return true;
       }
       return false;
-    },
-  },
-  Mutation: {
-    setAttributes: (_, variables, { cache }) => {
-      const id = `Proposal:${variables.id}`;
-      const fragment = gql`
-        fragment getMeta on Proposal {
-          status
-          title
-          description
-          gracePeriod
-          votingEnds
-          votingStarts
-          readyForProcessing
-        }
-      `;
-      const proposal = cache.readFragment({ fragment, id });
-      const data = {
-        ...proposal,
-        status: variables.status,
-        title: variables.title,
-        description: variables.description,
-        gracePeriod: variables.gracePeriod,
-        votingEnds: variables.votingEnds,
-        votingStarts: variables.votingStarts,
-        readyForProcessing: variables.readyForProcessing,
-      };
-      cache.writeData({ id, data });
-      return data;
     },
   },
 };

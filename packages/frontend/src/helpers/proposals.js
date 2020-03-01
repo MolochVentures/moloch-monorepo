@@ -5,14 +5,14 @@ export const GRACE_PERIOD_LENGTH = 35;
 export const PERIOD_DURATION = 17280;
 
 export const ProposalStatus = {
-  Unknown: "Unknown",
-  InQueue: "InQueue",
-  VotingPeriod: "VotingPeriod",
-  GracePeriod: "GracePeriod",
-  Aborted: "Aborted",
-  Passed: "Passed",
-  Failed: "Failed",
-  ReadyForProcessing: "ReadyForProcessing"
+  Unknown: "UNKNOWN",
+  InQueue: "IN_QUEUE",
+  VotingPeriod: "VOTING_PERIOD",
+  GracePeriod: "GRACE_PERIOD",
+  Aborted: "ABORTED",
+  Passed: "PASSED",
+  Failed: "FAILED",
+  ReadyForProcessing: "READY_FOR_PROCESSING"
 };
 
 export function periodsToTime(periods) {

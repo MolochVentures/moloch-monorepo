@@ -77,8 +77,6 @@ const GET_COMPLETED_PROPOSAL_LIST = gql`
       tokenTribute
       sharesRequested
       processed
-      didPass
-      aborted
       yesVotes
       noVotes
       yesShares
@@ -93,19 +91,18 @@ const GET_COMPLETED_PROPOSAL_LIST = gql`
       details
       startingPeriod
       processed
-      status @client
+      votingPeriodBegins
+      votingPeriodEnds
+      gracePeriodEnds
+      status
       title @client
       description @client
-      gracePeriod @client
-      votingEnds @client
-      votingStarts @client
-      readyForProcessing @client
     }
   }
 `;
 
 const GET_ACTIVE_PROPOSAL_LIST = gql`
-  {
+  query GetActiveProposals {
     proposals(
       first: 100
       orderBy: proposalIndex
@@ -117,8 +114,6 @@ const GET_ACTIVE_PROPOSAL_LIST = gql`
       tokenTribute
       sharesRequested
       processed
-      didPass
-      aborted
       yesVotes
       noVotes
       yesShares
@@ -133,18 +128,23 @@ const GET_ACTIVE_PROPOSAL_LIST = gql`
       details
       startingPeriod
       processed
-      status @client
+      votingPeriodBegins
+      votingPeriodEnds
+      gracePeriodEnds
+      status
       title @client
       description @client
-      gracePeriod @client
-      votingEnds @client
-      votingStarts @client
-      readyForProcessing @client
     }
-    exchangeRate @client
-    totalShares @client
+    meta(id: "") {
+      currentPeriod
+      gracePeriodLength
+      votingPeriodLength
+      periodDuration
+      totalShares
+      summoningTime
+    }
     guildBankValue @client
-    currentPeriod @client
+    exchangeRate @client
   }
 `;
 
@@ -167,7 +167,9 @@ const ProposalList = ({ isActive }) => {
   if (loading) return <Loader size="massive" active />;
   if (error) throw new Error(error);
   if (completedError) throw new Error(completedError);
-  const { proposals, exchangeRate, totalShares, guildBankValue } = data;
+  console.log('data: ', data);
+  const { proposals, exchangeRate, meta, guildBankValue } = data;
+  const { totalShares } = meta;
   const shareValue = getShareValue(totalShares, guildBankValue);
 
   let completedProposals = [];
@@ -337,16 +339,8 @@ const GET_MEMBER_BY_DELEGATE_KEY = gql`
   query Member($delegateKey: String!) {
     members(where: { delegateKey: $delegateKey }) {
       id
-      shares
       isActive
-      tokenTribute
-      delegateKey
     }
-    exchangeRate @client
-    totalShares @client
-    guildBankValue @client
-    currentPeriod @client
-    proposalQueueLength @client
   }
 `;
 

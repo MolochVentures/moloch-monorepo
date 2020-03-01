@@ -1,7 +1,7 @@
 import { useQuery } from "@apollo/react-hooks";
 import { HttpLink, ApolloClient, InMemoryCache } from "apollo-boost";
 import gql from "graphql-tag";
-import React from "react";
+import React, { useCallback } from "react";
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import { ApolloProvider } from "react-apollo";
 import { ToastMessage } from "rimble-ui";
@@ -34,7 +34,7 @@ const client = new ApolloClient({
 });
 
 cache.writeData({
-  data: { loggedInUser: window.localStorage.getItem("loggedInUser") || "" },
+  data: { loggedInUser: window.localStorage.getItem("loggedInUser") || "", molochPeriod: 0, },
 });
 client.onResetStore(() => cache.writeData({ data: { loggedInUser: "" } }));
 

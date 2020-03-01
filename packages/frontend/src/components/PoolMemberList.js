@@ -7,7 +7,6 @@ import bull from "assets/bull.png";
 import hood from "assets/hood.png";
 
 import { useQuery } from "react-apollo";
-import { GET_POOL_MEMBER_DETAIL } from "../helpers/graphQlQueries";
 import gql from "graphql-tag";
 
 import ProfileHover from "profile-hover";
@@ -32,6 +31,16 @@ const MemberAvatar = ({ address, shares }) => (
     </ProfileHover>
   </Grid.Column>
 );
+
+const GET_POOL_MEMBER_DETAIL = gql`
+  query PoolMember($address: String!) {
+    poolMember(id: $address) {
+      id
+      shares
+      keepers
+    }
+  }
+`;
 
 const LoggedInUser = props => {
   const { loading, error, data } = useQuery(GET_POOL_MEMBER_DETAIL, {
