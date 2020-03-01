@@ -1,4 +1,5 @@
 import React from "react";
+import * as moment from "moment";
 
 export const VOTING_PERIOD_LENGTH = 35;
 export const GRACE_PERIOD_LENGTH = 35;
@@ -33,24 +34,27 @@ export function periodsToTime(periods) {
 export function getProposalCountdownText(proposal) {
   switch (proposal.status) {
     case ProposalStatus.InQueue:
+      const votingPeriodBegins = moment.unix(proposal.votingPeriodBegins);
       return (
         <>
-          <span className="subtext">Voting Begins: </span>
-          <span>{proposal.votingStarts ? periodsToTime(proposal.votingStarts) : "-"}</span>
+          <span className="subtext">Voting Begins </span>
+          <span>{moment().to(votingPeriodBegins)}</span>
         </>
       );
     case ProposalStatus.VotingPeriod:
+      const votingPeriodEnds = moment.unix(proposal.votingPeriodEnds);
       return (
         <>
-          <span className="subtext">Voting Ends: </span>
-          <span>{proposal.votingEnds ? periodsToTime(proposal.votingEnds) : "-"}</span>
+          <span className="subtext">Voting Ends </span>
+          <span>{moment().to(votingPeriodEnds)}</span>
         </>
       );
     case ProposalStatus.GracePeriod:
+      const gracePeriodEnds = moment.unix(proposal.gracePeriodEnds);
       return (
         <>
           <span className="subtext">Grace Period Ends: </span>
-          <span>{proposal.gracePeriod ? periodsToTime(proposal.gracePeriod) : "-"}</span>
+          <span>{moment().to(gracePeriodEnds)}</span>
         </>
       );
     case ProposalStatus.Passed:
@@ -59,11 +63,11 @@ export function getProposalCountdownText(proposal) {
       return <span className="subtext">Failed</span>;
     case ProposalStatus.Aborted:
       return <span className="subtext">Aborted</span>;
-    case ProposalStatus.ReadyForProcessing:
-      return <span className="subtext">Ready For Processing</span>;
-    default:
-      return <></>;
   }
+  if (proposal.readyForProcessing) {
+    return <span className="subtext">Ready For Processing</span>;
+  }
+  return <></>;
 }
 
 export const inQueue = (proposal, currentPeriod) => currentPeriod < proposal.startingPeriod;

@@ -13,6 +13,7 @@
     "graphql": "14.6.0",
     "graphql-resolvers": "0.4.2",
     "graphql-tag": "2.10.3",
+    "moment": "^2.24.0",
     "node-sass": "4.13.1",
     "profile-hover": "1.1.1",
     "react": "16.12.0",
