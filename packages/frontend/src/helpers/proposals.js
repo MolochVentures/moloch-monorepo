@@ -32,7 +32,7 @@ export function periodsToTime(periods) {
 }
 
 export function getProposalCountdownText(proposal) {
-  switch (proposal.status) {
+  switch (proposal.computedStatus) {
     case ProposalStatus.InQueue:
       const votingPeriodBegins = moment.unix(proposal.votingPeriodBegins);
       return (
@@ -90,14 +90,14 @@ export function determineProposalStatus(proposal, currentPeriod) {
     status = ProposalStatus.Passed;
   } else if (proposal.processed && !proposal.didPass) {
     status = ProposalStatus.Failed;
+  } else if (passedVotingAndGrace(proposal, currentPeriod)) {
+    status = ProposalStatus.ReadyForProcessing;
   } else if (inGracePeriod(proposal, currentPeriod)) {
     status = ProposalStatus.GracePeriod;
   } else if (inVotingPeriod(proposal, currentPeriod)) {
     status = ProposalStatus.VotingPeriod;
   } else if (inQueue(proposal, currentPeriod)) {
     status = ProposalStatus.InQueue;
-  } else if (passedVotingAndGrace(proposal, currentPeriod)) {
-    status = ProposalStatus.ReadyForProcessing;
   } else {
     status = ProposalStatus.Unknown;
   }

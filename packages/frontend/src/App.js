@@ -34,7 +34,7 @@ const client = new ApolloClient({
 });
 
 cache.writeData({
-  data: { loggedInUser: window.localStorage.getItem("loggedInUser") || "", molochPeriod: 0, },
+  data: { loggedInUser: window.localStorage.getItem("loggedInUser") || "" },
 });
 client.onResetStore(() => cache.writeData({ data: { loggedInUser: "" } }));
 

@@ -8,11 +8,12 @@ export const typeDefs = gql`
   }
 
   extend type Query {
-    exchangeRate: string
+    exchangeRate: String
     guildBankValue: String
     proposalQueueLength: String
     totalPoolShares: String
     poolValue: String
-    molochPeriod: String
+    molochPeriod: Int
+    computedStatus: String
   }
 `;

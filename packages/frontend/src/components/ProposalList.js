@@ -94,9 +94,9 @@ const GET_COMPLETED_PROPOSAL_LIST = gql`
       votingPeriodBegins
       votingPeriodEnds
       gracePeriodEnds
-      status
       title @client
       description @client
+      computedStatus @client
     }
   }
 `;
@@ -131,9 +131,9 @@ const GET_ACTIVE_PROPOSAL_LIST = gql`
       votingPeriodBegins
       votingPeriodEnds
       gracePeriodEnds
-      status
       title @client
       description @client
+      computedStatus @client
     }
     meta(id: "") {
       currentPeriod
@@ -184,9 +184,6 @@ const ProposalList = ({ isActive }) => {
           offset: completedData.proposals.length,
         },
         updateQuery: (prev, { fetchMoreResult }) => {
-          console.log(
-            `fetchMoreResult.proposals.length: ${fetchMoreResult.proposals.length}, prev.proposals.length: ${prev.proposals.length}`,
-          );
           if (fetchMoreResult.proposals.length === 0) {
             console.log(`Finished loading`);
             finishedLoadingRecords = true;
@@ -203,14 +200,14 @@ const ProposalList = ({ isActive }) => {
   const sortProposals = (a, b) => b.proposalIndex - a.proposalIndex;
 
   const gracePeriod = proposals
-    .filter(p => p.status === ProposalStatus.GracePeriod)
+    .filter(p => p.computedStatus === ProposalStatus.GracePeriod)
     .sort(sortProposals);
   const votingPeriod = proposals
-    .filter(p => p.status === ProposalStatus.VotingPeriod)
+    .filter(p => p.computedStatus === ProposalStatus.VotingPeriod)
     .sort(sortProposals);
-  const inQueue = proposals.filter(p => p.status === ProposalStatus.InQueue).sort(sortProposals);
+  const inQueue = proposals.filter(p => p.computedStatus === ProposalStatus.InQueue).sort(sortProposals);
   const readyForProcessing = proposals
-    .filter(p => p.status === ProposalStatus.ReadyForProcessing)
+    .filter(p => p.computedStatus === ProposalStatus.ReadyForProcessing)
     .sort(sortProposals);
 
   const panes = [

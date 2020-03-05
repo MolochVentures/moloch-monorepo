@@ -64,13 +64,13 @@ const GET_PROPOSAL_DETAIL = gql`
       details
       startingPeriod
       processed
-      status
       votingPeriodBegins
       votingPeriodEnds
       gracePeriodEnds
       title @client
       description @client
       readyForProcessing @client
+      computedStatus @client
     }
     members(where: { delegateKey: $delegateKey }) {
       id
@@ -142,7 +142,7 @@ const ProposalDetail = ({ loggedInUser, match }) => {
   const cannotVote =
     proposal.aborted ||
     userHasVoted ||
-    proposal.status !== ProposalStatus.VotingPeriod ||
+    proposal.computedStatus !== ProposalStatus.VotingPeriod ||
     (!(user && user.shares) || !(user && user.isActive));
 
   return (
@@ -267,7 +267,7 @@ const ProposalDetail = ({ loggedInUser, match }) => {
                     className="btn"
                     color="grey"
                     onClick={() => handleProcess(proposal)}
-                    disabled={proposal.status !== ProposalStatus.ReadyForProcessing}
+                    disabled={proposal.computedStatus !== ProposalStatus.ReadyForProcessing}
                   >
                     Process Proposal
                   </Button>

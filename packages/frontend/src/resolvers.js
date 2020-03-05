@@ -1,13 +1,24 @@
-import {
-  passedVotingAndGrace,
-} from "./helpers/proposals";
+import { passedVotingAndGrace, determineProposalStatus, ProposalStatus } from "./helpers/proposals";
 import { getToken, getMoloch, getMedianizer, getMolochPool } from "./web3";
 import { bigNumberify } from "ethers/utils";
 import gql from "graphql-tag";
 
-const GET_CURRENT_PERIOD = gql`
+const GET_MOLOCH_PERIOD = gql`
   query Metadata {
     molochPeriod @client
+  }
+`;
+
+const GET_META = gql`
+  {
+    meta(id: "") {
+      currentPeriod
+      gracePeriodLength
+      votingPeriodLength
+      periodDuration
+      totalShares
+      summoningTime
+    }
   }
 `;
 
@@ -38,11 +49,11 @@ export const resolvers = {
       const value = (await token.balanceOf(process.env.REACT_APP_MOLOCH_POOL_ADDRESS)).toString();
       return value;
     },
-    molochPeriod: async () => {
-      const moloch = await getMoloch();
-      const period = (await moloch.getCurrentPeriod()).toString();
-      return period;
-    }
+    molochPeriod: async (parent, _args, { client, cache }) => {
+      const { data: { meta } } = await client.query({ query: GET_META });
+      const currentPeriod = Math.floor(((Date.now() / 1000) - +meta.summoningTime) / +meta.periodDuration);
+      return currentPeriod;
+    },
   },
   Proposal: {
     title: proposal => {
@@ -95,12 +106,13 @@ export const resolvers = {
         return "";
       }
     },
-    readyForProcessing: (proposal, _args, { cache }) => {
-      const { currentPeriod } = cache.readQuery({ query: GET_CURRENT_PERIOD });
-      if (passedVotingAndGrace(proposal, currentPeriod) && !proposal.processed) {
-        return true;
-      }
-      return false;
+    readyForProcessing: async (proposal, _args, { client, cache }) => {
+      const query = await client.query({ query: GET_MOLOCH_PERIOD });
+      return determineProposalStatus(proposal, +query.data.molochPeriod) === ProposalStatus.ReadyForProcessing;
+    },
+    computedStatus: async (proposal, _args, { client, cache }) => {
+      const query = await client.query({ query: GET_MOLOCH_PERIOD });
+      return determineProposalStatus(proposal, +query.data.molochPeriod);
     },
   },
 };
