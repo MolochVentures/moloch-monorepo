@@ -63,6 +63,8 @@ export function getProposalCountdownText(proposal) {
       return <span className="subtext">Failed</span>;
     case ProposalStatus.Aborted:
       return <span className="subtext">Aborted</span>;
+    default:
+      break;
   }
   if (proposal.readyForProcessing) {
     return <span className="subtext">Ready For Processing</span>;

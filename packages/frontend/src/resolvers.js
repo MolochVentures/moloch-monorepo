@@ -1,4 +1,4 @@
-import { passedVotingAndGrace, determineProposalStatus, ProposalStatus } from "./helpers/proposals";
+import { determineProposalStatus, ProposalStatus } from "./helpers/proposals";
 import { getToken, getMoloch, getMedianizer, getMolochPool } from "./web3";
 import { bigNumberify } from "ethers/utils";
 import gql from "graphql-tag";

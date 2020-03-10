@@ -1,7 +1,7 @@
 import { useQuery } from "@apollo/react-hooks";
 import { HttpLink, ApolloClient, InMemoryCache } from "apollo-boost";
 import gql from "graphql-tag";
-import React, { useCallback } from "react";
+import React from "react";
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import { ApolloProvider } from "react-apollo";
 import { ToastMessage } from "rimble-ui";
