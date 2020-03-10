@@ -86,9 +86,9 @@ export function determineProposalStatus(proposal, currentPeriod) {
   let status;
   if (proposal.processed && proposal.aborted) {
     status = ProposalStatus.Aborted;
-  } else if (proposal.processed && proposal.didPass) {
+  } else if (proposal.processed && (+proposal.yesShares > +proposal.noShares)) {
     status = ProposalStatus.Passed;
-  } else if (proposal.processed && !proposal.didPass) {
+  } else if (proposal.processed && (+proposal.yesShares <= +proposal.noShares)) {
     status = ProposalStatus.Failed;
   } else if (passedVotingAndGrace(proposal, currentPeriod)) {
     status = ProposalStatus.ReadyForProcessing;
