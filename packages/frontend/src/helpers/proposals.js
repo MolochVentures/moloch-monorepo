@@ -1,8 +1,8 @@
 import React from "react";
 
-export const VOTING_PERIOD_LENGTH = 2;
-export const GRACE_PERIOD_LENGTH = 2;
-export const PERIOD_DURATION = 600;
+export const VOTING_PERIOD_LENGTH = 30;
+export const GRACE_PERIOD_LENGTH = 30;
+export const PERIOD_DURATION = 8640;
 
 export const ProposalStatus = {
   Unknown: "Unknown",
