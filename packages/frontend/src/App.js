@@ -120,11 +120,12 @@ const App = () => {
         query: IS_LOGGED_IN,
       });
 
+      setRestored(true);
+
       // make sure logged in metamask user is the one that's saved to storage
       if (loggedInUser && client) {
         await initWeb3(client, loggedInUser);
       }
-      setRestored(true);
     }
     init();
   }, []);
