@@ -294,6 +294,13 @@ export default ({ loggedInUser, client }) => {
 
   const _handleCloseDropdown = () => setVisibleRightMenu(false);
 
+  const _maybeToggleDropdownState = (e) => {
+    const isHeader = e.target.classList.contains('right_dropdown') 
+      || e.target.parentNode.classList.contains('right_dropdown');
+    if (!isHeader) return;
+    visibleRightMenu ? _handleCloseDropdown() : _handleOpenDropdown();
+  }
+
   const logIn = async method => {
     let eth;
     if (method === "metamask") {
@@ -472,6 +479,7 @@ export default ({ loggedInUser, client }) => {
             open={visibleRightMenu}
             onBlur={() => _handleCloseDropdown()}
             onFocus={() => _handleOpenDropdown()}
+            onClick={(e) => _maybeToggleDropdownState(e)}
             text={loggedInUser ? `${loggedInUser.substring(0, 6)}...` : "Web3 Login"}
           >
             <Dropdown.Menu className="menu blurred" direction="left">
