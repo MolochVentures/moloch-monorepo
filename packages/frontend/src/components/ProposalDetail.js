@@ -271,10 +271,12 @@ const ProposalDetail = ({ loggedInUser, match }) => {
                 </Grid.Column>
               </Grid.Row>
 
+              
+
 
               <Grid.Row>
                 <Grid container stackable columns={3}>
-                  <Grid.Column textAlign="left">
+                  <Grid.Column >
                     <ButtonGroup>
                       <Button
                         className="btn"
@@ -295,9 +297,9 @@ const ProposalDetail = ({ loggedInUser, match }) => {
                     </Button>
                     </ButtonGroup>
                   </Grid.Column>
-                  <Grid.Column textAlign="left">
+                  <Grid.Column >
                   </Grid.Column>
-                  <Grid.Column textAlign="left">
+                  <Grid.Column >
                     <Button
                       className="btn"
                       color="grey"

@@ -85,7 +85,7 @@ class SubmitModal extends Component {
                 ) : (
                       <List.Icon name="x" />
                     )}
-                <List.Content>{DEPOSIT_WETH} DAI Deposit Approved</List.Content>
+                <List.Content>100 DAI Deposit Approved</List.Content>
               </List.Item>
               <List.Item>
                 {loading ? (
@@ -282,7 +282,7 @@ export default class ProposalSubmission extends Component {
             </Grid.Column>
             <Grid.Row stretched>
               <Grid.Column mobile={16} tablet={16} computer={12}>
-                <Input
+                <Form.Input
                   id="titleInput"
                   name="title"
                   size="big"
@@ -333,15 +333,17 @@ export default class ProposalSubmission extends Component {
                 <Grid columns="equal">
                   <Grid.Column>
                     <Segment className="blurred box">
-                      <Form.TextArea
-                        name="description"
-                        label="Description"
-                        placeholder="Type here"
-                        rows={15}
-                        onChange={this.handleInput}
-                        value={description}
-                        error={!descriptionValid}
-                      />
+                      <p> Add a link to your Proposal from <a href="https://discourse.rosebud.fund/">our Forum </a> </p>
+                        <Form.Input
+                          name="description"
+                          placeholder="https://discourse.rosebud.fund/c/proposals/myproposal"
+                          rows={1}
+                          type="url"
+                          pattern="^https:\/\/discourse\.rosebud\.fund\/.*"
+                          onChange={this.handleInput}
+                          value={description}
+                          error={!descriptionValid}
+                        />
                     </Segment>
                   </Grid.Column>
                 </Grid>

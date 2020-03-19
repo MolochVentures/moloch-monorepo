@@ -118,13 +118,14 @@ class CustomProgressBar extends React.Component{
       console.log({leftPercent, rightPercent})
 
       return (<ElementType className={classes} data-left={Math.floor(leftPercent)} data-right={Math.floor(rightPercent)}>
-          <div className={`bar bar--left bar--${left.color}`} style={{width: `${leftPercent}%`}}>
+          {leftPercent > 0 &&  
+          <div className={`bar bar--left bar--${left.color}`} style={{width: `${leftPercent}%`}}> 
             {this.renderProgress(left.value, true)}
-          </div>
+          </div> }
+          {rightPercent > 0 && 
           <div className={`bar bar--right bar--${right.color}`} style={{width: `${rightPercent}%`}}>
             {this.renderProgress(right.value, true)}
-          </div>
-          {this.renderLabel()}
+          </div> }
         </ElementType>
       )
     }

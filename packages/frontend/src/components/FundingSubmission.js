@@ -89,7 +89,7 @@ class SubmitModal extends Component {
                 ) : (
                       <List.Icon name="x" />
                     )}
-                <List.Content>{DEPOSIT_WETH} DAI Deposit Approved</List.Content>
+                <List.Content>100 DAI Deposit Approved</List.Content>
               </List.Item>
               <List.Item>
                 {submittedTx ? <List.Icon name="code" /> : <></>}
@@ -323,11 +323,13 @@ export default class FundingSubmission extends Component {
                 <Grid columns="equal">
                   <Grid.Column>
                     <Segment className="blurred box">
-                      <Form.TextArea
+                      <p> Add a link to your Proposal from <a href="https://discourse.rosebud.fund/">our Forum </a> </p>
+                      <Form.Input
                         name="description"
-                        label="Description"
-                        placeholder="Type here"
-                        rows={15}
+                        placeholder="https://discourse.rosebud.fund/c/proposals/myproposal"
+                        rows={1}
+                        type="url"
+                        pattern="^https:\/\/discourse\.rosebud\.fund\/.*"
                         onChange={this.handleInput}
                         value={description}
                         error={!descriptionValid}
