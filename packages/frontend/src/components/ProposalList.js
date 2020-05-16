@@ -167,8 +167,8 @@ const ProposalList = ({ isActive }) => {
   if (loading) return <Loader size="massive" active />;
   if (error) throw new Error(error);
   if (completedError) throw new Error(completedError);
-  console.log('data: ', data);
-  const { proposals, exchangeRate, meta, guildBankValue } = data;
+  let { proposals, exchangeRate, meta, guildBankValue } = data;
+  proposals = proposals.map(proposal => proposal.id !== "120").filter(proposal => !!proposal);
   const { totalShares } = meta;
   const shareValue = getShareValue(totalShares, guildBankValue);
 
@@ -205,7 +205,9 @@ const ProposalList = ({ isActive }) => {
   const votingPeriod = proposals
     .filter(p => p.computedStatus === ProposalStatus.VotingPeriod)
     .sort(sortProposals);
-  const inQueue = proposals.filter(p => p.computedStatus === ProposalStatus.InQueue).sort(sortProposals);
+  const inQueue = proposals
+    .filter(p => p.computedStatus === ProposalStatus.InQueue)
+    .sort(sortProposals);
   const readyForProcessing = proposals
     .filter(p => p.computedStatus === ProposalStatus.ReadyForProcessing)
     .sort(sortProposals);
