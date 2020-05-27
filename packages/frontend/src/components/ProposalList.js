@@ -168,7 +168,6 @@ const ProposalList = ({ isActive }) => {
   if (error) throw new Error(error);
   if (completedError) throw new Error(completedError);
   let { proposals, exchangeRate, meta, guildBankValue } = data;
-  proposals = proposals.map(proposal => proposal.id !== "120").filter(proposal => !!proposal);
   const { totalShares } = meta;
   const shareValue = getShareValue(totalShares, guildBankValue);
 
